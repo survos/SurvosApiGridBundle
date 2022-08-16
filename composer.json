@@ -1,0 +1,63 @@
+{
+    "name": "survos/api-grid-bundle",
+    "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.2",
+    "keywords": ["symfony-ux", "symfony6"],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "type": "symfony-bundle",
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "Tac Tacelosky",
+            "email": "tacman@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "doctrine/doctrine-bundle": "^2.7",
+        "doctrine/orm": "^2.12",
+        "doctrine/persistence": "^2.0 || ^3.0",
+        "survos/inspection-bundle": "^1.1-dev",
+        "symfony/config": "^6.1",
+        "symfony/dependency-injection": "^6.1",
+        "symfony/http-kernel": "^6.1",
+        "symfony/options-resolver": "^6.1",
+        "symfony/ux-twig-component": "^2.2",
+        "twig/twig": "^2 || ^3.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Survos\\ApiGrid\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.1-dev"
+        },
+        "symfony": {
+            "require": "^6.1"
+        }
+    },
+    "scripts": {
+        "phpstan": "vendor/bin/phpstan analyse"
+    },
+    "suggest": {
+        "monolog/monolog": "Allows more advanced logging of the application flow",
+        "api-platform/core": "For javascript-based grid rendering",
+        "friendsofsymfony/jsrouting-bundle": "use path() in javascript grid rendering"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+        ,
+        "phpstan/phpstan": "^1.7",
+        "symfony/browser-kit": "^6.1",
+        "symfony/framework-bundle": "^6.1",
+        "symfony/phpunit-bridge": "^6.1",
+        "symfony/twig-bundle": "^6.1",
+        "symfony/var-dumper": "^6.1",
+        "symfony/webpack-encore-bundle": "^1.11"
+    }
+
+
+}

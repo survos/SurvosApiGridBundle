@@ -1,0 +1,45 @@
+{# templates/components/datatable.html.twig #}
+
+{% set columns = this.normalizedColumns %}
+{% set templates = [] %}
+{#    {% if block(c.name) is defined %} #}
+{#        {% set templates[c.name] = block(c.name) %} #}
+{#        {% with {row: row} %} #}
+{#            {{ block(c.name) }} #}
+{#        {% endwith %} #}
+{#    {% else %} #}
+{#        {{ attribute(row, c.name)|default() }} #}
+{#    {% endif %} #}
+
+{# <code>{{ this.stimulusController }}</code> #}
+{#    {{ dump(search_builder_fields(this.class, columns)) }} #}
+{# {{ dump('sortable', sortable_fields(this.class)) }} #}
+
+<div {{ stimulus_controller(this.stimulusController, {
+    class: this.class,
+    searchBuilderFields: search_builder_fields(this.class, columns),
+    sortableFields: sortable_fields(this.class),
+    searchableFields: searchable_fields(this.class),
+    api_call:  api_route(this.class),
+    columnConfiguration: columns|json_encode,
+    filter: this.filter
+}) }}>
+
+    {% block modal %}
+        {{ include('@SurvosGrid/_modal.html.twig', {
+            formUrl: '/',
+            aaController: this.stimulusController,
+            modalController: 'modal-form',
+            modalClass: 'modal-md',
+            modalTitle: this.caller,
+            buttonLabel: 'Show MODAL',
+            modalContent: 'really should load with ajax'
+        }) }}
+    {% endblock %}
+
+
+    <table class="table" {{ stimulus_target(this.stimulusController, 'table') }}>
+    </table>
+
+</div>
+

@@ -10,7 +10,7 @@ use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
 use function Symfony\Component\String\u;
 
-#[AsTwigComponent('api_grid', template: '@SurvosGrid/components/api_grid.html.twig')]
+#[AsTwigComponent('api_grid', template: '@SurvosApiGrid/components/api_grid.html.twig')]
 class ApiGridComponent
 {
     public function __construct(private Environment $twig,

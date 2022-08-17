@@ -18,12 +18,13 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
+        "survos/grid-bundle": "^1.0",
         "survos/inspection-bundle": "^1.1-dev",
         "symfony/config": "^6.1",
         "symfony/dependency-injection": "^6.1",
         "symfony/http-kernel": "^6.1",
         "symfony/options-resolver": "^6.1",
-        "symfony/ux-twig-component": "^2.2",
+        "symfony/ux-twig-component": "^2.3",
         "twig/twig": "^2 || ^3.4"
     },
     "autoload": {

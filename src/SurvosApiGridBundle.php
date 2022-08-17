@@ -15,7 +15,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Twig\Environment;
 
-class SurvosGridBundle extends AbstractBundle
+class SurvosApiGridBundle extends AbstractBundle
 {
 
     // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed

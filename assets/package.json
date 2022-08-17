@@ -1,5 +1,5 @@
 {
-  "name": "@survos/grid-bundle",
+  "name": "@survos/api-grid-bundle",
   "description": "integrate php and javascript helpers for DataTables.net",
   "license": "MIT",
   "version": "1.0.1",

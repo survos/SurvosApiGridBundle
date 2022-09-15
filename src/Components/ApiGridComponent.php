@@ -27,14 +27,12 @@ class ApiGridComponent
     public ?string $source = null;
     public ?string $path = null;
 
-    private function getTwigBlocks(): iterable
+    private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];
         if ($this->caller) {
-            $template = $this->twig->resolveTemplate($this->caller);
-            $path = $template->getSourceContext()->getPath();
+//            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
-            $source = $sourceContext->getCode();
             $path = $sourceContext->getPath();
             $this->path = $path;
 
@@ -42,6 +40,7 @@ class ApiGridComponent
             $source = file_get_contents($path);
 //            $this->source = $source;
 //            dd($this->twig);
+            // get rid of comments
             $source = preg_replace('/{#.*?#}/', '', $source);
 
             // this blows up with nested blocks.

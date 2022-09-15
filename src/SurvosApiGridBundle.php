@@ -2,7 +2,6 @@
 
 namespace Survos\ApiGrid;
 
-use Survos\ApiGrid\Api\DataProvider\GridCollectionProvider;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Symfony\Component\DependencyInjection\Definition;
@@ -38,10 +37,6 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->setPublic(false)
             ;
         }
-
-        $builder->register(GridCollectionProvider::class)
-            ->setPublic(true)
-            ->setAutowired(true);
 
         $builder->register(ApiGridComponent::class)
             ->setAutowired(true)

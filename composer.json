@@ -2,11 +2,8 @@
     "name": "survos/api-grid-bundle",
     "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.2",
     "keywords": ["symfony-ux", "symfony6"],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "type": "symfony-bundle",
     "license": "MIT",
-
     "authors": [
         {
             "name": "Tac Tacelosky",
@@ -18,8 +15,8 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "survos/grid-bundle": "^1.0",
-        "survos/inspection-bundle": "^1.2",
+        "survos/grid-bundle": "^1.2.4",
+        "survos/inspection-bundle": "^1.2.4",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "symfony/config": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
@@ -50,8 +47,7 @@
         "friendsofsymfony/jsrouting-bundle": "use path() in javascript grid rendering"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest"
-        ,
+        "roave/security-advisories": "dev-latest",
         "phpstan/phpstan": "^1.8",
         "symfony/browser-kit": "^6.1.0",
         "symfony/framework-bundle": "^6.1.0",
@@ -59,7 +55,19 @@
         "symfony/twig-bundle": "^6.1.0",
         "symfony/var-dumper": "^6.1.0",
         "symfony/webpack-encore-bundle": "^1.11"
-    }
-
-
+    },
+    "conflict": {
+        "survos/maker-bundle": "<1.2.4",
+        "survos/html-prettify-bundle": "<1.2.4",
+        "survos/barcode-bundle": "<1.2.4",
+        "survos/second-package": "<1.2.4",
+        "survos/bootstrap-bundle": "<1.2.4",
+        "survos/faker-bundle": "<1.2.4",
+        "survos/doc-bundle": "<1.2.4",
+        "survos/core-bundle": "<1.2.4",
+        "survos/tree-bundle": "<1.2.4",
+        "survos/first-package": "<1.2.4"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

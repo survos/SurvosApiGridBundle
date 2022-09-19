@@ -19,14 +19,14 @@
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
         "survos/grid-bundle": "^1.0",
-        "survos/inspection-bundle": "^1.1-dev",
+        "survos/inspection-bundle": "^1.2",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
-        "symfony/config": "^6.1",
-        "symfony/dependency-injection": "^6.1",
-        "symfony/http-kernel": "^6.1",
-        "symfony/options-resolver": "^6.1",
+        "symfony/config": "^6.1.0",
+        "symfony/dependency-injection": "^6.1.0",
+        "symfony/http-kernel": "^6.1.0",
+        "symfony/options-resolver": "^6.1.0",
         "symfony/ux-twig-component": "^2.3",
-        "twig/twig": "^2 || ^3.4"
+        "twig/twig": "^3.4"
     },
     "autoload": {
         "psr-4": {
@@ -38,7 +38,7 @@
             "dev-main": "1.1-dev"
         },
         "symfony": {
-            "require": "^6.1"
+            "require": "^6.1.0"
         }
     },
     "scripts": {
@@ -52,12 +52,12 @@
     "require-dev": {
         "roave/security-advisories": "dev-latest"
         ,
-        "phpstan/phpstan": "^1.7",
-        "symfony/browser-kit": "^6.1",
-        "symfony/framework-bundle": "^6.1",
-        "symfony/phpunit-bridge": "^6.1",
-        "symfony/twig-bundle": "^6.1",
-        "symfony/var-dumper": "^6.1",
+        "phpstan/phpstan": "^1.8",
+        "symfony/browser-kit": "^6.1.0",
+        "symfony/framework-bundle": "^6.1.0",
+        "symfony/phpunit-bridge": "^6.1.0",
+        "symfony/twig-bundle": "^6.1.0",
+        "symfony/var-dumper": "^6.1.0",
         "symfony/webpack-encore-bundle": "^1.11"
     }
 

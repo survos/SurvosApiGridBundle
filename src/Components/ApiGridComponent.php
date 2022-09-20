@@ -13,33 +13,41 @@ use function Symfony\Component\String\u;
 #[AsTwigComponent('api_grid', template: '@SurvosApiGrid/components/api_grid.html.twig')]
 class ApiGridComponent
 {
-    public function __construct(private Environment $twig,
-                                private LoggerInterface $logger,
-                                public ?string $stimulusController)
-    {
-//        ='@survos/grid-bundle/api_grid';
+    public function __construct(
+        private Environment $twig,
+        private LoggerInterface $logger,
+        public ?string $stimulusController
+    ) {
+        //        ='@survos/grid-bundle/api_grid';
     }
+
     public iterable $data;
+
     public array $columns = [];
-    public ?string $caller=null;
+
+    public ?string $caller = null;
+
     public string $class;
+
     public array $filter = [];
+
     public ?string $source = null;
+
     public ?string $path = null;
 
     private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];
         if ($this->caller) {
-//            $template = $this->twig->resolveTemplate($this->caller);
+            //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
             $path = $sourceContext->getPath();
             $this->path = $path;
 
-//            dd($template);
+            //            dd($template);
             $source = file_get_contents($path);
-//            $this->source = $source;
-//            dd($this->twig);
+            //            $this->source = $source;
+            //            dd($this->twig);
             // get rid of comments
             $source = preg_replace('/{#.*?#}/', '', $source);
 
@@ -60,24 +68,28 @@ class ApiGridComponent
         return $customColumnTemplates;
     }
 
-    /** @return array<int, Column> */
+    /**
+     * @return array<int, Column>
+     */
     public function normalizedColumns(): iterable
     {
-//        $normalizedColumns = parent::normalizedColumns();
+        //        $normalizedColumns = parent::normalizedColumns();
 
-//        dd($customColumnTemplates);
-//        dd($template->getBlockNames());
-//        dd($template->getSourceContext());
-//        dd($template->getBlockNames());
-//        dump($this->caller);
+        //        dd($customColumnTemplates);
+        //        dd($template->getBlockNames());
+        //        dd($template->getSourceContext());
+        //        dd($template->getBlockNames());
+        //        dump($this->caller);
         $customColumnTemplates = $this->getTwigBlocks();
         $normalizedColumns = [];
-        foreach ($this->columns as $idx=>$c) {
+        foreach ($this->columns as $idx => $c) {
             if (empty($c)) {
                 continue;
             }
             if (is_string($c)) {
-                $c = ['name' => $c];
+                $c = [
+                    'name' => $c,
+                ];
             }
             $columnName = $c['name'];
             $fixDotColumnName = str_replace('.', '_', $columnName);
@@ -87,11 +99,8 @@ class ApiGridComponent
             assert(is_array($c));
             $column = new Column(...$c);
             $normalizedColumns[] = $column;
-//            $normalizedColumns[$column->name] = $column;
+            //            $normalizedColumns[$column->name] = $column;
         }
         return $normalizedColumns;
     }
-
-
-
 }

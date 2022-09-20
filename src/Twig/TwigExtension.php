@@ -15,11 +15,11 @@ use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerAwareInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
 use function Symfony\Component\String\u;
 
 class TwigExtension extends AbstractExtension
@@ -37,13 +37,11 @@ class TwigExtension extends AbstractExtension
         ];
     }
 
-
     public function getFunctions(): array
     {
         return [
-//            new TwigFunction('reverseRange', fn($x, $y) => sprintf("%s-%s", $x, $y)),
-//            new TwigFunction('api_table', [$this, 'apiTable'], ['needs_environment' => true, 'is_safe' => ['html']]),
+            //            new TwigFunction('reverseRange', fn($x, $y) => sprintf("%s-%s", $x, $y)),
+            //            new TwigFunction('api_table', [$this, 'apiTable'], ['needs_environment' => true, 'is_safe' => ['html']]),
         ];
     }
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 // api/src/Filter/RegexpFilter.php
 
 namespace Survos\ApiGrid\Api\Filter;
@@ -12,14 +13,19 @@ use Symfony\Component\PropertyInfo\Type;
 
 final class RegexpFilter extends AbstractFilter
 {
-    protected function filterProperty(string $property, $value, QueryBuilder $queryBuilder,
-                                      QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass,
-                                      Operation $operation = null, array $context = []): void
-    {
+    protected function filterProperty(
+        string $property,
+        $value,
+        QueryBuilder $queryBuilder,
+        QueryNameGeneratorInterface $queryNameGenerator,
+        string $resourceClass,
+        Operation $operation = null,
+        array $context = []
+    ): void {
         // otherwise filter is applied to order and page as well
         if (
-            !$this->isPropertyEnabled($property, $resourceClass) ||
-            !$this->isPropertyMapped($property, $resourceClass)
+            ! $this->isPropertyEnabled($property, $resourceClass) ||
+            ! $this->isPropertyMapped($property, $resourceClass)
         ) {
             return;
         }
@@ -33,7 +39,7 @@ final class RegexpFilter extends AbstractFilter
     // This function is only used to hook in documentation generators (supported by Swagger and Hydra)
     public function getDescription(string $resourceClass): array
     {
-        if (!$this->properties) {
+        if (! $this->properties) {
             return [];
         }
 

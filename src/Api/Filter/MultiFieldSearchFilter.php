@@ -93,7 +93,7 @@ class MultiFieldSearchFilter extends AbstractFilter
 //        assert(false, $resourceClass);
         $props = $this->getProperties();
         if (null===$props) {
-            throw new InvalidArgumentException('Properties must be specified');
+            throw new \InvalidArgumentException('Properties must be specified');
         }
         return [
             $this->searchParameterName => [

@@ -2,50 +2,42 @@
 
 namespace Survos\ApiGrid\Api\Filter;
 
-//use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
-//use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
 use ApiPlatform\Api\FilterInterface;
-use ApiPlatform\Core\Exception\InvalidArgumentException;
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
-
-//use ApiPlatform\Core\Api\FilterInterface;
 use Doctrine\ORM\QueryBuilder;
-//use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
-//use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
+use ApiPlatform\Exception\InvalidArgumentException;
 
 /**
  * Selects entities where each search term is found somewhere
  * in at least one of the specified properties.
  * Search terms must be separated by spaces.
- * Search is case insensitive.
+ * Search is case-insensitive.
  * All specified properties type must be string.
  * @package App\Filter
  */
-class MultiFieldSearchFilter extends AbstractFilter
+class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
 {
     /**
      * Add configuration parameter
      * {@inheritdoc}
      * @param string $searchParameterName The parameter whose value this filter searches for
      */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        LoggerInterface $logger = null,
-        array $properties = null,
-        NameConverterInterface $nameConverter = null,
-        private string $searchParameterName = 'search'
-    ) {
+    public function __construct(ManagerRegistry        $managerRegistry,
+                                LoggerInterface $logger = null,
+                                array $properties = null,
+                                NameConverterInterface $nameConverter = null,
+                                private string         $searchParameterName = 'search')
+    {
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
     }
 
 
+    /** {@inheritdoc} */
     protected function filterProperty(
         string $property,
         $value,

@@ -292,8 +292,8 @@ export default class extends Controller {
             'Content-Type': 'application/json'
         };
 
-        // let dt = $(el).DataTable({
-        let dt = new DataTable(el, {
+        let dt = $(el).DataTable({
+        // let dt = new DataTable(el, {
             language: {
                 searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
             },
@@ -320,7 +320,7 @@ export default class extends Controller {
 
             initComplete: (obj, data) => {
                 this.handleTrans(el);
-                let xapi = new DataTable.Api(obj);
+                // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
 

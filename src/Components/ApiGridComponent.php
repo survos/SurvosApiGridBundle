@@ -92,7 +92,10 @@ class ApiGridComponent
                 ];
             }
             $columnName = $c['name'];
-            $fixDotColumnName = str_replace('.', '_', $columnName);
+            if (!$block = $c['block'] ?? false) {
+                $block = $columnName;
+            }
+            $fixDotColumnName = str_replace('.', '_', $block);
             if (array_key_exists($fixDotColumnName, $customColumnTemplates)) {
                 $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];
             }

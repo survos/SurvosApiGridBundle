@@ -3,11 +3,14 @@
 import {Controller} from "@hotwired/stimulus";
 
 import {default as axios} from "axios";
+
+// shouldn't these be automatically included (from package.json)
 import 'datatables.net-scroller';
 import 'datatables.net-scroller-bs5';
 import 'datatables.net-datetime';
 import 'datatables.net-searchbuilder-bs5';
 import 'datatables.net-fixedheader-bs5';
+import 'datatables.net-responsive-bs5';
 const DataTable = require('datatables.net');
 // import('datatables.net-buttons-bs5');
 
@@ -71,7 +74,7 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = ( data, type, row, meta ) => {
-                    return template.render({data: data, row: row})
+                    return template.render({data: data, row: row, field_name: c.name})
                 }
             }
 
@@ -91,7 +94,6 @@ export default class extends Controller {
 
     }
     connect() {
-        console.warn("dispatching changeFormUrlEvent");
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!' });
         window.dispatchEvent(event);
 
@@ -499,7 +501,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                     if (modal_route) {
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
-                        return data;
+                        // console.log(propertyName, row[propertyName], row);
+                        return row[propertyName];
                     }
                 }
 

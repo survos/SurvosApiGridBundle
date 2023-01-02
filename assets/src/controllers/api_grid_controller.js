@@ -5,17 +5,17 @@ import {Controller} from "@hotwired/stimulus";
 import {default as axios} from "axios";
 
 // shouldn't these be automatically included (from package.json)
-import 'datatables.net-scroller';
-import 'datatables.net-scroller-bs5';
-import 'datatables.net-datetime';
-import 'datatables.net-searchbuilder-bs5';
-import 'datatables.net-fixedheader-bs5';
-import 'datatables.net-responsive-bs5';
+// import 'datatables.net-scroller';
+// import 'datatables.net-scroller-bs5';
+// import 'datatables.net-datetime';
+// import 'datatables.net-searchbuilder-bs5';
+// import 'datatables.net-fixedheader-bs5';
+// import 'datatables.net-responsive-bs5';
 const DataTable = require('datatables.net');
 // import('datatables.net-buttons-bs5');
 
-import('datatables.net-bs5');
-import('datatables.net-select-bs5');
+// import('datatables.net-bs5');
+// import('datatables.net-select-bs5');
 
 // if component
 let routes = false;

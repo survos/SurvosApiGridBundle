@@ -12,10 +12,9 @@
         "enabled": true,
         "autoimport": {
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
-          "datatables.net-responsive/css/responsive.min.css": true,
-          "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
-          "datatables.net-responsive/js/responsive.min.js": true,
+          "datatables.net-responsive/js/dataTables.responsive.min.js": true,
           "datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js": true,
+          "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
           "datatables.net-fixedheader-bs5/css/fixedHeader.bootstrap5.min.css": true,
           "datatables.net-fixedheader-bs5/js/fixedHeader.bootstrap5.min.js": true,
           "datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.min.css": true

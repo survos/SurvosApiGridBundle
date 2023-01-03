@@ -3,6 +3,15 @@
 import {Controller} from "@hotwired/stimulus";
 
 import {default as axios} from "axios";
+import DataTables from "datatables.net-bs5";
+import 'datatables.net-select-bs5';
+import 'datatables.net-responsive';
+// import 'datatables.net-responsive-bs5';
+import 'datatables.net-buttons-bs5';
+import 'datatables.net-scroller-bs5';
+import 'datatables.net-buttons/js/buttons.colVis.min';
+import 'datatables.net-buttons/js/buttons.html5.min';
+import 'datatables.net-buttons/js/buttons.print.min';
 
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
@@ -11,7 +20,7 @@ import {default as axios} from "axios";
 // import 'datatables.net-searchbuilder-bs5';
 // import 'datatables.net-fixedheader-bs5';
 // import 'datatables.net-responsive-bs5';
-const DataTable = require('datatables.net');
+// const DataTable = require('datatables.net');
 // import('datatables.net-buttons-bs5');
 
 // import('datatables.net-bs5');
@@ -294,7 +303,7 @@ export default class extends Controller {
             'Content-Type': 'application/json'
         };
 
-        let dt = $(el).DataTable({
+        let setup = {
         // let dt = new DataTable(el, {
             language: {
                 searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
@@ -303,7 +312,7 @@ export default class extends Controller {
             // paging: true,
             scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
             // scrollY: true,
-            displayLength: 50, // not sure how to adjust the 'length' sent to the server
+            // displayLength: 50, // not sure how to adjust the 'length' sent to the server
             // pageLength: 15,
             columnDefs: this.columnDefs,
             orderCellsTop: true,
@@ -420,11 +429,9 @@ export default class extends Controller {
                 ;
 
             },
-        });
-
-
+        };
+        let dt = new DataTables(el, setup);
         return dt;
-
     }
 
     get columnDefs() {
@@ -484,7 +491,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 //     // console.log(row, data);
                 //     label = data || propertyName;
                 // }
-                let display = data;
+                let displayData = data;
                 // @todo: move some twig templates to a common library
                 if (renderType === 'image') {
                     return `<img class="img-thumbnail plant-thumb" alt="${data}" src="${data}" />`;
@@ -495,7 +502,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                     if(modal) {
                         return `<button class="btn btn-primary"></button>`;
                     } else {
-                        return `<a href="${url}">${display}</a>`;
+                        return `<a href="${url}">${displayData}</a>`;
                     }
                 } else {
                     if (modal_route) {

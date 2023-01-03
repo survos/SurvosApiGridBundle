@@ -41,6 +41,7 @@
     "datatables.net-datetime": "^1.1.2",
     "datatables.net-fixedcolumns-bs5": "^4.0.0",
     "datatables.net-fixedheader-bs5": "^3.2.2",
+    "datatables.net-responsive": "^2.4.0",
     "datatables.net-responsive-bs5": "^2.4.0",
     "datatables.net-scroller": "^2.0.4",
     "datatables.net-scroller-bs5": "^2.0.4",

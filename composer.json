@@ -18,8 +18,8 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "survos/grid-bundle": "^1.3",
-        "survos/inspection-bundle": "^1.3",
+        "survos/grid-bundle": "^1.2.51",
+        "survos/inspection-bundle": "^1.2.51",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "symfony/config": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
@@ -31,11 +31,6 @@
     "autoload": {
         "psr-4": {
             "Survos\\ApiGrid\\": "src/"
-        }
-    },
-    "extra": {
-        "symfony": {
-            "require": "^6.1.0"
         }
     },
     "scripts": {
@@ -57,25 +52,25 @@
         "symfony/webpack-encore-bundle": "^1.11"
     },
     "conflict": {
-        "survos/maker-bundle": "<1.2.50",
-        "survos/html-prettify-bundle": "<1.2.50",
-        "survos/barcode-bundle": "<1.2.50",
-        "survos/bootstrap-bundle": "<1.2.50",
-        "survos/faker-bundle": "<1.2.50",
-        "survos/doc-bundle": "<1.2.50",
-        "survos/core-bundle": "<1.2.50",
-        "survos/tree-bundle": "<1.2.50",
-        "survos/auth-bundle": "<1.2.50",
-        "survos/workflow-helper-bundle": "<1.2.50",
-        "survos/crawler-bundle": "<1.2.50",
-        "survos/location-bundle": "<1.2.50",
-        "survos/command-bundle": "<1.2.50",
-        "survos/ruler-bundle": "<1.2.50",
-        "survos/providence-bundle": "<1.2.50",
-        "survos/stripe-product": "<1.2.50",
-        "survos/wiki-bundle": "<1.2.50",
-        "survos/import-bridge": "<1.2.50",
-        "survos/grid-group-bundle": "<1.2.50"
+        "survos/maker-bundle": "<1.2.51",
+        "survos/html-prettify-bundle": "<1.2.51",
+        "survos/barcode-bundle": "<1.2.51",
+        "survos/bootstrap-bundle": "<1.2.51",
+        "survos/faker-bundle": "<1.2.51",
+        "survos/doc-bundle": "<1.2.51",
+        "survos/core-bundle": "<1.2.51",
+        "survos/tree-bundle": "<1.2.51",
+        "survos/auth-bundle": "<1.2.51",
+        "survos/workflow-helper-bundle": "<1.2.51",
+        "survos/crawler-bundle": "<1.2.51",
+        "survos/location-bundle": "<1.2.51",
+        "survos/command-bundle": "<1.2.51",
+        "survos/ruler-bundle": "<1.2.51",
+        "survos/providence-bundle": "<1.2.51",
+        "survos/stripe-product": "<1.2.51",
+        "survos/wiki-bundle": "<1.2.51",
+        "survos/import-bridge": "<1.2.51",
+        "survos/grid-group-bundle": "<1.2.51"
     },
     "minimum-stability": "dev",
     "prefer-stable": true

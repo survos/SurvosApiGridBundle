@@ -64,6 +64,7 @@ const contentTypes = {
     'POST': 'application/json'
 };
 
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
     static targets = ['table', 'modal', 'modalBody', 'fieldSearch', 'message'];
     static values = {

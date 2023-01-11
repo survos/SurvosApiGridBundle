@@ -79,7 +79,6 @@ class ApiGridComponent
         //        dd($template->getBlockNames());
         //        dd($template->getSourceContext());
         //        dd($template->getBlockNames());
-        //        dump($this->caller);
         $customColumnTemplates = $this->getTwigBlocks();
         $normalizedColumns = [];
         foreach ($this->columns as $idx => $c) {

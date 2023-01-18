@@ -12,9 +12,7 @@
 {#    {% endif %} #}
 
 {# <code>{{ this.stimulusController }}</code> #}
-{#    {{ dump(search_builder_fields(this.class, columns)) }} #}
 {# {{ dump('sortable', sortable_fields(this.class)) }} #}
-
 <div {{ stimulus_controller(this.stimulusController, {
     class: this.class,
     searchBuilderFields: search_builder_fields(this.class, columns),

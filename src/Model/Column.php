@@ -9,6 +9,7 @@ class Column
         public ?string $title = null,
         public ?string $twigTemplate = null,
         public ?string $route = null,
+        public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
         public ?array $actions = null,
         public bool $modal = false

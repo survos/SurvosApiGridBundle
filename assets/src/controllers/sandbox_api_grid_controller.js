@@ -1,25 +1,36 @@
 // during dev, from project_dir run
-// ln -s ~/survos/bundles/grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
+// ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import {Controller} from "@hotwired/stimulus";
 
 import {default as axios} from "axios";
-import 'datatables.net-scroller';
+import DataTables from "datatables.net-bs5";
+import 'datatables.net-select-bs5';
+import 'datatables.net-responsive';
+// import 'datatables.net-responsive-bs5';
+import 'datatables.net-buttons-bs5';
 import 'datatables.net-scroller-bs5';
-import 'datatables.net-datetime';
-import 'datatables.net-searchbuilder-bs5';
-// import 'datatables.net-searchpanes-bs5'
-import 'datatables.net-fixedheader-bs5';
-const DataTable = require('datatables.net');
+import 'datatables.net-buttons/js/buttons.colVis.min';
+import 'datatables.net-buttons/js/buttons.html5.min';
+import 'datatables.net-buttons/js/buttons.print.min';
+
+// shouldn't these be automatically included (from package.json)
+// import 'datatables.net-scroller';
+// import 'datatables.net-scroller-bs5';
+// import 'datatables.net-datetime';
+// import 'datatables.net-searchbuilder-bs5';
+// import 'datatables.net-fixedheader-bs5';
+// import 'datatables.net-responsive-bs5';
+// const DataTable = require('datatables.net');
 // import('datatables.net-buttons-bs5');
 
-import ('datatables.net-bs5');
-import('datatables.net-select-bs5');
+// import('datatables.net-bs5');
+// import('datatables.net-select-bs5');
 
 // if component
 let routes = false;
 
 // import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-//    routes = require('../../../../../public/js/fos_js_routes.json');
+// routes = require('../../../../../public/js/fos_js_routes.json');
 // if a local test.
 routes = require('../../public/js/fos_js_routes.json');
 import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
@@ -53,6 +64,7 @@ const contentTypes = {
     'POST': 'application/json'
 };
 
+/* stimulusFetch: 'lazy' */
 export default class extends Controller {
     static targets = ['table', 'modal', 'modalBody', 'fieldSearch', 'message'];
     static values = {
@@ -72,7 +84,7 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = ( data, type, row, meta ) => {
-                    return template.render({data: data, row: row})
+                    return template.render({data: data, row: row, field_name: c.name})
                 }
             }
 
@@ -92,7 +104,6 @@ export default class extends Controller {
 
     }
     connect() {
-        console.warn("dispatching changeFormUrlEvent");
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!' });
         window.dispatchEvent(event);
 
@@ -260,9 +271,6 @@ export default class extends Controller {
             }
 
 
-            console.error(el.dataset, data, $event.currentTarget, );
-            console.log(this.identifier + ' received an tr->click event', data, el);
-
             if(el.querySelector("a")) {
                 return; // skip links, let it bubble up to handle
             }
@@ -295,11 +303,9 @@ export default class extends Controller {
             Accept: 'application/ld+json',
             'Content-Type': 'application/json'
         };
-        let cols = this.cols();
-        console.log(cols);
 
-        // let dt = $(el).DataTable({
-        let dt = new DataTable(el, {
+        let setup = {
+            // let dt = new DataTable(el, {
             language: {
                 searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
             },
@@ -307,7 +313,7 @@ export default class extends Controller {
             // paging: true,
             scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
             // scrollY: true,
-            displayLength: 50, // not sure how to adjust the 'length' sent to the server
+            // displayLength: 50, // not sure how to adjust the 'length' sent to the server
             // pageLength: 15,
             columnDefs: this.columnDefs,
             orderCellsTop: true,
@@ -326,7 +332,7 @@ export default class extends Controller {
 
             initComplete: (obj, data) => {
                 this.handleTrans(el);
-                let xapi = new DataTable.Api(obj);
+                // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
 
@@ -365,7 +371,6 @@ export default class extends Controller {
                         let hydraData = response.data;
 
                         var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
-                        console.error(total);
                         var itemsReturned = hydraData['hydra:member'].length;
                         let first = (params.page-1) * params.itemsPerPage;
                         if (params.search.value) {
@@ -425,11 +430,9 @@ export default class extends Controller {
                 ;
 
             },
-        });
-
-
+        };
+        let dt = new DataTables(el, setup);
         return dt;
-
     }
 
     get columnDefs() {
@@ -489,7 +492,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 //     // console.log(row, data);
                 //     label = data || propertyName;
                 // }
-                let display = data;
+                let displayData = data;
                 // @todo: move some twig templates to a common library
                 if (renderType === 'image') {
                     return `<img class="img-thumbnail plant-thumb" alt="${data}" src="${data}" />`;
@@ -500,13 +503,14 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                     if(modal) {
                         return `<button class="btn btn-primary"></button>`;
                     } else {
-                        return `<a href="${url}">${display}</a>`;
+                        return `<a href="${url}">${displayData}</a>`;
                     }
                 } else {
                     if (modal_route) {
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
-                        return data;
+                        // console.log(propertyName, row[propertyName], row);
+                        return row[propertyName];
                     }
                 }
 
@@ -546,7 +550,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
 
         }
-        console.error(v);
         let obj = {
             title : v,
             data : v,
@@ -591,8 +594,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]']=c.value1;
             });
         }
-        console.error(params, apiData);
-
         params.columns.forEach(function(column, index) {
             if (column.search && column.search.value) {
                 // console.error(column);

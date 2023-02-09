@@ -6,13 +6,15 @@ class Column
 {
     public function __construct(
         public string $name,
+        public ?string $block = null, // reuse the blocks even if the data changes
         public ?string $title = null,
         public ?string $twigTemplate = null,
         public ?string $route = null,
         public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
         public ?array $actions = null,
-        public bool $modal = false
+        public bool $modal = false,
+        public bool|string $locale = false,
     ) {
         if (empty($this->title)) {
             $this->title = ucwords($this->name);

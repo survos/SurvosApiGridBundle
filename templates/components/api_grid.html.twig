@@ -13,12 +13,17 @@
 
 {# <code>{{ this.stimulusController }}</code> #}
 {# {{ dump('sortable', sortable_fields(this.class)) }} #}
+
+this.locale {{ this.locale }}
+app.req.locale {{ app.request.locale  }}
+
 <div {{ stimulus_controller(this.stimulusController, {
     class: this.class,
     searchBuilderFields: search_builder_fields(this.class, columns),
     sortableFields: sortable_fields(this.class),
     searchableFields: searchable_fields(this.class),
     api_call:  api_route(this.class),
+    locale: this.locale ?: (app.request.locale ?: 'xx'),
     columnConfiguration: columns|json_encode,
     filter: this.filter
 }) }}>

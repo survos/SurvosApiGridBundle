@@ -4,7 +4,8 @@ namespace Survos\ApiGrid\Components;
 
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Psr\Log\LoggerInterface;
-use Survos\Grid\Model\Column;
+use Survos\ApiGrid\Model\Column;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
@@ -16,6 +17,7 @@ class ApiGridComponent
     public function __construct(
         private Environment $twig,
         private LoggerInterface $logger,
+        private RequestStack $requestStack,
         public ?string $stimulusController
     ) {
         //        ='@survos/grid-bundle/api_grid';
@@ -33,8 +35,14 @@ class ApiGridComponent
 
     public ?string $source = null;
 
+    public ?string $locale = null; // shouldn't be necessary, but sanity for testing.
+
     public ?string $path = null;
 
+//    public function getLocale(): string
+//    {
+//        return $this->requestStack->getParentRequest()->getLocale();
+//    }
     private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];

@@ -73,6 +73,7 @@ export default class extends Controller {
         sortableFields: {type: String, default: '[]'},
         searchableFields: {type: String, default: '[]'},
         searchBuilderFields: {type: String, default: '[]'},
+        locale: {type: String, default: 'no-locale!'},
         filter: String
     }
 
@@ -97,6 +98,7 @@ export default class extends Controller {
                 data: c.name,
                 label: c.title,
                 route: c.route,
+                locale: c.locale,
                 render: render
             })
         });
@@ -104,6 +106,7 @@ export default class extends Controller {
 
     }
     connect() {
+        super.connect(); //
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!' });
         window.dispatchEvent(event);
 
@@ -116,8 +119,9 @@ export default class extends Controller {
         this.sortableFields = JSON.parse(this.sortableFieldsValue);
         this.searchableFields = JSON.parse(this.searchableFieldsValue);
         this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
-        console.log('hi from ' + this.identifier);
-        super.connect(); //
+        this.locale = this.localeValue;
+
+        console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
 
         // console.log(this.hasTableTarget ? 'table target exists' : 'missing table target')
         // console.log(this.hasModalTarget ? 'target exists' : 'missing modalstarget')
@@ -300,12 +304,24 @@ export default class extends Controller {
     initDataTable(el)
     {
         let apiPlatformHeaders = {
-            Accept: 'application/ld+json',
+            'Accept': 'application/ld+json',
             'Content-Type': 'application/json'
         };
 
+        const userLocale =
+            navigator.languages && navigator.languages.length
+                ? navigator.languages[0]
+                : navigator.language;
+
+        console.log('user locale: ' + userLocale); // 👉️ "en-US"
+        console.error('this.locale: ' + this.locale);
+        if (this.locale !== '') {
+            apiPlatformHeaders['Accept-Language'] = this.locale;
+        }
+
+
         let setup = {
-        // let dt = new DataTable(el, {
+            // let dt = new DataTable(el, {
             language: {
                 searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
             },
@@ -361,6 +377,12 @@ export default class extends Controller {
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
 
                 Object.assign(apiParams, this.filter);
+                // yet another locale hack
+                if (this.locale !== '') {
+                    apiParams['_locale'] = this.locale;
+                }
+
+                console.warn(apiPlatformHeaders);
                 axios.get(this.apiCallValue, {
                     params: apiParams,
                     headers: apiPlatformHeaders
@@ -483,6 +505,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
           label =  null,
           modal = false,
           render = null,
+          locale = null,
           renderType = 'string'
       } = {}) {
 
@@ -499,6 +522,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 }
 
                 if (route) {
+                    if (locale) {
+                        row.uniqueIdentifiers['_locale'] = locale;
+                    }
                     let url = Routing.generate(route, row.uniqueIdentifiers);
                     if(modal) {
                         return `<button class="btn btn-primary"></button>`;

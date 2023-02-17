@@ -314,9 +314,9 @@ export default class extends Controller {
                 : navigator.language;
 
         console.log('user locale: ' + userLocale); // 👉️ "en-US"
-        console.error('this.locale: ' + this.locale);
         if (this.locale !== '') {
             apiPlatformHeaders['Accept-Language'] = this.locale;
+            apiPlatformHeaders['X-LOCALE'] = this.locale;
         }
 
 

@@ -474,9 +474,9 @@ export default class extends Controller {
     //     ]
     // }
 
-    actions({prefix = null, actions=['edit','show']} = {})
+    actions({prefix = null, actions=['edit','show', 'qr']} = {})
     {
-        let icons = {edit: 'fas fa-edit', show: 'fas fa-eye text-success', 'delete': 'fas fa-trash text-danger'};
+        let icons = {edit: 'fas fa-edit', show: 'fas fa-eye text-success', 'qr': 'fas fa-qrcode', 'delete': 'fas fa-trash text-danger'};
         let buttons = actions.map( action => {
             let modal_route = prefix + action;
             let icon = icons[action];

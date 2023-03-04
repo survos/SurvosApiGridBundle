@@ -1,10 +1,7 @@
 {
     "name": "survos/api-grid-bundle",
     "description": "incorporate DatatablesNet, using twig and stimulus, twig_component requires ^2.2",
-    "keywords": [
-        "symfony-ux",
-        "symfony6"
-    ],
+    "keywords": ["symfony-ux", "symfony6"],
     "type": "symfony-bundle",
     "license": "MIT",
     "authors": [

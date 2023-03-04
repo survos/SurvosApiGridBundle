@@ -39,7 +39,15 @@ Routing.setRoutingData(routes);
 import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
-        return Routing.generate(route, routeParams);
+
+        delete routeParams._keys; // seems to be added by twigjs
+        let path = Routing.generate(route, routeParams);
+        // if (route == 'category_show') {
+        //     console.error(route);
+        //     console.warn(routeParams);
+        //     console.log(path);
+        // }
+        return path;
     });
 });
 
@@ -241,8 +249,8 @@ export default class extends Controller {
                 this.modalBodyTarget.innerHTML = data.code;
                 this.modal = new Modal(this.modalTarget);
                 this.modal.show();
-                console.assert(data.uniqueIdentifiers, "missing uniqueIdentifiers, add @Groups to entity")
-                let formUrl = Routing.generate(modalRoute, {...data.uniqueIdentifiers, _page_content_only: 1});
+                console.assert(data.rp, "missing rp, add @Groups to entity")
+                let formUrl = Routing.generate(modalRoute, {...data.rp, _page_content_only: 1});
                 console.warn("dispatching changeFormUrlEvent");
                 const event = new CustomEvent("changeFormUrlEvent", {detail: {formUrl: formUrl }});
                 window.dispatchEvent(event);
@@ -283,8 +291,8 @@ export default class extends Controller {
                 this.modalBodyTarget.innerHTML = data.code;
                 this.modal = new Modal(this.modalTarget);
                 this.modal.show();
-                console.assert(data.uniqueIdentifiers, "missing uniqueIdentifiers, add @Groups to entity")
-                let formUrl = Routing.generate(modalRoute, data.uniqueIdentifiers);
+                console.assert(data.rp, "missing rp, add @Groups to entity")
+                let formUrl = Routing.generate(modalRoute, data.rp);
 
                 axios({
                     method: 'get', //you can set what request you want to be
@@ -313,7 +321,8 @@ export default class extends Controller {
                 ? navigator.languages[0]
                 : navigator.language;
 
-        console.log('user locale: ' + userLocale); // 👉️ "en-US"
+        // console.log('user locale: ' + userLocale); // 👉️ "en-US"
+        // console.error('this.locale: ' + this.locale);
         if (this.locale !== '') {
             apiPlatformHeaders['Accept-Language'] = this.locale;
             apiPlatformHeaders['X-LOCALE'] = this.locale;
@@ -382,7 +391,7 @@ export default class extends Controller {
                     apiParams['_locale'] = this.locale;
                 }
 
-                console.warn(apiPlatformHeaders);
+                // console.warn(apiPlatformHeaders);
                 axios.get(this.apiCallValue, {
                     params: apiParams,
                     headers: apiPlatformHeaders
@@ -473,9 +482,9 @@ export default class extends Controller {
     //     ]
     // }
 
-    actions({prefix = null, actions=['edit','show']} = {})
+    actions({prefix = null, actions=['edit','show', 'qr']} = {})
     {
-        let icons = {edit: 'fas fa-edit', show: 'fas fa-eye text-success', 'delete': 'fas fa-trash text-danger'};
+        let icons = {edit: 'fas fa-edit', show: 'fas fa-eye text-success', 'qr': 'fas fa-qrcode', 'delete': 'fas fa-trash text-danger'};
         let buttons = actions.map( action => {
             let modal_route = prefix + action;
             let icon = icons[action];
@@ -523,9 +532,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
                 if (route) {
                     if (locale) {
-                        row.uniqueIdentifiers['_locale'] = locale;
+                        row.rp['_locale'] = locale;
                     }
-                    let url = Routing.generate(route, row.uniqueIdentifiers);
+                    let url = Routing.generate(route, row.rp);
                     if(modal) {
                         return `<button class="btn btn-primary"></button>`;
                     } else {

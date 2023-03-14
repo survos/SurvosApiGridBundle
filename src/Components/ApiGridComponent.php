@@ -26,10 +26,12 @@ class ApiGridComponent
     public iterable $data;
 
     public array $columns = [];
+    public array $searchBuilderFields = [];
 
     public ?string $caller = null;
 
     public string $class;
+    public string $searchPanesDataUrl;
 
     public array $filter = [];
 

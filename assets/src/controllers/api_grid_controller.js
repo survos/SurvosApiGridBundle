@@ -8,6 +8,7 @@ import 'datatables.net-select-bs5';
 import 'datatables.net-responsive';
 // import 'datatables.net-responsive-bs5';
 import 'datatables.net-buttons-bs5';
+import 'datatables.net-searchpanes-bs5';
 import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
@@ -29,14 +30,17 @@ import 'datatables.net-buttons/js/buttons.print.min';
 // if component
 let routes = false;
 
+// if live
 import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 routes = require('../../../../../public/js/fos_js_routes.json');
-// if a local test.
+// if local
 // routes = require('../../public/js/fos_js_routes.json');
 // import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+
 Routing.setRoutingData(routes);
 
 import Twig from 'twig/twig.min';
+
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
@@ -77,22 +81,24 @@ export default class extends Controller {
     static targets = ['table', 'modal', 'modalBody', 'fieldSearch', 'message'];
     static values = {
         apiCall: {type: String, default: ''},
+        searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
         sortableFields: {type: String, default: '[]'},
         searchableFields: {type: String, default: '[]'},
         searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
         filter: String
     }
 
     cols() {
-        let x = this.columns.map(  c => {
+        let x = this.columns.map(c => {
             let render = null;
             if (c.twigTemplate) {
                 let template = Twig.twig({
                     data: c.twigTemplate
                 });
-                render = ( data, type, row, meta ) => {
+                render = (data, type, row, meta) => {
                     return template.render({data: data, row: row, field_name: c.name})
                 }
             }
@@ -113,17 +119,19 @@ export default class extends Controller {
         return x;
 
     }
+
     connect() {
         super.connect(); //
-        const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!' });
+        const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
         // "compile" the custom twig blocks
         // var columnRender = [];
+        this.dom = this.domValue;
 
-        this.filter = JSON.parse(this.filterValue||'[]')
+        this.filter = JSON.parse(this.filterValue || '[]')
         this.sortableFields = JSON.parse(this.sortableFieldsValue);
         this.searchableFields = JSON.parse(this.searchableFieldsValue);
         this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
@@ -149,16 +157,26 @@ export default class extends Controller {
         //     console.error('A table element is required.');
         // }
         if (this.tableElement) {
-            this.dt = this.initDataTable(this.tableElement);
+            // get the (cached) fields first, then load the datatable
+            if (this.searchPanesDataUrlValue) {
+                axios.get(this.searchPanesDataUrlValue, {})
+                    .then((response) => {
+                            // handle success
+                            // console.log(response.data);
+                            this.dt = this.initDataTable(this.tableElement, response.data);
+                        }
+                    );
+            } else {
+                this.dt = this.initDataTable(this.tableElement, response.data);
+            }
             this.initialized = true;
         }
-
     }
 
     openModal(e) {
         console.error('yay, open modal!', e, e.currentTarget, e.currentTarget.dataset);
 
-        this.modalTarget.addEventListener('show.bs.modal',  (e) => {
+        this.modalTarget.addEventListener('show.bs.modal', (e) => {
             console.log(e, e.relatedTarget, e.currentTarget);
             // do something...
         });
@@ -169,8 +187,7 @@ export default class extends Controller {
 
     }
 
-    createdRow( row, data, dataIndex )
-    {
+    createdRow(row, data, dataIndex) {
         // we could add the thumbnail URL here.
         // console.log(row, data, dataIndex, this.identifier);
         // let aaController = 'projects';
@@ -185,20 +202,18 @@ export default class extends Controller {
     }
 
 
-
-    handleTrans(el)
-    {
+    handleTrans(el) {
         let transitionButtons = el.querySelectorAll('button.transition');
         // console.log(transitionButtons);
-        transitionButtons.forEach( btn => btn.addEventListener('click', (event) => {
+        transitionButtons.forEach(btn => btn.addEventListener('click', (event) => {
             const isButton = event.target.nodeName === 'BUTTON';
             if (!isButton) {
                 return;
             }
             console.log(event, event.target, event.currentTarget);
 
-            let row  = this.dt.row( event.target.closest('tr') );
-            let  data = row.data();
+            let row = this.dt.row(event.target.closest('tr'));
+            let data = row.data();
             console.log(row, data);
             this.notify('deleting ' + data.id);
 
@@ -211,19 +226,18 @@ export default class extends Controller {
 
     }
 
-    // eh... not working
+// eh... not working
     get modalController() {
         return this.application.getControllerForElementAndIdentifier(this.modalTarget, "modal_form")
     }
 
-    addButtonClickListener(dt)
-    {
+    addButtonClickListener(dt) {
         console.log("Listening for button.transition and button .btn-modal clicks events");
 
-        dt.on('click', 'tr td button.transition',  ($event) => {
+        dt.on('click', 'tr td button.transition', ($event) => {
             console.log($event.currentTarget);
             let target = $event.currentTarget;
-            var data = dt.row( target.closest('tr') ).data();
+            var data = dt.row(target.closest('tr')).data();
             let transition = target.dataset['t'];
             console.log(transition, target);
             console.log(data, $event);
@@ -234,12 +248,12 @@ export default class extends Controller {
         });
 
         // dt.on('click', 'tr td button .btn-modal',  ($event, x) => {
-        dt.on('click', 'tr td button ',  ($event, x) => {
+        dt.on('click', 'tr td button ', ($event, x) => {
             console.log($event, $event.currentTarget);
-            var data = dt.row( $event.currentTarget.closest('tr') ).data();
+            var data = dt.row($event.currentTarget.closest('tr')).data();
             console.log(data, $event, x);
             console.warn("dispatching changeFormUrlEvent");
-            const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'test' });
+            const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'test'});
             window.dispatchEvent(event);
 
 
@@ -252,28 +266,27 @@ export default class extends Controller {
                 console.assert(data.rp, "missing rp, add @Groups to entity")
                 let formUrl = Routing.generate(modalRoute, {...data.rp, _page_content_only: 1});
                 console.warn("dispatching changeFormUrlEvent");
-                const event = new CustomEvent("changeFormUrlEvent", {detail: {formUrl: formUrl }});
+                const event = new CustomEvent("changeFormUrlEvent", {detail: {formUrl: formUrl}});
                 window.dispatchEvent(event);
                 document.dispatchEvent(event);
 
                 console.log('getting formURL ' + formUrl);
 
 
-
                 axios.get(formUrl)
-                    .then( response => this.modalBodyTarget.innerHTML = response.data)
-                    .catch( error => this.modalBodyTarget.innerHTML = error)
+                    .then(response => this.modalBodyTarget.innerHTML = response.data)
+                    .catch(error => this.modalBodyTarget.innerHTML = error)
                 ;
             }
 
         });
     }
-    addRowClickListener(dt)
-    {
-        dt.on('click', 'tr td',  ($event) => {
+
+    addRowClickListener(dt) {
+        dt.on('click', 'tr td', ($event) => {
             let el = $event.currentTarget;
             console.log($event, $event.currentTarget);
-            var data = dt.row( $event.currentTarget ).data();
+            var data = dt.row($event.currentTarget).data();
             var btn = el.querySelector('button');
             console.log(btn);
             let modalRoute = null;
@@ -283,7 +296,7 @@ export default class extends Controller {
             }
 
 
-            if(el.querySelector("a")) {
+            if (el.querySelector("a")) {
                 return; // skip links, let it bubble up to handle
             }
 
@@ -302,15 +315,45 @@ export default class extends Controller {
                         _page_content_only: '1' // could send blocks that we want??
                     }
                 })
-                    .then( response => this.modalBodyTarget.innerHTML = response.data)
-                    .catch( error => this.modalBodyTarget.innerHTML = error)
+                    .then(response => this.modalBodyTarget.innerHTML = response.data)
+                    .catch(error => this.modalBodyTarget.innerHTML = error)
                 ;
             }
-        } );
+        });
     }
 
-    initDataTable(el)
-    {
+    initDataTable(el, fields) {
+
+        let lookup = [];
+        fields.forEach((field, index) => {
+            lookup[field.jsonKeyCode] = field;
+        });
+        let searchFieldsByColumnNumber = [];
+        let options = [];
+        this.columns.forEach((column, index) => {
+            if (column.browsable && (column.name in lookup)) {
+                searchFieldsByColumnNumber.push(index);
+                let field = lookup[column.name];
+                options[field.jsonKeyCode] = [];
+                for (const label in field.valueCounts) {
+                    let count = field.valueCounts[label];
+                    //     console.log(field.valueCounts);
+                    // field.valueCounts.protoforEach( (label, count) =>
+                    // {
+                    options[field.jsonKeyCode].push({
+                        label: label,
+                        count: field.distinctValuesCount,
+                        value: label,
+                        total: count
+                    });
+                }
+            } else {
+                // console.warn("Missing " + column.name, Object.keys(lookup));
+            }
+        });
+        console.error(options);
+
+
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
             'Content-Type': 'application/json'
@@ -340,11 +383,10 @@ export default class extends Controller {
             // scrollY: true,
             // displayLength: 50, // not sure how to adjust the 'length' sent to the server
             // pageLength: 15,
-            columnDefs: this.columnDefs,
             orderCellsTop: true,
             fixedHeader: true,
 
-            deferRender:    true,
+            deferRender: true,
             // scrollX:        true,
             scrollCollapse: true,
             scroller: {
@@ -365,10 +407,16 @@ export default class extends Controller {
                 this.addButtonClickListener(dt);
             },
 
+            dom: this.dom,
+            // dom: 'Plfrtip',
+
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
-            dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f': '') +'t',
+            // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
             buttons: [], // this.buttons,
             columns: this.cols(),
+            searchPanes: {
+                layout: 'columns-1',
+            },
             searchBuilder: {
                 columns: this.searchBuilderFields,
                 depthLimit: 1
@@ -379,6 +427,7 @@ export default class extends Controller {
             //         propertyName: 'name',
             //     }),
             // ],
+            columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
                 let apiParams = this.dataTableParamsToApiPlatformParams(params);
                 // this.debug &&
@@ -396,14 +445,13 @@ export default class extends Controller {
                     params: apiParams,
                     headers: apiPlatformHeaders
                 })
-                    .then( (response) =>
-                    {
+                    .then((response) => {
                         // handle success
                         let hydraData = response.data;
 
                         var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
                         var itemsReturned = hydraData['hydra:member'].length;
-                        let first = (params.page-1) * params.itemsPerPage;
+                        let first = (params.page - 1) * params.itemsPerPage;
                         if (params.search.value) {
                             console.log(`dt search: ${params.search.value}`);
                         }
@@ -421,14 +469,21 @@ export default class extends Controller {
 
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
                         let next = hydraData["hydra:view"]['hydra:next'];
+                        // we need the searchpanes options, too.
+                        let searchPanes = {
+                            options: options
+                        };
+
+
                         let callbackValues = {
                             draw: params.draw,
                             data: d,
+                            searchPanes: searchPanes,
                             recordsTotal: total,
                             recordsFiltered: total, //  itemsReturned,
                         }
 
-                        if ( next && (params.start > 0) ) // && itemsReturned !== params.length
+                        if (next && (params.start > 0)) // && itemsReturned !== params.length
                         {
 
                             console.log('fetching second page ' + next);
@@ -463,29 +518,45 @@ export default class extends Controller {
             },
         };
         let dt = new DataTables(el, setup);
+        dt.searchPanes();
+        console.log('moving panes.');
+        $("div.search-panes").append(dt.searchPanes.container());
+
         return dt;
     }
 
-    get columnDefs() {
+    columnDefs(searchPanesColumns) {
+        console.error(searchPanesColumns);
         return [
-            // { targets: [0, 1], visible: true},
-            { targets: '_all', visible: true, sortable: false,  "defaultContent": "~~" }
-        ]
+            {
+                searchPanes: {show: true}, targets: searchPanesColumns,
+            },
+            {targets: [0, 1], visible: true},
+            // defaultContent is critical! Otherwise, lots of stuff fails.
+            {targets: '_all', visible: true, sortable: false, "defaultContent": "~~"}
+        ];
+
+        // { targets: [0, 1], visible: true},
+        // { targets: '_all', visible: true, sortable: false,  "defaultContent": "~~" }
     }
 
 
-    // get columns() {
-    //     // if columns isn't overwritten, use the th's in the first tr?  or data-field='status', and then make the api call with _fields=...?
-    //     // or https://datatables.net/examples/ajax/null_data_source.html
-    //     return [
-    //         {title: '@id', data: 'id'}
-    //     ]
-    // }
+// get columns() {
+//     // if columns isn't overwritten, use the th's in the first tr?  or data-field='status', and then make the api call with _fields=...?
+//     // or https://datatables.net/examples/ajax/null_data_source.html
+//     return [
+//         {title: '@id', data: 'id'}
+//     ]
+// }
 
-    actions({prefix = null, actions=['edit','show', 'qr']} = {})
-    {
-        let icons = {edit: 'fas fa-edit', show: 'fas fa-eye text-success', 'qr': 'fas fa-qrcode', 'delete': 'fas fa-trash text-danger'};
-        let buttons = actions.map( action => {
+    actions({prefix = null, actions = ['edit', 'show', 'qr']} = {}) {
+        let icons = {
+            edit: 'fas fa-edit',
+            show: 'fas fa-eye text-success',
+            'qr': 'fas fa-qrcode',
+            'delete': 'fas fa-trash text-danger'
+        };
+        let buttons = actions.map(action => {
             let modal_route = prefix + action;
             let icon = icons[action];
             // return action + ' ' + modal_route;
@@ -506,12 +577,13 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         })
 
     }
+
     c({
           propertyName = null,
           name = null,
           route = null,
           modal_route = null,
-          label =  null,
+          label = null,
           modal = false,
           render = null,
           locale = null,
@@ -519,7 +591,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
       } = {}) {
 
         if (render === null) {
-            render =   ( data, type, row, meta ) => {
+            render = (data, type, row, meta) => {
                 // if (!label) {
                 //     // console.log(row, data);
                 //     label = data || propertyName;
@@ -535,7 +607,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                         row.rp['_locale'] = locale;
                     }
                     let url = Routing.generate(route, row.rp);
-                    if(modal) {
+                    if (modal) {
                         return `<button class="btn btn-primary"></button>`;
                     } else {
                         return `<a href="${url}">${displayData}</a>`;
@@ -561,22 +633,21 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // ...function body...
     }
 
-    guessColumn(v)
-    {
+    guessColumn(v) {
 
         let renderFunction = null;
         switch (v) {
             case 'id':
-                renderFunction = ( data, type, row, meta ) => {
+                renderFunction = (data, type, row, meta) => {
                     console.warn('id render');
                     return "<b>" + data + "!!</b>"
                 }
                 break;
             case 'newestPublishTime':
             case 'createTime':
-                renderFunction = ( data, type, row, meta ) => {
+                renderFunction = (data, type, row, meta) => {
                     let isoTime = data;
-                    let str =  isoTime ? '<time class="timeago" datetime="' + data + '">' + data + '</time>' : '';
+                    let str = isoTime ? '<time class="timeago" datetime="' + data + '">' + data + '</time>' : '';
                     return str;
                 }
                 break;
@@ -586,8 +657,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         }
         let obj = {
-            title : v,
-            data : v,
+            title: v,
+            data: v,
         }
         if (renderFunction) {
             obj.render = renderFunction;
@@ -622,14 +693,32 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
             // console.error(c, order, o.column, o.dir);
         });
+        for (const [key, value] of Object.entries(params.searchPanes)) {
+            // console.log(value, key, Object.values(value)); // "a 5", "b 7", "c 9"
+
+            // if ($attr = $request->get('a')) {
+            //     $filter['attribute_search']['operator'] = sprintf("%s,%s,%s", $attr, '=', $request->get('v'));
+            // }
+
+            if (Object.values(value).length) {
+                Object.values(value).forEach((vvv) => apiData['attributes[operator]'] = key + ',=,' + vvv);
+                console.warn(apiData);
+            }
+        }
+        // if (params.searchPanes.length) {
+        //     params.searchPanes.forEach((c, index) => {
+        //         console.warn(c);
+        //         // apiData[c.origData + '[]'] = c.value1;
+        //     });
+        // }
+
         if (params.searchBuilder && params.searchBuilder.criteria) {
-            params.searchBuilder.criteria.forEach( (c, index) =>
-            {
+            params.searchBuilder.criteria.forEach((c, index) => {
                 console.warn(c);
-                apiData[c.origData + '[]']=c.value1;
+                apiData[c.origData + '[]'] = c.value1;
             });
         }
-        params.columns.forEach(function(column, index) {
+        params.columns.forEach(function (column, index) {
             if (column.search && column.search.value) {
                 // console.error(column);
                 let value = column.search.value;
@@ -652,7 +741,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
     }
 
     initFooter(el) {
-        return ;
+        return;
 
         var footer = el.querySelector('tfoot');
         if (footer) {
@@ -661,7 +750,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         var handleInput = function (column) {
             var input = $('<input class="form-control" type="text">');
-            input.attr('placeholder', column.filter.placeholder || column.data );
+            input.attr('placeholder', column.filter.placeholder || column.data);
             return input;
         };
 
@@ -685,7 +774,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 // Add some bold text in the new cell:
 //         cell.innerHTML = "<b>This is a table footer</b>";
 
-        this.columns().forEach( (column, index) => {
+        this.columns().forEach((column, index) => {
                 var cell = row.insertCell(index);
 
                 // cell.innerHTML = column.data;
@@ -722,7 +811,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         // see http://live.datatables.net/giharaka/1/edit for moving the footer to below the header
     }
-
 
 
 }

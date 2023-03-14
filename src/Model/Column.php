@@ -12,6 +12,9 @@ class Column
         public ?string $route = null,
         public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
+        public bool $searchable = false,
+        public bool $browsable = false,
+        public bool $sortable = false,
         public ?array $actions = null,
         public bool $modal = false,
         public bool|string $locale = false,

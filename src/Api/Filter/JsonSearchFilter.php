@@ -96,12 +96,12 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
                 json_encode($attrValue),
                 json_encode($attrValue),
             ))
-//        dd($where, json_encode($attrValue));
 
 //            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
 //            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
 //            ->setParameter('attr', sprintf("{'%s'}", $attribute))
             ->setParameter('attrValue', $attrValue, 'json');
+//        dd($where, json_encode($attrValue));
 
         $query = $queryBuilder->getQuery();
 

@@ -23,6 +23,8 @@
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: this.locale ?: (app.request.locale ?: 'xx'),
     columnConfiguration: columns|json_encode,
+    dom: this.dom|default(false),
+    pageLength: this.pageLength,
     filter: this.filter
 }) }}>
 

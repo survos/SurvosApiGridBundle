@@ -167,7 +167,7 @@ export default class extends Controller {
                         }
                     );
             } else {
-                this.dt = this.initDataTable(this.tableElement, response.data);
+                this.dt = this.initDataTable(this.tableElement, []);
             }
             this.initialized = true;
         }

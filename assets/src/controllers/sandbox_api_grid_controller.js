@@ -379,21 +379,22 @@ export default class extends Controller {
             },
             createdRow: this.createdRow,
             // paging: true,
-            scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
+            // scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
             // scrollY: true,
             // displayLength: 50, // not sure how to adjust the 'length' sent to the server
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
 
-            deferRender: true,
+            // deferRender: true,
             // scrollX:        true,
-            scrollCollapse: true,
-            scroller: {
-                // rowHeight: 90, // @WARNING: Problematic!!
-                // displayBuffer: 10,
-                loadingIndicator: true,
-            },
+            // scrollCollapse: true,
+            scroller: true,
+            // scroller: {
+            //     // rowHeight: 90, // @WARNING: Problematic!!
+            //     // displayBuffer: 10,
+            //     loadingIndicator: true,
+            // },
             // "processing": true,
             serverSide: true,
 
@@ -407,8 +408,8 @@ export default class extends Controller {
                 this.addButtonClickListener(dt);
             },
 
-            dom: this.dom,
-            // dom: 'Plfrtip',
+            // dom: this.dom,
+            dom: 'Plfrtip',
 
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',

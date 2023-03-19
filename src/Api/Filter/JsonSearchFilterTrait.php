@@ -31,10 +31,18 @@ trait JsonSearchFilterTrait
                 continue;
             }
 
-//            $description += $this->getFilterDescription($property, null);
-            $description += $this->getFilterDescription($property, self::PARAMETER_OPERATIOR);
-            $description += $this->getFilterDescription($property, self::PARAMETER_EQUALS);
-            $description += $this->getFilterDescription($property, self::PARAMETER_BETWEEN);
+//            foreach ([$property, "{$property}[]"] as $filterParameterName) {
+//                $description[$filterParameterName] = [
+//                    'property' => $property,
+//                    'type' => 'string',
+//                    'required' => false,
+//                ];
+//            }
+
+            $description += $this->getFilterDescription($property, null);
+//            $description += $this->getFilterDescription($property, self::PARAMETER_OPERATIOR);
+//            $description += $this->getFilterDescription($property, self::PARAMETER_EQUALS);
+//            $description += $this->getFilterDescription($property, self::PARAMETER_BETWEEN);
         }
 
         return $description;
@@ -63,13 +71,15 @@ trait JsonSearchFilterTrait
             ];
 
         } else {
-//            return [
-//                sprintf('%s', $propertyName) => [
-//                    'property' => $propertyName,
-//                    'type' => 'string',
-//                    'required' => false,
-//                ],
-//            ];
+            // not sure how to make this an array...
+            return [
+                sprintf('%s', $propertyName) => [
+                    'property' => $propertyName . '[]',
+                    'type' => 'string',
+                    'is_collection' => true,
+                    'required' => false,
+                ],
+            ];
 
         }
 

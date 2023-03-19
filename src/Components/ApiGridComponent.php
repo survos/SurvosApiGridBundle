@@ -31,6 +31,8 @@ class ApiGridComponent
     public ?string $caller = null;
 
     public string $class;
+    public string $dom;
+    public int $pageLength=50;
     public string $searchPanesDataUrl;
 
     public array $filter = [];

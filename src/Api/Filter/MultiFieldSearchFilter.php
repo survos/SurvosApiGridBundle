@@ -64,11 +64,18 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
     {
         $alias = $queryBuilder->getRootAliases()[0];
 
+        // for translatable fields, we need to join and search the translations, not the entity itself.
+        // OR search the translated strings in the JSON
+        // OR use ElasticSearch
+
+
+
         // Build OR expression
         $orExp = $queryBuilder->expr()->orX();
         foreach ($this->getProperties() as $prop => $ignoored) {
             $orExp->add($queryBuilder->expr()->like('LOWER(' . $alias . '.' . $prop . ')', ':' . $parameterName));
         }
+//        dd($orExp->getParts(), $queryBuilder);
 
         // @todo: this is supposed to be looking for tsquery types!  hack!
         if ($prop === 'headlineText') {

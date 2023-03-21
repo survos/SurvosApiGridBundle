@@ -87,9 +87,10 @@ export default class extends Controller {
         searchableFields: {type: String, default: '[]'},
         searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
-        dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
+        dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
+    // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
 
     cols() {
         let x = this.columns.map(c => {
@@ -130,6 +131,8 @@ export default class extends Controller {
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
+        // dom: 'Plfrtip',
+        assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
         this.sortableFields = JSON.parse(this.sortableFieldsValue);
@@ -351,8 +354,6 @@ export default class extends Controller {
                 // console.warn("Missing " + column.name, Object.keys(lookup));
             }
         });
-        console.error(options);
-
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -379,14 +380,14 @@ export default class extends Controller {
             },
             createdRow: this.createdRow,
             // paging: true,
-            // scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
+            scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
             // scrollY: true,
             // displayLength: 50, // not sure how to adjust the 'length' sent to the server
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
 
-            // deferRender: true,
+            deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
@@ -408,8 +409,8 @@ export default class extends Controller {
                 this.addButtonClickListener(dt);
             },
 
-            // dom: this.dom,
-            dom: 'Plfrtip',
+            dom: this.dom,
+            // dom: 'Plfrtip',
 
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
@@ -520,14 +521,14 @@ export default class extends Controller {
         };
         let dt = new DataTables(el, setup);
         dt.searchPanes();
-        console.log('moving panes.');
+        // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
 
         return dt;
     }
 
     columnDefs(searchPanesColumns) {
-        console.error(searchPanesColumns);
+        // console.error(searchPanesColumns);
         return [
             {
                 searchPanes: {show: true}, targets: searchPanesColumns,

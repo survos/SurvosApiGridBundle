@@ -87,9 +87,10 @@ export default class extends Controller {
         searchableFields: {type: String, default: '[]'},
         searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
-        dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
+        dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
+    // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
 
     cols() {
         let x = this.columns.map(c => {
@@ -130,6 +131,8 @@ export default class extends Controller {
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
+        // dom: 'Plfrtip',
+        assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
         this.sortableFields = JSON.parse(this.sortableFieldsValue);
@@ -351,8 +354,6 @@ export default class extends Controller {
                 // console.warn("Missing " + column.name, Object.keys(lookup));
             }
         });
-        console.error(options);
-
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -388,12 +389,13 @@ export default class extends Controller {
 
             deferRender: true,
             // scrollX:        true,
-            scrollCollapse: true,
-            scroller: {
-                // rowHeight: 90, // @WARNING: Problematic!!
-                // displayBuffer: 10,
-                loadingIndicator: true,
-            },
+            // scrollCollapse: true,
+            scroller: true,
+            // scroller: {
+            //     // rowHeight: 90, // @WARNING: Problematic!!
+            //     // displayBuffer: 10,
+            //     loadingIndicator: true,
+            // },
             // "processing": true,
             serverSide: true,
 
@@ -519,14 +521,14 @@ export default class extends Controller {
         };
         let dt = new DataTables(el, setup);
         dt.searchPanes();
-        console.log('moving panes.');
+        // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
 
         return dt;
     }
 
     columnDefs(searchPanesColumns) {
-        console.error(searchPanesColumns);
+        // console.error(searchPanesColumns);
         return [
             {
                 searchPanes: {show: true}, targets: searchPanesColumns,

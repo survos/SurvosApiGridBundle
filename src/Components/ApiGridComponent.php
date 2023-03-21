@@ -31,7 +31,7 @@ class ApiGridComponent
     public ?string $caller = null;
 
     public string $class;
-    public string $dom;
+    public string $dom='lfrtip';
     public int $pageLength=50;
     public string $searchPanesDataUrl;
 

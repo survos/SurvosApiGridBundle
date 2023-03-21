@@ -132,7 +132,7 @@ export default class extends Controller {
         // var columnRender = [];
         this.dom = this.domValue;
         // dom: 'Plfrtip',
-        assert(this.dom, "Missing dom");
+        console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
         this.sortableFields = JSON.parse(this.sortableFieldsValue);

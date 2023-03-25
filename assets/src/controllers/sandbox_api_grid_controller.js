@@ -674,6 +674,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         var apiData = {
             page: 1
         };
+        console.error(params);
+
+        apiData.start = params.start;
 
         if (params.length) {
             apiData.itemsPerPage = params.length;

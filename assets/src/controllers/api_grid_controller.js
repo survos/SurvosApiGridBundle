@@ -485,30 +485,31 @@ export default class extends Controller {
                             recordsFiltered: total, //  itemsReturned,
                         }
 
-                        if (next && (params.start > 0)) // && itemsReturned !== params.length
-                        {
-
-                            console.log('fetching second page ' + next);
-                            axios.get(next, {
-                                headers: apiPlatformHeaders,
-                            })
-                                .then(response => response.data)
-                                .then(json => {
-                                    d = d.concat(json['hydra:member']);
-
-                                    this.debug && console.log(d.map(obj => obj.id));
-                                    if (this.debug && console && console.log) {
-                                        console.log(`  ${itemsReturned} (of ${total}) returned, page ${apiOptions.page}, ${apiOptions.itemsPerPage}/page first: ${first} :`, d);
-                                    }
-                                    d = d.slice(params.start - first, (params.start - first) + params.length);
-                                    callbackValues.data = d;
-
-                                    itemsReturned = d.length;
-
-                                    console.log(`2-page callback with ${total} records (${itemsReturned} items)`);
-                                    console.log(d);
-                                });
-                        }
+                        console.log('NOT fetching second page ' + next);
+                        // if (next && (params.start > 0)) // && itemsReturned !== params.length
+                        // {
+                        //
+                        //     console.log('NOT fetching second page ' + next);
+                        //     axios.get(next, {
+                        //         headers: apiPlatformHeaders,
+                        //     })
+                        //         .then(response => response.data)
+                        //         .then(json => {
+                        //             d = d.concat(json['hydra:member']);
+                        //
+                        //             this.debug && console.log(d.map(obj => obj.id));
+                        //             if (this.debug && console && console.log) {
+                        //                 console.log(`  ${itemsReturned} (of ${total}) returned, page ${apiOptions.page}, ${apiOptions.itemsPerPage}/page first: ${first} :`, d);
+                        //             }
+                        //             d = d.slice(params.start - first, (params.start - first) + params.length);
+                        //             callbackValues.data = d;
+                        //
+                        //             itemsReturned = d.length;
+                        //
+                        //             console.log(`2-page callback with ${total} records (${itemsReturned} items)`);
+                        //             console.log(d);
+                        //         });
+                        // }
                         callback(callbackValues);
                     })
                     .catch(function (error) {

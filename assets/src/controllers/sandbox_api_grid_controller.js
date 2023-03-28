@@ -443,6 +443,7 @@ export default class extends Controller {
                 }
 
                 // console.warn(apiPlatformHeaders);
+                console.log("calling API " + this.apiCallValue, apiParams);
                 axios.get(this.apiCallValue, {
                     params: apiParams,
                     headers: apiPlatformHeaders
@@ -453,7 +454,7 @@ export default class extends Controller {
 
                         var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
                         var itemsReturned = hydraData['hydra:member'].length;
-                        let first = (params.page - 1) * params.itemsPerPage;
+                        // let first = (params.page - 1) * params.itemsPerPage;
                         if (params.search.value) {
                             console.log(`dt search: ${params.search.value}`);
                         }
@@ -485,6 +486,7 @@ export default class extends Controller {
                             recordsFiltered: total, //  itemsReturned,
                         }
 
+                        if (0)
                         if (next && (params.start > 0)) // && itemsReturned !== params.length
                         {
 
@@ -671,15 +673,17 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
     dataTableParamsToApiPlatformParams(params) {
         let columns = params.columns; // get the columns passed back to us, sanity.
-        var apiData = {
-            page: 1
-        };
-        console.error(params);
+        // var apiData = {
+        //     page: 1
+        // };
+        // console.error(params);
 
-        apiData.start = params.start;
+        // apiData.start = params.start; // ignored?s
 
+        let apiData = {};
         if (params.length) {
-            apiData.itemsPerPage = params.length;
+            // was apiData.itemsPerPage = params.length;
+            apiData.limit = params.length;
         }
 
         // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
@@ -736,8 +740,10 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         if (params.start) {
             // was apiData.page = Math.floor(params.start / params.length) + 1;
-            apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
+            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
+        apiData.offset = params.start;
+        // console.error(apiData);
 
         // add our own filters
         // apiData['marking'] = ['fetch_success'];

@@ -671,12 +671,17 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
     dataTableParamsToApiPlatformParams(params) {
         let columns = params.columns; // get the columns passed back to us, sanity.
-        var apiData = {
-            page: 1
-        };
+        // var apiData = {
+        //     page: 1
+        // };
+        // console.error(params);
 
+        // apiData.start = params.start; // ignored?s
+
+        let apiData = {};
         if (params.length) {
-            apiData.itemsPerPage = params.length;
+            // was apiData.itemsPerPage = params.length;
+            apiData.limit = params.length;
         }
 
         // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
@@ -733,8 +738,10 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         if (params.start) {
             // was apiData.page = Math.floor(params.start / params.length) + 1;
-            apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
+            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
+        apiData.offset = params.start;
+        // console.error(apiData);
 
         // add our own filters
         // apiData['marking'] = ['fetch_success'];

@@ -39,11 +39,15 @@ class SurvosApiGridBundle extends AbstractBundle
 //    App\Paginator\SlicePaginationExtension:
 //        alias: api_platform.doctrine.orm.query_extension.pagination
 
-        $service_id = 'api_platform.doctrine.SlicePaginationExtension.query_extension.collection';
         $builder->register(SlicePaginationExtension::class)
             ->setAutowired(true)
-            ->addTag($service_id , ['priority' => -65]);
-        $container->services()->alias($service_id, SlicePaginationExtension::class, );
+//            ->addTag('api_platform.doctrine.SlicePaginationExtension.query_extension.collection', ['priority' => -65])
+        ;
+        $services = $container->services();
+        $services->set(SlicePaginationExtension::class)
+            ->tag('api_platform.doctrine.SlicePaginationExtension.query_extension.collection', ['priority' => -65])
+        ;
+        $container->services()->alias('api_platform.doctrine.orm.query_extension.pagination', SlicePaginationExtension::class, );
 
         if (class_exists(Environment::class) && class_exists(StimulusTwigExtension::class)) {
             $builder

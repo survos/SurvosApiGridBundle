@@ -41,7 +41,7 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register(SlicePaginationExtension::class)
             ->setAutowired(true)
-//            ->addTag('api_platform.doctrine.SlicePaginationExtension.query_extension.collection', ['priority' => -65])
+            ->addTag('api_platform.doctrine.SlicePaginationExtension.query_extension.collection', ['priority' => -65])
         ;
         $services = $container->services();
         $services->set(SlicePaginationExtension::class)

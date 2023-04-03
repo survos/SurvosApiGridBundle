@@ -83,14 +83,14 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
-        sortableFields: {type: String, default: '[]'},
-        searchableFields: {type: String, default: '[]'},
-        searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
+    // sortableFields: {type: String, default: '[]'},
+    // searchableFields: {type: String, default: '[]'},
+    // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
         let x = this.columns.map(c => {

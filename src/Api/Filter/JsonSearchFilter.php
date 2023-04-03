@@ -33,8 +33,8 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
     public function __construct(ManagerRegistry        $managerRegistry,
                                 LoggerInterface        $logger = null,
                                 array                  $properties = null,
-                                NameConverterInterface $nameConverter = null,
-                                private string         $searchParameterName = 'json_search')
+                                NameConverterInterface $nameConverter = null
+    )
     {
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
     }
@@ -69,11 +69,9 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
                 $this->addJsonWhere($queryBuilder, $property, $attribute, $operator, $attrValue);
             }
 
-
-
-        if (null === $value || $property !== $this->searchParameterName) {
-            return;
-        }
+//        if (null === $value || $property !== $this->searchParameterName) {
+//            return;
+//        }
 
     }
 
@@ -116,84 +114,80 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
 //            ->setParameter('code', "24");
 
 
-        $query = $queryBuilder->getQuery();
-        if ($property == 'estatus_legal') {
-            dd($query->getSQL(), $property, $attribute, $query->getResult() ? $query->getResult()[0] : null);
-        }
+//        $query = $queryBuilder->getQuery();
+//        return;
 //
-        return;
-
-
-        $queryBuilder
-//            ->andWhere($where = sprintf(" (TEXT_EXISTS(%s.%s, :attrValue)=TRUE)",
-            ->andWhere($where = sprintf(" TEXT_EXISTS('a','b')",
-                sprintf("%s->'%s'", $alias, $property),
-//                $property,
-                json_encode($attrValue),
-                json_encode($attrValue),
-            ))
-            ->setParameter('attrValue', $attrValue, 'json');
-
-//            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
-//            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
-//            ->setParameter('attr', sprintf("{'%s'}", $attribute))
-//        dd($where, json_encode($attrValue));
-
-
-        $queryBuilder
-            ->andWhere($where = sprintf(" json->'autor' ? 'goitia_francisco'",
-//                $alias,
-//                $property,
+//
+//        $queryBuilder
+////            ->andWhere($where = sprintf(" (TEXT_EXISTS(%s.%s, :attrValue)=TRUE)",
+//            ->andWhere($where = sprintf(" TEXT_EXISTS('a','b')",
+//                sprintf("%s->'%s'", $alias, $property),
+////                $property,
 //                json_encode($attrValue),
 //                json_encode($attrValue),
-            ))
-
-//            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
-//            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
-//            ->setParameter('attr', sprintf("{'%s'}", $attribute))
-            ->setParameter('attrValue', $attrValue, 'json');
-
-
-        $query = $queryBuilder->getQuery();
-
-        // select code, json from instance where (json->'autor')::jsonb ? 'goitia_francisco';
-
-        dd($queryBuilder->getQuery()->getDQL(),
-            $query->getFirstResult(),
-            $property,
-            $attribute,
-            $attrValue,
-            $query->getParameters(), $query->getParameter('attrValue'),
-            $queryBuilder->getQuery()->getSQL());
+//            ))
+//            ->setParameter('attrValue', $attrValue, 'json');
 //
-        return;
-
-        $queryBuilder
-            ->andWhere('(' . $orExp . ')')
-            ->setParameter($parameterName, strtolower($word) . '%');
-
-        // Build OR expression
-        $orExp = $queryBuilder->expr()->orX();
-        foreach ($this->getProperties() as $prop => $ignoored) {
-            $orExp->add($queryBuilder->expr()->like('LOWER(' . $alias . '.' . $prop . ')', ':' . $parameterName));
-        }
-
-        // @todo: this is supposed to be looking for tsquery types!  hack!
-        if ($prop === 'headlineText') {
-            if (strlen($word) > 2) {
-                $queryBuilder
-                    ->andWhere(sprintf('tsquery(%s.headlineText,:searchQuery) = true', $alias))
-                    ->setParameter('searchQuery', $word);
-            }
-        } else {
-            $queryBuilder
-                ->andWhere('(' . $orExp . ')')
-                ->setParameter($parameterName, strtolower($word) . '%');
-        }
-
-        // if the field is a full text field, apply tsquery
-
-        //        dd($queryBuilder->getQuery()->getSQL());
+////            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
+////            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
+////            ->setParameter('attr', sprintf("{'%s'}", $attribute))
+////        dd($where, json_encode($attrValue));
+//
+//
+//        $queryBuilder
+//            ->andWhere($where = sprintf(" json->'autor' ? 'goitia_francisco'",
+////                $alias,
+////                $property,
+////                json_encode($attrValue),
+////                json_encode($attrValue),
+//            ))
+//
+////            ->andWhere(sprintf("JSON_GET_FIELD_AS_TEXT(%s.%s, '%s') = :attrValue", $alias, $property, $attribute))
+////            ->andWhere('JSON_GET_OBJECT(s.notes, :attr) = :attrValue')
+////            ->setParameter('attr', sprintf("{'%s'}", $attribute))
+//            ->setParameter('attrValue', $attrValue, 'json');
+//
+//
+//        $query = $queryBuilder->getQuery();
+//
+//        // select code, json from instance where (json->'autor')::jsonb ? 'goitia_francisco';
+//
+//        dd($queryBuilder->getQuery()->getDQL(),
+//            $query->getFirstResult(),
+//            $property,
+//            $attribute,
+//            $attrValue,
+//            $query->getParameters(), $query->getParameter('attrValue'),
+//            $queryBuilder->getQuery()->getSQL());
+////
+//        return;
+//
+//        $queryBuilder
+//            ->andWhere('(' . $orExp . ')')
+//            ->setParameter($parameterName, strtolower($word) . '%');
+//
+//        // Build OR expression
+//        $orExp = $queryBuilder->expr()->orX();
+//        foreach ($this->getProperties() as $prop => $ignoored) {
+//            $orExp->add($queryBuilder->expr()->like('LOWER(' . $alias . '.' . $prop . ')', ':' . $parameterName));
+//        }
+//
+//        // @todo: this is supposed to be looking for tsquery types!  hack!
+//        if ($prop === 'headlineText') {
+//            if (strlen($word) > 2) {
+//                $queryBuilder
+//                    ->andWhere(sprintf('tsquery(%s.headlineText,:searchQuery) = true', $alias))
+//                    ->setParameter('searchQuery', $word);
+//            }
+//        } else {
+//            $queryBuilder
+//                ->andWhere('(' . $orExp . ')')
+//                ->setParameter($parameterName, strtolower($word) . '%');
+//        }
+//
+//        // if the field is a full text field, apply tsquery
+//
+//        //        dd($queryBuilder->getQuery()->getSQL());
     }
 
 

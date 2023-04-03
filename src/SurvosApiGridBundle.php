@@ -5,6 +5,7 @@ namespace Survos\ApiGrid;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
+use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\GridGroupBundle\Service\GridGroupService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -56,11 +57,14 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->setPublic(false);
         }
 
+        $builder->register(DatatableService::class)->setAutowired(true)->setAutoconfigured(true);
+
         $builder->register(ApiGridComponent::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
             ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))

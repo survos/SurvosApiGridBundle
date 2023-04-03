@@ -5,6 +5,7 @@ namespace Survos\ApiGrid\Components;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Model\Column;
+use Survos\ApiGrid\Service\DatatableService;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
@@ -18,6 +19,7 @@ class ApiGridComponent
         private Environment $twig,
         private LoggerInterface $logger,
         private RequestStack $requestStack,
+        private DatatableService $datatableService,
         public ?string $stimulusController
     ) {
         //        ='@survos/grid-bundle/api_grid';
@@ -80,41 +82,9 @@ class ApiGridComponent
         return $customColumnTemplates;
     }
 
-    /**
-     * @return array<int, Column>
-     */
-    public function normalizedColumns(): iterable
+    public function getNormalizedColumns()
     {
-        //        $normalizedColumns = parent::normalizedColumns();
-
-        //        dd($customColumnTemplates);
-        //        dd($template->getBlockNames());
-        //        dd($template->getSourceContext());
-        //        dd($template->getBlockNames());
-        $customColumnTemplates = $this->getTwigBlocks();
-        $normalizedColumns = [];
-        foreach ($this->columns as $idx => $c) {
-            if (empty($c)) {
-                continue;
-            }
-            if (is_string($c)) {
-                $c = [
-                    'name' => $c,
-                ];
-            }
-            $columnName = $c['name'];
-            if (!$block = $c['block'] ?? false) {
-                $block = $columnName;
-            }
-            $fixDotColumnName = str_replace('.', '_', $block);
-            if (array_key_exists($fixDotColumnName, $customColumnTemplates)) {
-                $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];
-            }
-            assert(is_array($c));
-            $column = new Column(...$c);
-            $normalizedColumns[] = $column;
-            //            $normalizedColumns[$column->name] = $column;
-        }
-        return $normalizedColumns;
+        return $this->datatableService->normalizedColumns($this->class, $this->columns, $this->getTwigBlocks());
     }
+
 }

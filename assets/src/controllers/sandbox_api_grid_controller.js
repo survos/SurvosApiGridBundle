@@ -135,9 +135,9 @@ export default class extends Controller {
         console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
-        this.sortableFields = JSON.parse(this.sortableFieldsValue);
-        this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        // this.sortableFields = JSON.parse(this.sortableFieldsValue);
+        // this.searchableFields = JSON.parse(this.searchableFieldsValue);
+        // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
 
         this.locale = this.localeValue;
 
@@ -359,7 +359,7 @@ export default class extends Controller {
                 // console.warn("Missing " + column.name, Object.keys(lookup));
             }
         });
-        console.error('searchFields', searchFieldsByColumnNumber);
+        // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -382,7 +382,7 @@ export default class extends Controller {
         let setup = {
             // let dt = new DataTable(el, {
             language: {
-                searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
+                searchPlaceholder: 'srch: '// + this.searchableFields.join(',')
             },
             createdRow: this.createdRow,
             // paging: true,
@@ -612,7 +612,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             title: label,
             data: propertyName || '',
             render: render,
-            sortable: this.sortableFields.includes(propertyName)
+            sortable: false, // this.sortableFields.includes(propertyName)
         }
         // ...function body...
     }

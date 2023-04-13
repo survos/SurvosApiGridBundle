@@ -36,6 +36,7 @@ class ApiGridComponent
     public string $dom='lfrtip';
     public int $pageLength=50;
     public string $searchPanesDataUrl;
+    public string $apiGetCollectionUrl;
 
     public array $filter = [];
 

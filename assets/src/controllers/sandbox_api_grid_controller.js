@@ -166,7 +166,7 @@ export default class extends Controller {
                 axios.get(this.searchPanesDataUrlValue, {})
                     .then((response) => {
                             // handle success
-                            // console.log(response.data);
+                            console.log(response.data);
                             this.dt = this.initDataTable(this.tableElement, response.data);
                         }
                     );
@@ -329,9 +329,18 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        fields.forEach((field, index) => {
-            lookup[field.jsonKeyCode] = field;
-        });
+        console.error(fields);
+        // for (const property in fields) {
+        //     lookup[property] = field;
+        //     console.error(property, fields[property]);
+        //     console.log(`${property}: ${fields[property]}`);
+        // }
+        // fields = Array.from(fields);
+        // fields.forEach((field, index) => {
+        //     console.error(field);
+        //     lookup[field.jsonKeyCode] = field;
+        // });
+        // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
         this.columns.forEach((column, index) => {
@@ -340,25 +349,28 @@ export default class extends Controller {
                 console.error(index);
                 searchFieldsByColumnNumber.push(index);
             }
-            if (column.browsable && (column.name in lookup)) {
-                let field = lookup[column.name];
-                options[field.jsonKeyCode] = [];
-                for (const label in field.valueCounts) {
-                    let count = field.valueCounts[label];
-                    //     console.log(field.valueCounts);
-                    // field.valueCounts.protoforEach( (label, count) =>
-                    // {
-                    options[field.jsonKeyCode].push({
-                        label: label,
-                        count: field.distinctValuesCount,
-                        value: label,
-                        total: count
-                    });
-                }
-            } else {
-                // console.warn("Missing " + column.name, Object.keys(lookup));
-            }
+            options = fields;
+            // this is specific to museado, but needs to be generalized with a field structure.
+            // if (column.browsable && (column.name in fields)) {
+            //     let fieldName = column.name; //  lookup[column.name];
+            //     // options[field.jsonKeyCode] = [];
+            //     for (const label in field.valueCounts) {
+            //         let count = field.valueCounts[label];
+            //         //     console.log(field.valueCounts);
+            //         // field.valueCounts.protoforEach( (label, count) =>
+            //         // {
+            //         options[fieldName].push({
+            //             label: label,
+            //             count: field.distinctValuesCount,
+            //             value: label,
+            //             total: count
+            //         });
+            //     }
+            // } else {
+            //     // console.warn("Missing " + column.name, Object.keys(lookup));
+            // }
         });
+        console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {

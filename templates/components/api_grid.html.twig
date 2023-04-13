@@ -19,7 +19,7 @@
     searchBuilderFields: this.searchBuilderFields,
     sortableFields: sortable_fields(this.class),
     searchableFields: searchable_fields(this.class),
-    api_call:  api_route(this.class),
+    api_call:  this.apiGetCollectionUrl|default(api_route(this.class)),
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: this.locale ?: (app.request.locale ?: 'xx'),
     columnConfiguration: columns|json_encode,

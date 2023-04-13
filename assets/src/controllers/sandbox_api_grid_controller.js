@@ -684,6 +684,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
 
         let order = {};
+        if (params.searchBuilder) {
+            apiData['searchBuilder'] = params.searchBuilder;
+        }
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];

@@ -88,8 +88,14 @@ class DatatableService
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-//            dd($attribute);
-/** @var FilterInterface $filter */
+            // dd($attribute);
+
+            // $filter = $attribute->getArguments()[0];
+            // if (u($filter)->endsWith('OrderFilter')) {
+            //     $orderProperties = $attribute->getArguments()['properties'];
+            //     return $orderProperties;
+            //            dd($attribute);
+            /** @var FilterInterface $filter */
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
             $settings = [];

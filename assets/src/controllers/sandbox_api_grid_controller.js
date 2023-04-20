@@ -161,18 +161,7 @@ export default class extends Controller {
         //     console.error('A table element is required.');
         // }
         if (this.tableElement) {
-            // get the (cached) fields first, then load the datatable
-            if (this.searchPanesDataUrlValue) {
-                axios.get(this.searchPanesDataUrlValue, {})
-                    .then((response) => {
-                            // handle success
-                            console.log(response.data);
-                            this.dt = this.initDataTable(this.tableElement, response.data);
-                        }
-                    );
-            } else {
-                this.dt = this.initDataTable(this.tableElement, []);
-            }
+            this.dt = this.initDataTable(this.tableElement, []);
             this.initialized = true;
         }
     }
@@ -435,6 +424,7 @@ export default class extends Controller {
             buttons: [], // this.buttons,
             columns: this.cols(),
             searchPanes: {
+                viewTotal: true,
                 layout: 'columns-1',
             },
             searchBuilder: {
@@ -484,6 +474,14 @@ export default class extends Controller {
                         if (d.length) {
                             console.log(d[0]);
                         }
+                        let searchPanes = {};
+                        if(typeof hydraData['hydra:facets'] !== "undefined") {
+                            searchPanes = hydraData['hydra:facets']['searchPanes'];
+                        } else {
+                            searchPanes = {
+                                options: options
+                            };
+                        }
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:
                         //     pagination_client_items_per_page: true
@@ -491,9 +489,7 @@ export default class extends Controller {
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
                         let next = hydraData["hydra:view"]['hydra:next'];
                         // we need the searchpanes options, too.
-                        let searchPanes = {
-                            options: options
-                        };
+
 
 
                         let callbackValues = {
@@ -503,6 +499,7 @@ export default class extends Controller {
                             recordsTotal: total,
                             recordsFiltered: total, //  itemsReturned,
                         }
+                        console.log(callbackValues);
                         callback(callbackValues);
                     })
                     .catch(function (error) {

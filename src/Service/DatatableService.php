@@ -99,6 +99,10 @@ class DatatableService
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
             $settings = [];
+            if (!array_key_exists('properties', $arguments)) {
+                continue;
+//                dd($arguments);
+            }
             foreach ($arguments['properties'] as $fieldname) {
                 if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
                     $settings[$fieldname]['searchable'] = true;

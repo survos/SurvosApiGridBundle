@@ -318,7 +318,6 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        console.error(fields);
         // for (const property in fields) {
         //     lookup[property] = field;
         //     console.error(property, fields[property]);
@@ -335,7 +334,6 @@ export default class extends Controller {
         this.columns.forEach((column, index) => {
             console.log(column);
             if (column.searchable || column.browsable ) {
-                console.error(index);
                 searchFieldsByColumnNumber.push(index);
             }
             options = fields;

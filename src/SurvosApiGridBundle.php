@@ -16,6 +16,12 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
 use Twig\Environment;
+use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
+use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
+use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
+use Survos\ApiGrid\State\MeilliSearchStateProvider;
+use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
+use ApiPlatform\Hydra\Serializer\PartialCollectionViewNormalizer;
 
 class SurvosApiGridBundle extends AbstractBundle
 {
@@ -25,20 +31,47 @@ class SurvosApiGridBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        //        $builder
-        //            ->setDefinition('survos.inspection_bundle', new Definition(\Survos\InspectionBundle\Twig\TwigExtension::class))
-        //            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
-        //            ->addTag('twig.extension')
-        //            ->setPublic(false)
-        //        ;
 
-//        api_platform.doctrine.orm.query_extension.pagination:
-//        class: App\Paginator\SlicePaginationExtension
-//        tags:
-//          - {name : api_platform.doctrine.orm.query_extension.collection, priority: -65}
-//        autowire: true
-//    App\Paginator\SlicePaginationExtension:
-//        alias: api_platform.doctrine.orm.query_extension.pagination
+        $builder->register(DataTableFilter::class)
+            ->setAutowired(true)
+            ->addTag('meilli_search_filter')
+        ;
+        $builder->register(DataTableFacetsFilter::class)
+            ->setAutowired(true)
+            ->addTag('meilli_search_filter')
+        ;
+        $builder->register(SortFilter::class)
+            ->setAutowired(true)
+            ->addTag('meilli_search_filter')
+        ;
+
+        $services = $builder->findTaggedServiceIds('meilli_search_filter');
+        $builder->register(MeilliSearchStateProvider::class)
+            ->setArgument('$meilliSearchFilter', array_map(function ($serviceId) {
+                    return new Reference($serviceId);
+                }, array_keys($services))
+            )
+            ->setAutowired(true)
+            ->addTag('api_platform.state_provider')
+            ->setPublic(true);
+
+        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+                ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
+                ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
+                ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+                ->setArgument('$resourceMetadataCollectionFactory', null)
+                ->addTag('serializer.normalizer', ['priority' => -985]);
+
+        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');
+        
+        // $builder->register('api_platform.hydra.normalizer.partial_collection_view', PartialCollectionViewNormalizer::class)
+        //     ->setArgument('$collectionNormalizer', new Reference('api_platform.hydra.normalizer.partial_collection_view.inner'))
+        //     ->setArgument('$pageParameterName', new Reference('api_platform.collection.pagination.page_parameter_name'))
+        //     ->setArgument('$enabledParameterName', new Reference('api_platform.collection.pagination.enabled_parameter_name'))
+        //     ->setArgument('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
+        //     ->setArgument('$propertyAccessor', new Reference('api_platform.property_accessor'))
+        //     ->setPublic(false)
+        //     ->setDecoratedService(MeiliCollectionNormalizer::class);
 
         $builder->register('api_platform.doctrine.orm.query_extension.pagination',SlicePaginationExtension::class)
             ->setAutowired(true)

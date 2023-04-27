@@ -31,10 +31,10 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
             $filter = isset($clauseBody['filter'])? $clauseBody['filter'] :"";
 
             $searchBuilder = $context['filters']['searchBuilder'];
-
-            $dataTablefilter = $this->criteria($searchBuilder['logic'], $searchBuilder['criteria']);
-            
-            $clauseBody['filter'] = ($filter != "")?$filter." AND ".$dataTablefilter:$filter.$dataTablefilter;
+            if(isset($searchBuilder['logic']) && isset($searchBuilder['criteria'])) {
+                $dataTablefilter = $this->criteria($searchBuilder['logic'], $searchBuilder['criteria']);
+                $clauseBody['filter'] = ($filter != "")?$filter." AND ".$dataTablefilter:$filter.$dataTablefilter;
+            }
         }
 
         return $clauseBody;

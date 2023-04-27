@@ -44,7 +44,7 @@ import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        delete routeParams._keys; // seems to be added by twigjs
+        //delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -318,6 +318,7 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
+        console.error(fields);
         // for (const property in fields) {
         //     lookup[property] = field;
         //     console.error(property, fields[property]);
@@ -334,6 +335,7 @@ export default class extends Controller {
         this.columns.forEach((column, index) => {
             console.log(column);
             if (column.searchable || column.browsable ) {
+                console.error(index);
                 searchFieldsByColumnNumber.push(index);
             }
             options = fields;
@@ -357,6 +359,8 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
+        console.error(options);
+        // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -389,7 +393,7 @@ export default class extends Controller {
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
-            cascadePanes  : true,
+
             deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
@@ -420,7 +424,6 @@ export default class extends Controller {
             buttons: [], // this.buttons,
             columns: this.cols(),
             searchPanes: {
-                viewTotal: true,
                 layout: 'columns-1',
             },
             searchBuilder: {
@@ -435,9 +438,6 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                console.log("==============");
-                console.log(callback);
-                console.log("==============");
                 let apiParams = this.dataTableParamsToApiPlatformParams(params);
                 // this.debug &&
                 // console.error(params, apiParams);
@@ -608,22 +608,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                     if (modal_route) {
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
-                        // if nested, explode...
-                        let elements = propertyName.split('.');
-                        if (elements.length === 3) {
-                            let x1 = elements[0];
-                            let x2 = elements[1];
-                            let x3 = elements[2];
-                            return row[x1][x2][x3];
-                        } else if (elements.length === 2) {
-                            // hack, only one level deep, etc.  ugh
-                            let x1 = elements[0];
-                            let x2 = elements[1];
-                            return row[x1][x2];
-                        } else {
-                            return row[propertyName];
-                        }
-
+                        // console.log(propertyName, row[propertyName], row);
+                        return row[propertyName];
                     }
                 }
 
@@ -732,18 +718,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]'] = c.value1;
             });
         }
-        let facets = [];
-        this.columns.forEach((column) => {
-            if (column.searchable || column.browsable ) {
-                console.error(column.name);
-                facets.push(column.name);
-            }
-        });
-        apiData.facets = facets;
         params.columns.forEach(function (column, index) {
-            // if(col) {
-
-            // }
             if (column.search && column.search.value) {
                 // console.error(column);
                 let value = column.search.value;
@@ -759,7 +734,15 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
-        
+        let facets = [];
+        this.columns.forEach((column) => {
+            if (column.searchable || column.browsable ) {
+                console.error(column.name);
+                facets.push(column.name);
+            }
+        });
+        apiData.facets = facets;
+
         // console.error(apiData);
 
         // add our own filters

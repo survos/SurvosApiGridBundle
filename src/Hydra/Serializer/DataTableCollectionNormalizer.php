@@ -53,7 +53,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         $facets = [];
         if(is_array($object) && isset($object['facetDistribution'])) {
-            $facets = $this->getFacetsData($object['facetDistribution']);
+            parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+            if(isset($params['facets'])) {
+                $facets = $this->getFacetsData($object['facetDistribution'], $params['facets']);
+            }
         }
 
         if(is_array($object) && isset($object['hits'])) {
@@ -174,7 +177,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         return $context;
     }
 
-    private function getFacetsData(array $facets) :array {
+    private function getFacetsData(array $facets, ?array $params) :array {
         // $facetsData['searchPanes']['options'] = [];
         $facetsData = [];
 
@@ -190,6 +193,18 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $facetsData['searchPanes']['options'][$key] = $data;        
         }
 
+        // Add facets that are not return from meilisearch
+        foreach ($params as $param) {
+            if (!isset($facetsData['searchPanes']['options'][$param])) {
+                $data = [];
+                $fdata["label"] =  $param;
+                $fdata["total"] =  0;
+                $fdata["value"] =  $param;
+                $fdata["count"] =  0;
+                $data[] = $fdata;
+                $facetsData['searchPanes']['options'][$param] = $data;
+            }
+        }
         return $facetsData;
     }
 

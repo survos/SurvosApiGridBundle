@@ -29,7 +29,7 @@ class DatatableService
      * @param array $columns
      * @return array<int, Column>
      */
-    public function normalizedColumns(string $class, array $columns, array $customColumnTemplates): iterable
+    public function normalizedColumns(array $settings, array $columns, array $customColumnTemplates): iterable
     {
         //        $normalizedColumns = parent::normalizedColumns();
 
@@ -39,7 +39,6 @@ class DatatableService
         //        dd($template->getBlockNames());
         $normalizedColumns = [];
 
-        $settings = $this->getSettingsFromAttributes($class);
 //        $sortableFields = $this->sortableFields($class);
 //        $searchableFields = $this->searchableFields($class);
 
@@ -123,8 +122,9 @@ class DatatableService
     }
 
 
-    public function sortableFields(string $class): array
+    public function sortableFields(?string $class): array
     {
+
         assert(class_exists($class), $class);
         $reflector = new \ReflectionClass($class);
         foreach ($reflector->getAttributes() as $attribute) {

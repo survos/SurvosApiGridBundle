@@ -31,8 +31,9 @@ class ApiGridComponent
     public array $searchBuilderFields = [];
 
     public ?string $caller = null;
+    public array|object|null $schema = null;
 
-    public string $class;
+    public ?string $class = null;
     public string $dom='lfrtip';
     public int $pageLength=50;
     public string $searchPanesDataUrl;
@@ -85,7 +86,14 @@ class ApiGridComponent
 
     public function getNormalizedColumns()
     {
-        return $this->datatableService->normalizedColumns($this->class, $this->columns, $this->getTwigBlocks());
+        // really we're getting the schema from the PHP Attributes here.
+        if ($this->class) {
+                $settings = $this->datatableService->getSettingsFromAttributes($this->class);
+            } else {
+                $settings = []; // really settings should probably be passed in via a json schema or something like that.
+            }
+
+        return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
 
 }

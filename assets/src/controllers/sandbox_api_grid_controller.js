@@ -741,7 +741,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
         let facets = [];
         this.columns.forEach(function (column, index) {
-            if (column.searchable || column.browsable ) {
+            if ( column.browsable ) {
                 facets.push(column.name);
             }
         });
@@ -767,7 +767,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             apiData.facets = {};
             this.columns.forEach((column, index) => {
                 console.log(column);
-                if (column.searchable || column.browsable ) {
+                if ( column.browsable ) {
                     apiData.facets[column.name] = 1;
                     // apiData['facets'][column.name][0]['total'] = 0;
                 }

@@ -7,6 +7,7 @@ use ApiPlatform\State\ProviderInterface;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;
+use Meilisearch\Client;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Tagged;
 use ApiPlatform\Util\Inflector;
@@ -17,10 +18,11 @@ class MeilliSearchStateProvider implements ProviderInterface
 {
     public function __construct(
         private NormalizerInterface $normalizer,
-        private SearchService $searchService,
         private EntityManagerInterface $em,
         private Pagination $pagination,
-        private iterable $meilliSearchFilter
+        private iterable $meilliSearchFilter,
+        private string $meiliHost,
+        private string $meiliKey
     )
     {
     }
@@ -39,14 +41,22 @@ class MeilliSearchStateProvider implements ProviderInterface
 
             $body['hitsPerPage'] = $body['hitsPerPage'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = $body['offset'] ??= $this->pagination->getOffset($operation, $context);
+            $objectData = $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
 
-            $objectData = $this->searchService->rawSearch($operation->getClass(), $searchQuery, $body);
+//            $objectData = $this->searchService->search($operation->getClass(), $searchQuery, $body);
             return $objectData;
-            return  $this->returnObject($objectData, $operation->getClass());
+            //return  $this->returnObject($objectData, $operation->getClass());
         }
-
+        return null;
         // Retrieve the state from somewhere
         //return $this->em->getRepository($operation->getClass())->find($uriVariables['imdbId']);
+    }
+
+    private function getSearchIndexObject(string $class) {
+        $client = new Client($this->meiliHost, $this->meiliKey);
+        $class = explode("\\",$class);
+        $lastKey = strtolower(end($class));
+        return $client->index($lastKey);
     }
 
     private function returnObject(array $objectData, string $class) : object|array|null{

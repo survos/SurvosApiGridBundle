@@ -56,6 +56,8 @@ class SurvosApiGridBundle extends AbstractBundle
                     return new Reference($serviceId);
                 }, array_keys($services))
             )
+            ->setArgument('$meiliHost',$config['meiliHost'])
+            ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)
             ->addTag('api_platform.state_provider')
             ->setPublic(true);
@@ -125,6 +127,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('widthFactor')->defaultValue(2)->end()
             ->scalarNode('height')->defaultValue(30)->end()
             ->scalarNode('foregroundColor')->defaultValue('green')->end()
+            ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
+            ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
             ->end();;
     }
 

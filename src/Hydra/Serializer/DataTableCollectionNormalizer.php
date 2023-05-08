@@ -12,6 +12,7 @@ use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
+use Meilisearch\Search\SearchResult;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
@@ -52,15 +53,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         $facets = [];
-        if(is_array($object) && isset($object['facetDistribution'])) {
+        if($object instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
-            if(isset($params['facets']) && is_array($facets = json_decode($params['facets'],true))) {
-                $facets = $this->getFacetsData($object['facetDistribution'], $facets);
+            if(isset($params['facets']) && is_array($params['facets'])) {
+                $facets = $this->getFacetsData($object->getFacetDistribution(), $params['facets']);
             }
-        }
-
-        if(is_array($object) && isset($object['hits'])) {
-            $object = $object['hits'];
+            $object = $object->getHits();
         }
 
         if ($object instanceof PaginatorInterface) {
@@ -187,7 +185,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $fdata["total"] =  $facetValue;
                 $fdata["value"] =  $facetKey;
                 $fdata["count"] =  $facetValue;
-                if(is_array($params[$key])) {
+                if(isset($params[$key]) && is_array($params[$key])) {
                     foreach($params[$key] as $param) {
                         if(isset($param['label']) && $param['label'] === $facetKey) {
                             $fdata['total'] = $param['total'];

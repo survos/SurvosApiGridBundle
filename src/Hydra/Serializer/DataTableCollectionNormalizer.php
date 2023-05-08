@@ -68,16 +68,16 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $em = $object->getQuery()->getEntityManager();
             $metadata = $em->getClassMetadata($context['operation']->getClass());
             $repo = $em->getRepository($context['operation']->getClass());
-
-            if(isset($params['facets']) && is_array($facets = json_decode($params['facets'],true))) {
+            if(isset($params['facets']) && is_array($params['facets'])) {
                 $doctrineFacets = [];
-                foreach($facets as $facet => $value) {
+                foreach($params['facets'] as $key => $facet) {
                     $keyArray = array_keys($metadata->getReflectionProperties());
-                    if(in_array($facet, $keyArray)) {
-                        $doctrineFacets[$facet] = $repo->getCounts($facet);
+                    if(in_array($key, $keyArray)) {
+                        $doctrineFacets[$key] = $repo->getCounts($key);
                     }                    
                 }
-                $facets = $this->getFacetsData($doctrineFacets,$facets);
+
+                $facets = $this->getFacetsData($doctrineFacets,$params['facets']);
             }
         }
 
@@ -178,7 +178,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     }
 
     private function getFacetsData(array $facets, ?array $params) :array {
-        // $facetsData['searchPanes']['options'] = [];
         $facetsData = [];
 
         foreach($facets as $key => $facet) {
@@ -188,27 +187,32 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $fdata["total"] =  $facetValue;
                 $fdata["value"] =  $facetKey;
                 $fdata["count"] =  $facetValue;
-                foreach($params[$key] as $param) {
-                    if($param['label'] === $facetKey) {
-                        $fdata['total'] = $param['total'];
-                        break;
+                if(is_array($params[$key])) {
+                    foreach($params[$key] as $param) {
+                        if(isset($param['label']) && $param['label'] === $facetKey) {
+                            $fdata['total'] = $param['total'];
+                            break;
+                        }
                     }
                 }
+
                 $data[] = $fdata;
             }
             $facetsData[$key] = $data;
         }
 
         foreach ($params as $key => $subArray) {
-            foreach ($subArray as $bItem) {
-                $label = $bItem['label'];
-                if (!in_array($label, array_column($facetsData[$key], 'label'))) {
-                    $facetsData[$key][] = [
-                        'label' => $label,
-                        'total' => $bItem['total'],
-                        'value' => $label,
-                        'count' => 0
-                    ];
+            if(is_array($subArray)) {
+                foreach ($subArray as $bItem) {
+                    $label = $bItem['label'];
+                    if (!in_array($label, array_column($facetsData[$key], 'label'))) {
+                        $facetsData[$key][] = [
+                            'label' => $label,
+                            'total' => $bItem['total'],
+                            'value' => $label,
+                            'count' => 0
+                        ];
+                    }
                 }
             }
         }

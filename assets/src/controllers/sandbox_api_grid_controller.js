@@ -332,14 +332,13 @@ export default class extends Controller {
         // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
-        let rawFacets = {};
 
         this.columns.forEach((column, index) => {
             console.log(column);
             if (column.searchable || column.browsable ) {
                 console.error(index);
                 searchFieldsByColumnNumber.push(index);
-                rawFacets[column.name] = {};
+                //rawFacets.push(column.name);
             }
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
@@ -362,7 +361,8 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
-        let searchPanesRaw = rawFacets;
+        let searchPanesRaw = [];
+
         console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -487,7 +487,7 @@ export default class extends Controller {
                             console.log(d[0]);
                         }
                         let searchPanes = {};
-                        if(typeof hydraData['hydra:facets'] !== "undefined") {
+                        if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanes = hydraData['hydra:facets']['searchPanes'];
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                         } else {
@@ -762,8 +762,19 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
-
-        apiData.facets = searchPanesRaw;
+        console.log(searchPanesRaw.length);
+        if(searchPanesRaw.length == 0) {
+            apiData.facets = {};
+            this.columns.forEach((column, index) => {
+                console.log(column);
+                if (column.searchable || column.browsable ) {
+                    apiData.facets[column.name] = 1;
+                    // apiData['facets'][column.name][0]['total'] = 0;
+                }
+            });
+        } else {
+            apiData.facets = searchPanesRaw;
+        }
 
         // console.error(apiData);
 

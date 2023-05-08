@@ -19,9 +19,8 @@ final class DataTableFacetsFilter extends AbstractSearchFilter implements Filter
 
     public function apply(array $clauseBody, string $resourceClass, ?Operation $operation = null, array $context = []): array {
         if(isset($context['filters']['facets'])) {
-            $facets = json_decode($context['filters']['facets'],true);
-            if(is_array($facets)) {
-                $clauseBody['facets'] = array_keys($facets);
+            if(is_array($context['filters']['facets'])) {
+                $clauseBody['facets'] = array_keys($context['filters']['facets']);
             }
         }
 

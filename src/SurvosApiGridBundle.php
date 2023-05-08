@@ -67,8 +67,6 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->setArgument('$resourceMetadataCollectionFactory', null)
                 ->addTag('serializer.normalizer', ['priority' => -985]);
 
-        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');
-        
         // $builder->register('api_platform.hydra.normalizer.partial_collection_view', PartialCollectionViewNormalizer::class)
         //     ->setArgument('$collectionNormalizer', new Reference('api_platform.hydra.normalizer.partial_collection_view.inner'))
         //     ->setArgument('$pageParameterName', new Reference('api_platform.collection.pagination.page_parameter_name'))

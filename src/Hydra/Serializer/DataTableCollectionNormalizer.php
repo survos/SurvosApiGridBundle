@@ -5,7 +5,9 @@ namespace Survos\ApiGrid\Hydra\Serializer;
 use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Api\ResourceClassResolverInterface;
 use ApiPlatform\Api\UrlGeneratorInterface;
+use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
 use ApiPlatform\JsonLd\ContextBuilder;
+use ApiPlatform\JsonLd\ContextBuilderInterface;
 use ApiPlatform\JsonLd\Serializer\JsonLdContextTrait;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
@@ -16,8 +18,6 @@ use Meilisearch\Search\SearchResult;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
-    use JsonLdContextTrait;
-
     public const FORMAT = 'jsonld';
     public const IRI_ONLY = 'iri_only';
     private array $defaultContext = [
@@ -25,10 +25,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private $contextBuilder, 
-        ResourceClassResolverInterface $resourceClassResolver, 
-        private readonly IriConverterInterface $iriConverter, 
-        private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null, 
+        private $contextBuilder,
+        ResourceClassResolverInterface $resourceClassResolver,
+        private readonly IriConverterInterface $iriConverter,
+        private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null,
         array $defaultContext = []
     )
     {
@@ -72,7 +72,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     $keyArray = array_keys($metadata->getReflectionProperties());
                     if(in_array($key, $keyArray)) {
                         $doctrineFacets[$key] = $repo->getCounts($key);
-                    }                    
+                    }
                 }
 
                 $facets = $this->getFacetsData($doctrineFacets,$params['facets']);
@@ -82,7 +82,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         $context = $this->initContext($resourceClass, $context);
         $data = [];
-        
+
         $paginationData = $this->getPaginationData($object, $context);
 
         if (($operation = $context['operation'] ?? null) && method_exists($operation, 'getItemUriTemplate')) {
@@ -188,7 +188,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 if(isset($params[$key]) && is_array($params[$key])) {
                     foreach($params[$key] as $param) {
                         if(isset($param['label']) && $param['label'] === $facetKey) {
-                            $fdata['total'] = $param['total'];
+                            $fdata['total'] = (int) $param['total'];
                             break;
                         }
                     }
@@ -206,7 +206,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     if (!in_array($label, array_column($facetsData[$key], 'label'))) {
                         $facetsData[$key][] = [
                             'label' => $label,
-                            'total' => $bItem['total'],
+                            'total' => (int) $bItem['total'],
                             'value' => $label,
                             'count' => 0
                         ];
@@ -216,7 +216,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         $returnData['searchPanes']['options'] = $facetsData;
-        $returnData['searchPanes']["showZeroCounts"] = true;
+
         return $returnData;
     }
 
@@ -230,6 +230,38 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     private function createSearchPanesArray($key,$count) {
         return ["label" => $key, "total" => $count , "value" => $key,  "count" => $count];
+    }
+
+    // copied from JsonLdContextTrait, which is internal
+    private function addJsonLdContext(ContextBuilderInterface $contextBuilder, string $resourceClass, array &$context, array $data = []): array
+    {
+        if (isset($context['jsonld_has_context'])) {
+            return $data;
+        }
+
+        $context['jsonld_has_context'] = true;
+
+        if (isset($context['jsonld_embed_context'])) {
+            $data['@context'] = $contextBuilder->getResourceContext($resourceClass);
+
+            return $data;
+        }
+
+        $data['@context'] = $contextBuilder->getResourceContextUri($resourceClass);
+
+        return $data;
+    }
+
+    private function createJsonLdContext(AnonymousContextBuilderInterface $contextBuilder, $object, array &$context): array
+    {
+        // We're in a collection, don't add the @context part
+        if (isset($context['jsonld_has_context'])) {
+            return $contextBuilder->getAnonymousResourceContext($object, ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null, 'has_context' => true]);
+        }
+
+        $context['jsonld_has_context'] = true;
+
+        return $contextBuilder->getAnonymousResourceContext($object, ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null]);
     }
 
 }

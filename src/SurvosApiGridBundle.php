@@ -47,12 +47,6 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addTag('meilli_search_filter')
         ;
 
-        $builder->register(FacetsFieldSearchFilter::class)
-            ->setAutowired(true)
-            ->addTag('meilli_search_filter')
-        ;
-
-
         $builder->register(SortFilter::class)
             ->setAutowired(true)
             ->addTag('meilli_search_filter')

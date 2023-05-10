@@ -335,7 +335,7 @@ export default class extends Controller {
 
         this.columns.forEach((column, index) => {
             console.log(column);
-            if (column.searchable || column.browsable ) {
+            if (column.browsable) {
                 console.error(index);
                 searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
@@ -397,7 +397,7 @@ export default class extends Controller {
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
-            cascadePanes  : true,
+            //cascadePanes  : true,
             deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,

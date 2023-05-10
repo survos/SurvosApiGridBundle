@@ -44,7 +44,7 @@ import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        delete routeParams._keys; // seems to be added by twigjs
+        //delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -83,14 +83,14 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
-        sortableFields: {type: String, default: '[]'},
-        searchableFields: {type: String, default: '[]'},
-        searchBuilderFields: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
+    // sortableFields: {type: String, default: '[]'},
+    // searchableFields: {type: String, default: '[]'},
+    // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
         let x = this.columns.map(c => {
@@ -135,9 +135,10 @@ export default class extends Controller {
         console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
-        this.sortableFields = JSON.parse(this.sortableFieldsValue);
-        this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        // this.sortableFields = JSON.parse(this.sortableFieldsValue);
+        // this.searchableFields = JSON.parse(this.searchableFieldsValue);
+        // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+
         this.locale = this.localeValue;
 
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
@@ -160,18 +161,7 @@ export default class extends Controller {
         //     console.error('A table element is required.');
         // }
         if (this.tableElement) {
-            // get the (cached) fields first, then load the datatable
-            if (this.searchPanesDataUrlValue) {
-                axios.get(this.searchPanesDataUrlValue, {})
-                    .then((response) => {
-                            // handle success
-                            // console.log(response.data);
-                            this.dt = this.initDataTable(this.tableElement, response.data);
-                        }
-                    );
-            } else {
-                this.dt = this.initDataTable(this.tableElement, []);
-            }
+            this.dt = this.initDataTable(this.tableElement, []);
             this.initialized = true;
         }
     }
@@ -328,32 +318,53 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        fields.forEach((field, index) => {
-            lookup[field.jsonKeyCode] = field;
-        });
+        console.error(fields);
+        // for (const property in fields) {
+        //     lookup[property] = field;
+        //     console.error(property, fields[property]);
+        //     console.log(`${property}: ${fields[property]}`);
+        // }
+        // fields = Array.from(fields);
+        // fields.forEach((field, index) => {
+        //     console.error(field);
+        //     lookup[field.jsonKeyCode] = field;
+        // });
+        // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
+
         this.columns.forEach((column, index) => {
-            if (column.browsable && (column.name in lookup)) {
+            console.log(column);
+            if (column.browsable) {
+                console.error(index);
                 searchFieldsByColumnNumber.push(index);
-                let field = lookup[column.name];
-                options[field.jsonKeyCode] = [];
-                for (const label in field.valueCounts) {
-                    let count = field.valueCounts[label];
-                    //     console.log(field.valueCounts);
-                    // field.valueCounts.protoforEach( (label, count) =>
-                    // {
-                    options[field.jsonKeyCode].push({
-                        label: label,
-                        count: field.distinctValuesCount,
-                        value: label,
-                        total: count
-                    });
-                }
-            } else {
-                // console.warn("Missing " + column.name, Object.keys(lookup));
+                //rawFacets.push(column.name);
             }
+            options = fields;
+            // this is specific to museado, but needs to be generalized with a field structure.
+            // if (column.browsable && (column.name in fields)) {
+            //     let fieldName = column.name; //  lookup[column.name];
+            //     // options[field.jsonKeyCode] = [];
+            //     for (const label in field.valueCounts) {
+            //         let count = field.valueCounts[label];
+            //         //     console.log(field.valueCounts);
+            //         // field.valueCounts.protoforEach( (label, count) =>
+            //         // {
+            //         options[fieldName].push({
+            //             label: label,
+            //             count: field.distinctValuesCount,
+            //             value: label,
+            //             total: count
+            //         });
+            //     }
+            // } else {
+            //     // console.warn("Missing " + column.name, Object.keys(lookup));
+            // }
         });
+        let searchPanesRaw = [];
+
+        console.error(options);
+        // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
             'Accept': 'application/ld+json',
@@ -376,7 +387,7 @@ export default class extends Controller {
         let setup = {
             // let dt = new DataTable(el, {
             language: {
-                searchPlaceholder: 'srch: ' + this.searchableFields.join(',')
+                searchPlaceholder: 'srch: '// + this.searchableFields.join(',')
             },
             createdRow: this.createdRow,
             // paging: true,
@@ -386,7 +397,7 @@ export default class extends Controller {
             // pageLength: 15,
             orderCellsTop: true,
             fixedHeader: true,
-
+            //cascadePanes  : true,
             deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
@@ -400,11 +411,14 @@ export default class extends Controller {
             serverSide: true,
 
             initComplete: (obj, data) => {
+                dt.on('searchPanes.rebuildPane', function() {
+                    // This function will run after the user selects a value from the SearchPane
+                    console.log('A selection has been made and the table has been updated.');
+                });
                 this.handleTrans(el);
                 // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
-
                 // this.addRowClickListener(dt);
                 this.addButtonClickListener(dt);
             },
@@ -418,10 +432,16 @@ export default class extends Controller {
             columns: this.cols(),
             searchPanes: {
                 layout: 'columns-1',
+                show: true,
+//                cascadePanes: true,
+                viewTotal: true,
+                showZeroCounts: true
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
-                depthLimit: 1
+                depthLimit: 1,
+                threshold: 0,
+                showEmptyPanes: true
             },
             // columns:
             //     [
@@ -431,7 +451,7 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                let apiParams = this.dataTableParamsToApiPlatformParams(params);
+                let apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(params, apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
@@ -443,6 +463,7 @@ export default class extends Controller {
                 }
 
                 // console.warn(apiPlatformHeaders);
+                console.log("calling API " + this.apiCallValue, apiParams);
                 axios.get(this.apiCallValue, {
                     params: apiParams,
                     headers: apiPlatformHeaders
@@ -453,7 +474,7 @@ export default class extends Controller {
 
                         var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
                         var itemsReturned = hydraData['hydra:member'].length;
-                        let first = (params.page - 1) * params.itemsPerPage;
+                        // let first = (params.page - 1) * params.itemsPerPage;
                         if (params.search.value) {
                             console.log(`dt search: ${params.search.value}`);
                         }
@@ -465,6 +486,16 @@ export default class extends Controller {
                         if (d.length) {
                             console.log(d[0]);
                         }
+                        let searchPanes = {};
+                        if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
+                            searchPanes = hydraData['hydra:facets']['searchPanes'];
+                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                        } else {
+                            searchPanes = {
+                                options: options
+                            };
+                        }
+
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:
                         //     pagination_client_items_per_page: true
@@ -472,9 +503,7 @@ export default class extends Controller {
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
                         let next = hydraData["hydra:view"]['hydra:next'];
                         // we need the searchpanes options, too.
-                        let searchPanes = {
-                            options: options
-                        };
+
 
 
                         let callbackValues = {
@@ -594,7 +623,21 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                         return `<button data-modal-route="${modal_route}" class="btn btn-success">${modal_route}</button>`;
                     } else {
                         // console.log(propertyName, row[propertyName], row);
-                        return row[propertyName];
+                        // if nested, explode...
+                        let elements = propertyName.split('.');
+                        if (elements.length === 3) {
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            let x3 = elements[2];
+                            return row[x1][x2][x3];
+                        } else if (elements.length === 2) {
+                            // hack, only one level deep, etc.  ugh
+                            let x1 = elements[0];
+                            let x2 = elements[1];
+                            return row[x1][x2];
+                        } else {
+                            return row[propertyName];
+                        }
                     }
                 }
 
@@ -605,7 +648,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             title: label,
             data: propertyName || '',
             render: render,
-            sortable: this.sortableFields.includes(propertyName)
+            sortable: false, // this.sortableFields.includes(propertyName)
         }
         // ...function body...
     }
@@ -644,7 +687,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         return obj;
     }
 
-    dataTableParamsToApiPlatformParams(params) {
+    dataTableParamsToApiPlatformParams(params, searchPanesRaw) {
+
         let columns = params.columns; // get the columns passed back to us, sanity.
         // var apiData = {
         //     page: 1
@@ -665,6 +709,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
 
         let order = {};
+        if (params.searchBuilder) {
+            apiData['searchBuilder'] = params.searchBuilder;
+        }
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
@@ -675,24 +722,16 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
             // console.error(c, order, o.column, o.dir);
         });
+
+        let facetsFilter = [];
         for (const [key, value] of Object.entries(params.searchPanes)) {
-            // console.log(value, key, Object.values(value)); // "a 5", "b 7", "c 9"
-
-            // if ($attr = $request->get('a')) {
-            //     $filter['attribute_search']['operator'] = sprintf("%s,%s,%s", $attr, '=', $request->get('v'));
-            // }
-
             if (Object.values(value).length) {
-                Object.values(value).forEach((vvv) => apiData['attributes[operator]'] = key + ',=,' + vvv);
-                console.warn(apiData);
+                facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
             }
         }
-        // if (params.searchPanes.length) {
-        //     params.searchPanes.forEach((c, index) => {
-        //         console.warn(c);
-        //         // apiData[c.origData + '[]'] = c.value1;
-        //     });
-        // }
+        if(facetsFilter.length > 0) {
+            apiData['facet_filter'] = facetsFilter;
+        }
 
         if (params.searchBuilder && params.searchBuilder.criteria) {
             params.searchBuilder.criteria.forEach((c, index) => {
@@ -700,7 +739,14 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]'] = c.value1;
             });
         }
+        let facets = [];
+        this.columns.forEach(function (column, index) {
+            if ( column.browsable ) {
+                facets.push(column.name);
+            }
+        });
         params.columns.forEach(function (column, index) {
+
             if (column.search && column.search.value) {
                 // console.error(column);
                 let value = column.search.value;
@@ -716,6 +762,20 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
+        console.log(searchPanesRaw.length);
+        if(searchPanesRaw.length == 0) {
+            apiData.facets = {};
+            this.columns.forEach((column, index) => {
+                console.log(column);
+                if ( column.browsable ) {
+                    apiData.facets[column.name] = 1;
+                    // apiData['facets'][column.name][0]['total'] = 0;
+                }
+            });
+        } else {
+            apiData.facets = searchPanesRaw;
+        }
+
         // console.error(apiData);
 
         // add our own filters

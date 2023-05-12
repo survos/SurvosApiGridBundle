@@ -46,7 +46,7 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
             $values = explode('|', $words[2]);
             $contition = "";
             foreach ($values as $value) {
-                $contition .= " ".$key." = ".$value." OR ";
+                $contition .= " ".$key." = '".$value."' OR ";
             }
             $facetFilter .=" ( ".rtrim($contition,"OR "). " ) AND";
         }

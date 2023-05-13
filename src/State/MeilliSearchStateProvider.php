@@ -39,13 +39,10 @@ class MeilliSearchStateProvider implements ProviderInterface
 
             $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";
 
-            $body['hitsPerPage'] = $body['hitsPerPage'] ??= $this->pagination->getLimit($operation, $context);
-            $body['offset'] = $body['offset'] ??= $this->pagination->getOffset($operation, $context);
-            $objectData = $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
+            $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
+            $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
 
-//            $objectData = $this->searchService->search($operation->getClass(), $searchQuery, $body);
-            return $objectData;
-            //return  $this->returnObject($objectData, $operation->getClass());
+            return $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
         }
         return null;
         // Retrieve the state from somewhere

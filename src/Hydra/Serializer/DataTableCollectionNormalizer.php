@@ -52,6 +52,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             return $this->normalizeRawCollection($object, $format, $context);
         }
 
+        $paginationData = $this->getPaginationData($object, $context);
         $facets = [];
         if($object instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
@@ -82,8 +83,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         $context = $this->initContext($resourceClass, $context);
         $data = [];
-
-        $paginationData = $this->getPaginationData($object, $context);
 
         if (($operation = $context['operation'] ?? null) && method_exists($operation, 'getItemUriTemplate')) {
             $context['item_uri_template'] = $operation->getItemUriTemplate();
@@ -124,6 +123,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         if (\is_array($object) || ($object instanceof \Countable && !$object instanceof PartialPaginatorInterface)) {
             $data['hydra:totalItems'] = \count($object);
+        }
+
+        if($object instanceof  SearchResult) {
+            $data['hydra:totalItems'] = $object->getEstimatedTotalHits();
         }
 
         return $data;

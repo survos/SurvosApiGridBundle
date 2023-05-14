@@ -84,6 +84,7 @@ export default class extends Controller {
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }

@@ -34,9 +34,10 @@ class ApiGridComponent
     public array|object|null $schema = null;
 
     public ?string $class = null;
+    public ?string $index = null; // name of the meili index
     public string $dom='lfrtip';
     public int $pageLength=50;
-    public string $searchPanesDataUrl;
+    public string $searchPanesDataUrl; // maybe deprecate this?
     public string $apiGetCollectionUrl;
 
     public array $filter = [];

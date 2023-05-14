@@ -26,6 +26,7 @@ searchableFields: searchable_fields(this.class),
     locale: this.locale ?: (app.request.locale ?: 'xx'),
     columnConfiguration: columns|json_encode,
     dom: this.dom|default(false),
+    index: this.index|default(false),
     pageLength: this.pageLength,
     filter: this.filter
 }) }}>

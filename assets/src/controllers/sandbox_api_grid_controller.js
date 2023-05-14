@@ -84,6 +84,7 @@ export default class extends Controller {
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
@@ -489,7 +490,7 @@ export default class extends Controller {
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanes = hydraData['hydra:facets']['searchPanes'];
-                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           //searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                         } else {
                            searchPanes = {
                                 options: options

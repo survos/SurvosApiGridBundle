@@ -42,11 +42,16 @@ class MeilliSearchStateProvider implements ProviderInterface
             $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
 
-            return $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
+            $data = $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
+            unset($body['filter']);
+            $body['limit'] = 0;
+            $body['offset'] = 0;
+            $facets = $this->getSearchIndexObject($operation->getClass())->search('', $body);
+
+            return ['data' => $data, 'facets' => $facets];
         }
+
         return null;
-        // Retrieve the state from somewhere
-        //return $this->em->getRepository($operation->getClass())->find($uriVariables['imdbId']);
     }
 
     private function getSearchIndexObject(string $class) {
@@ -54,25 +59,5 @@ class MeilliSearchStateProvider implements ProviderInterface
         $class = explode("\\",$class);
         $lastKey = strtolower(end($class));
         return $client->index($lastKey);
-    }
-
-    private function returnObject(array $objectData, string $class) : object|array|null{
-        $returnObject = [];
-        foreach($objectData['hits'] as $hit) {
-            $oject = new $class($hit);
-            $methods = get_class_methods($oject);
-            foreach ($methods as $method) {
-                if (strpos($method, 'set') === 0) {
-                    $variableName = strtolower(substr($method, 3));
-                    $data = isset($hit[$variableName])?$hit[$variableName]:"";
-                    if($variableName == 'imdbid' || $variableName == 'runtimeminutes') {
-                        $data = (int) $data;
-                    }
-                    $oject->$method($data);
-                }
-            }
-            $returnObject[] = $oject;
-        }
-        return $returnObject;
     }
 }

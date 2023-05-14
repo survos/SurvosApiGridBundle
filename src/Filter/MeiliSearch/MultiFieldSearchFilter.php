@@ -36,7 +36,7 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
             return $clauseBody;
         }
         //return $clauseBody;
-        $facetFilter = isset($clauseBody['filter'])?$clauseBody['filter']:"";
+        $facetFilter = isset($clauseBody['filter'])?$clauseBody['filter']." AND ":"";
         foreach($context['filters']['facet_filter'] as $filter) {
             $words = explode(',', $filter);
             if(count($words) < 3) {

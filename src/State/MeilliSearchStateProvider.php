@@ -42,11 +42,18 @@ class MeilliSearchStateProvider implements ProviderInterface
             $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
 
-            $data = $this->getSearchIndexObject($operation->getClass())->search($searchQuery, $body);
+//            dd($uriVariables, $context);
+            $locale = $context['filters']['_locale'] ?? null;
+            $index = $this->getSearchIndexObject($operation->getClass(), $locale);
+            try {
+                $data = $index->search($searchQuery, $body);
+            } catch (\Exception $exception) {
+                throw new \Exception($index->getUid() . ' ' . $exception->getMessage());
+            }
             unset($body['filter']);
             $body['limit'] = 0;
             $body['offset'] = 0;
-            $facets = $this->getSearchIndexObject($operation->getClass())->search('', $body);
+            $facets = $index->search('', $body);
 
             return ['data' => $data, 'facets' => $facets];
         }
@@ -54,10 +61,13 @@ class MeilliSearchStateProvider implements ProviderInterface
         return null;
     }
 
-    private function getSearchIndexObject(string $class) {
+    private function getSearchIndexObject(string $class, ?string $locale=null) {
         $client = new Client($this->meiliHost, $this->meiliKey);
         $class = explode("\\",$class);
         $lastKey = strtolower(end($class));
+        if ($locale) {
+            $lastKey .= '-' . $locale;
+        }
         return $client->index($lastKey);
     }
 }

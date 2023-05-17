@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 final class SortFilter extends AbstractSearchFilter implements FilterInterface
 {
-    public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, ?NameConverterInterface $nameConverter = null, private readonly string $orderParameterName = 'sort', ?array $properties = null)
+    public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, ?NameConverterInterface $nameConverter = null, private readonly string $orderParameterName = 'order', ?array $properties = null)
     {
         parent::__construct($propertyNameCollectionFactory, $propertyMetadataFactory, $resourceClassResolver, $nameConverter, $properties);
     }
@@ -26,29 +26,21 @@ final class SortFilter extends AbstractSearchFilter implements FilterInterface
 
         $orders = [];
         foreach ($properties as $property => $direction) {
-            [$type] = $this->getMetadata($resourceClass, $property);
-
-            if (!$type) {
-                continue;
-            }
-
-            if (empty($direction) && null !== $defaultDirection = $this->properties[$property] ?? null) {
-                $direction = $defaultDirection;
-            }
 
             if (!\in_array($direction = strtolower($direction), ['asc', 'desc'], true)) {
                 continue;
             }
 
             $property = null === $this->nameConverter ? $property : $this->nameConverter->normalize($property, $resourceClass, null, $context);
-            $orders[] = $property.":".$direction;
+            //$orders[] = $property.":".$direction;
+            array_push($orders, $property.":".$direction);
         }
 
         if (!$orders) {
             return $clauseBody;
         }
 
-        return array_merge_recursive($clauseBody, [$this->orderParameterName => $orders]);
+        return array_merge_recursive($clauseBody, ['sort' => $orders]);
     }
 
     public function getDescription(string $resourceClass): array

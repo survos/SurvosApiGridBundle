@@ -115,7 +115,8 @@ export default class extends Controller {
                 label: c.title,
                 route: c.route,
                 locale: c.locale,
-                render: render
+                render: render,
+                sortable: (typeof c.sortable)?c.sortable:false
             })
         });
         return x;
@@ -338,9 +339,11 @@ export default class extends Controller {
             console.log(column);
             if (column.browsable) {
                 console.error(index);
+
                 searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }
+            //this.sortableFields.push(index);
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
             // if (column.browsable && (column.name in fields)) {
@@ -594,7 +597,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
           modal = false,
           render = null,
           locale = null,
-          renderType = 'string'
+          renderType = 'string',
+          sortable = false,
       } = {}) {
 
         if (render === null) {
@@ -644,12 +648,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
             }
         }
-
+        
         return {
             title: label,
             data: propertyName || '',
             render: render,
-            sortable: false, // this.sortableFields.includes(propertyName)
+            sortable: sortable
         }
         // ...function body...
     }

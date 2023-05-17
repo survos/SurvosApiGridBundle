@@ -465,6 +465,9 @@ export default class extends Controller {
                 if (this.locale !== '') {
                     apiParams['_locale'] = this.locale;
                 }
+                if (this.indexValue) {
+                    apiParams['_index'] = this.indexValue;
+                }
 
                 // console.warn(apiPlatformHeaders);
                 console.log("calling API " + this.apiCallValue, apiParams);

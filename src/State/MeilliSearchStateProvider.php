@@ -44,7 +44,11 @@ class MeilliSearchStateProvider implements ProviderInterface
 
 //            dd($uriVariables, $context);
             $locale = $context['filters']['_locale'] ?? null;
-            $index = $this->getSearchIndexObject($operation->getClass(), $locale);
+            if (!$indexName  = $context['filters']['_index'] ?? null) {
+                $indexName = $this->getSearchIndexObject($operation->getClass(), $locale);
+            }
+            $client = new Client($this->meiliHost, $this->meiliKey);
+            $index = $client->index($indexName);
             try {
                 $data = $index->search($searchQuery, $body);
             } catch (\Exception $exception) {
@@ -62,12 +66,11 @@ class MeilliSearchStateProvider implements ProviderInterface
     }
 
     private function getSearchIndexObject(string $class, ?string $locale=null) {
-        $client = new Client($this->meiliHost, $this->meiliKey);
         $class = explode("\\",$class);
         $lastKey = strtolower(end($class));
         if ($locale) {
             $lastKey .= '-' . $locale;
         }
-        return $client->index($lastKey);
+        return $lastKey;
     }
 }

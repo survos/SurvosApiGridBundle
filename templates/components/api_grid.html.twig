@@ -14,11 +14,6 @@
 {# <code>{{ this.stimulusController }}</code> #}
 {# {{ dump('sortable', sortable_fields(this.class)) }}#}
 
-class: this.class,
-searchBuilderFields: this.searchBuilderFields,
-sortableFields: sortable_fields(this.class),
-searchableFields: searchable_fields(this.class),
-
 <div {{ stimulus_controller(this.stimulusController, {
     schema: schema,
     api_call:  this.apiGetCollectionUrl|default(this.class ? api_route(this.class) : 'meilisearch'),

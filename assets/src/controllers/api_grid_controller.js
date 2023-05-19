@@ -83,6 +83,7 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
+        globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
@@ -101,6 +102,8 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
+                    Object.assign(row, JSON.parse(this.globalsValue));
+                    row.locale = this.localeValue;
                     return template.render({data: data, row: row, field_name: c.name})
                 }
             }

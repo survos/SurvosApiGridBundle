@@ -28,6 +28,7 @@ class ApiGridComponent
     public iterable $data;
 
     public array $columns = [];
+    public array $globals = [];
     public array $searchBuilderFields = [];
 
     public ?string $caller = null;
@@ -48,10 +49,10 @@ class ApiGridComponent
 
     public ?string $path = null;
 
-//    public function getLocale(): string
-//    {
-//        return $this->requestStack->getParentRequest()->getLocale();
-//    }
+    public function getLocale(): string
+    {
+        return $this->requestStack->getParentRequest()->getLocale();
+    }
     private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];

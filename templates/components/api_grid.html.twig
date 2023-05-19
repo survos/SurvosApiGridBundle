@@ -14,11 +14,17 @@
 {# <code>{{ this.stimulusController }}</code> #}
 {# {{ dump('sortable', sortable_fields(this.class)) }}#}
 
+{% set locale = this.locale ?: (app.request.locale ?: 'xx') %}
+
 <div {{ stimulus_controller(this.stimulusController, {
     schema: schema,
+    globals: this.globals,
     api_call:  this.apiGetCollectionUrl|default(this.class ? api_route(this.class) : 'meilisearch'),
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
-    locale: this.locale ?: (app.request.locale ?: 'xx'),
+    locale: locale,
+    globals: {
+        locale: locale
+    },
     columnConfiguration: columns|json_encode,
     dom: this.dom|default(false),
     index: this.index|default(false),

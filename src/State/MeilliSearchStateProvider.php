@@ -5,6 +5,7 @@ namespace Survos\ApiGrid\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;
 use Meilisearch\Client;
@@ -13,7 +14,7 @@ use Symfony\Component\DependencyInjection\Attribute\Tagged;
 use ApiPlatform\Util\Inflector;
 use ApiPlatform\State\Pagination\Pagination;
 use Symfony\Component\DependencyInjection\TaggedContainerInterface;
-
+use Meilisearch\Search\SearchResult;
 class MeilliSearchStateProvider implements ProviderInterface
 {
     public function __construct(
@@ -22,7 +23,8 @@ class MeilliSearchStateProvider implements ProviderInterface
         private Pagination $pagination,
         private iterable $meilliSearchFilter,
         private string $meiliHost,
-        private string $meiliKey
+        private string $meiliKey,
+        private readonly DenormalizerInterface $denormalizer
     )
     {
     }
@@ -51,6 +53,7 @@ class MeilliSearchStateProvider implements ProviderInterface
             $index = $client->index($indexName);
             try {
                 $data = $index->search($searchQuery, $body);
+                $data = $this->denormalizeObject($data, $resourceClass);
             } catch (\Exception $exception) {
                 throw new \Exception($index->getUid() . ' ' . $exception->getMessage());
             }
@@ -72,5 +75,18 @@ class MeilliSearchStateProvider implements ProviderInterface
             $lastKey .= '-' . $locale;
         }
         return $lastKey;
+    }
+
+    private function denormalizeObject(SearchResult $data, $resourceClass) {
+            $returnObject['offset'] = $data->getOffset();
+            $returnObject['limit'] = $data->getLimit();
+            $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();
+            $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
+            $returnObject['processingTimeMs'] = $data->getProcessingTimeMs();
+            $returnObject['query'] = $data->getQuery();
+            $returnObject['facetDistribution'] = $data->getFacetDistribution();
+            $returnObject['facetStats'] = $data->getFacetStats();
+
+        return new SearchResult($returnObject);
     }
 }

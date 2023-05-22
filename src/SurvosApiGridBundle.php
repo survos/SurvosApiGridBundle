@@ -61,6 +61,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)
+            ->setArgument('$denormalizer', new Reference('serializer'))
             ->addTag('api_platform.state_provider')
             ->setPublic(true);
 

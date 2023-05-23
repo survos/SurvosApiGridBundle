@@ -83,6 +83,7 @@ class DatatableService
     {
         assert(class_exists($class), $class);
         $reflector = new \ReflectionClass($class);
+        $settings = [];
         foreach ($reflector->getAttributes() as $attribute) {
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
@@ -97,7 +98,6 @@ class DatatableService
             /** @var FilterInterface $filter */
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
-            $settings = [];
             if (!array_key_exists('properties', $arguments)) {
                 continue;
 //                dd($arguments);

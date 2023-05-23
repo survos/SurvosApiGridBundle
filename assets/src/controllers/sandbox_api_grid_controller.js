@@ -44,7 +44,7 @@ import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        //delete routeParams._keys; // seems to be added by twigjs
+        delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -102,9 +102,10 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
-                    Object.assign(row, JSON.parse(this.globalsValue));
+                    let globals = JSON.parse(this.globalsValue);
+                    Object.assign(row, );
                     row.locale = this.localeValue;
-                    return template.render({data: data, row: row, field_name: c.name})
+                    return template.render({data: data, row: row, globals: globals, field_name: c.name})
                 }
             }
 

@@ -3,9 +3,11 @@
 namespace Survos\ApiGrid\Components;
 
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use DOMDocument;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Model\Column;
 use Survos\ApiGrid\Service\DatatableService;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
@@ -61,21 +63,67 @@ class ApiGridComponent
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
             $path = $sourceContext->getPath();
             $this->path = $path;
+//            dd($sourceContext, $sourceContext->getCode());
 
             //            dd($template);
-            $source = file_get_contents($path);
+
+
             //            $this->source = $source;
             //            dd($this->twig);
             // get rid of comments
+            $source = file_get_contents($path);
             $source = preg_replace('/{#.*?#}/', '', $source);
 
-            // this blows up with nested blocks.
             // first, get the component twig
+
+            if (0) {
+
+                if (preg_match('|<twig:api_grid.*?>(.*?)</twig:api_grid>|ms', $source, $mm)) {
+                    $twigBlocks = $mm[1];
+                    $componentHtml = $mm[0];
+                    $componentHtml = <<<END
+    <twig:Alert>
+        <twig:block name="footer">
+            <button class="btn btn-primary">Claim your prize</button>
+        </twig:block>
+    </twig:Alert>
+END;
+                    $crawler = new Crawler($componentHtml);
+                    $crawler->registerNamespace('twig','fake');
+                    foreach (['twig:block', 'alert', 'Alter', 'twig|alert', 'twig|block', 'twig', 'block'] as $hack) {
+                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
+                    }
+
+                    dd($componentHtml);
+//                    $componentHtml = "<html>$componentHtml</html>";
+
+                } else {
+                    dd($source);
+                    $twigBlocks = $source;
+                }
+
+            }
+
+            // this blows up with nested blocks.
             if (preg_match('/component.*?%}(.*?) endcomponent/ms', $source, $mm)) {
                 $twigBlocks = $mm[1];
             } else {
                 $twigBlocks = $source;
             }
+
+//            dump($twigBlocks);
+//            $crawler = new Crawler($twigBlocks);
+//            dd($crawler);
+//            foreach ($crawler as $domElement) {
+//                dump($domElement);
+//            }
+//            $nodeValues = $crawler->each(function (Crawler $node, $i) {
+//                dump($node);
+//                return $node->text();
+//            });
+//
+//            dd($path, $source, $sourceContext);
+
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
                 foreach ($mm as $m) {
                     [$all, $columnName, $twigCode] = $m;

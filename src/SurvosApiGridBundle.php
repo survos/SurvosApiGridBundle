@@ -24,6 +24,7 @@ use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
 use ApiPlatform\Hydra\Serializer\PartialCollectionViewNormalizer;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class SurvosApiGridBundle extends AbstractBundle
 {
@@ -33,7 +34,6 @@ class SurvosApiGridBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)
             ->addTag('meilli_search_filter')
@@ -52,12 +52,9 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addTag('meilli_search_filter')
         ;
 
-        $services = $builder->findTaggedServiceIds('meilli_search_filter');
         $builder->register(MeilliSearchStateProvider::class)
-            ->setArgument('$meilliSearchFilter', array_map(function ($serviceId) {
-                    return new Reference($serviceId);
-                }, array_keys($services))
-            )
+            ->setArgument('$meilliSearchFilter',tagged_locator('meilli_search_filter'))
+
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
             ->setAutowired(true)
@@ -66,11 +63,11 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setPublic(true);
 
         $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
-                ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
-                ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
-                ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
-                ->setArgument('$resourceMetadataCollectionFactory', null)
-                ->addTag('serializer.normalizer', ['priority' => -985]);
+            ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
+            ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
+            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+            ->setArgument('$resourceMetadataCollectionFactory', null)
+            ->addTag('serializer.normalizer', ['priority' => -985]);
 
 //        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');
         // $builder->register('api_platform.hydra.normalizer.partial_collection_view', PartialCollectionViewNormalizer::class)

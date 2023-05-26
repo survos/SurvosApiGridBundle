@@ -15,13 +15,15 @@ use ApiPlatform\Util\Inflector;
 use ApiPlatform\State\Pagination\Pagination;
 use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
+use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
+
 class MeilliSearchStateProvider implements ProviderInterface
 {
     public function __construct(
         private NormalizerInterface $normalizer,
         private EntityManagerInterface $em,
         private Pagination $pagination,
-        private iterable $meilliSearchFilter,
+        private ServiceLocator $meilliSearchFilter,
         private string $meiliHost,
         private string $meiliKey,
         private readonly DenormalizerInterface $denormalizer
@@ -35,8 +37,8 @@ class MeilliSearchStateProvider implements ProviderInterface
             $resourceClass = $operation->getClass();
             $body = [];
 
-            foreach ($this->meilliSearchFilter as $meilliSearchFilter) {
-                $body = $meilliSearchFilter->apply($body, $resourceClass, $operation, $context);
+            foreach ($this->meilliSearchFilter->getProvidedServices() as $meilliSearchFilter) {
+                $body = $this->meilliSearchFilter->get($meilliSearchFilter)->apply($body, $resourceClass, $operation, $context);
             }
 
             $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";
@@ -46,11 +48,13 @@ class MeilliSearchStateProvider implements ProviderInterface
 
 //            dd($uriVariables, $context);
             $locale = $context['filters']['_locale'] ?? null;
-            if (!$indexName  = $context['filters']['_index'] ?? null) {
+
+            if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
                 $indexName = $this->getSearchIndexObject($operation->getClass(), $locale);
             }
             $client = new Client($this->meiliHost, $this->meiliKey);
             $index = $client->index($indexName);
+            //dd($body);
             try {
                 $data = $index->search($searchQuery, $body);
                 $data = $this->denormalizeObject($data, $resourceClass);
@@ -78,14 +82,14 @@ class MeilliSearchStateProvider implements ProviderInterface
     }
 
     private function denormalizeObject(SearchResult $data, $resourceClass) {
-            $returnObject['offset'] = $data->getOffset();
-            $returnObject['limit'] = $data->getLimit();
-            $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();
-            $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
-            $returnObject['processingTimeMs'] = $data->getProcessingTimeMs();
-            $returnObject['query'] = $data->getQuery();
-            $returnObject['facetDistribution'] = $data->getFacetDistribution();
-            $returnObject['facetStats'] = $data->getFacetStats();
+        $returnObject['offset'] = $data->getOffset();
+        $returnObject['limit'] = $data->getLimit();
+        $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();
+        $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
+        $returnObject['processingTimeMs'] = $data->getProcessingTimeMs();
+        $returnObject['query'] = $data->getQuery();
+        $returnObject['facetDistribution'] = $data->getFacetDistribution();
+        $returnObject['facetStats'] = $data->getFacetStats();
 
         return new SearchResult($returnObject);
     }

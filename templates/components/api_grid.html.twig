@@ -16,10 +16,15 @@
 
 {% set locale = this.locale ?: (app.request.locale ?: 'xx') %}
 
+{% set apiCall = this.apiGetCollectionUrl %}
+{% if not apiCall %}
+{% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
+{% endif %}
+
 <div {{ stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,
-    api_call:  this.apiGetCollectionUrl|default(this.class ? api_route(this.class) : 'meilisearch'),
+    api_call:  apiCall,
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: locale,
     globals: {

@@ -778,7 +778,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         if(searchPanesRaw.length == 0) {
             apiData.facets = {};
             this.columns.forEach((column, index) => {
-                console.log(column);
                 if ( column.browsable ) {
                     apiData.facets[column.name] = 1;
                     // apiData['facets'][column.name][0]['total'] = 0;

@@ -20,3 +20,45 @@ http://2016.padjo.org/tutorials/sqlite-data-starterpacks/#more-info-simplefolks-
 
 composer config repositories.survos_grid_bundle '{"type": "vcs", "url": "git@github.com:survos/SurvosApiGridBundle.git"}'
 
+# setup
+Inorder to use api-grid we need to follow below:
+
+**1) Add Survos\CoreBundle\Traits\QueryBuilderHelperTrait in your repository class of the entity for which you want apiGrid**
+
+**2) you need to set columns variable like below:**
+```
+        {% set columns = [
+        'code',
+        'description',
+        {name: 'code', sortable: true},
+        'description',
+        {name: 'countrycode', sortable: true,  browsable: true, searchable: true},
+        {name: 'privacyPolicy', browsable: true},
+        {name: 'projectLocale', browsable: true},
+        ] %}
+```
+By default, sortable, browsable, searchable are false.
+
+For those columns you want sortable add sortable: true
+
+For those columns you want to add searchPanes add browsable: true
+
+For those columns you want to add searchable: true
+
+**3) For search you need to inclide below **
+```
+use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+
+
+#[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
+```
+Here name and code are columns in which you need to search
+
+**4) Use below for doctrine searchpane filters
+```
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
+
+
+#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['facet_filter'])]
+```
+Use above for searchpane filters

@@ -31,7 +31,7 @@ class FacetsFieldSearchFilter extends AbstractFilter implements FilterInterface
         LoggerInterface $logger = null,
         array $properties = null,
         NameConverterInterface $nameConverter = null,
-        private string         $searchParameterName = 'search')
+        private string         $searchParameterName = 'facet_filter')
     {
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
     }

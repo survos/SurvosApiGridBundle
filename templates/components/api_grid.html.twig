@@ -16,7 +16,7 @@
 
 {% set locale = this.locale ?: (app.request.locale ?: 'xx') %}
 
-{% set apiCall = this.apiGetCollectionUrl %}
+{% set apiCall = this.apiGetCollectionUrl|default(false) %}
 {% if not apiCall %}
 {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}
@@ -48,6 +48,11 @@
             modalContent: 'really should load with ajax'
         }) }}
     {% endblock %}
+
+
+    <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
+        Put the filters and any messages here.
+    </div>
 
 
     <table class="table table-striped responsive" {{ stimulus_target(this.stimulusController, 'table') }}>

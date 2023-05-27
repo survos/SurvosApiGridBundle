@@ -44,7 +44,7 @@ import Twig from 'twig/twig.min';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        //delete routeParams._keys; // seems to be added by twigjs
+        delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -102,9 +102,10 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
-                    Object.assign(row, JSON.parse(this.globalsValue));
+                    let globals = JSON.parse(this.globalsValue);
+                    Object.assign(row, );
                     row.locale = this.localeValue;
-                    return template.render({data: data, row: row, field_name: c.name})
+                    return template.render({data: data, row: row, globals: globals, field_name: c.name})
                 }
             }
 
@@ -504,6 +505,19 @@ export default class extends Controller {
                             };
                         }
 
+                        let targetMessage = "";
+                        if(typeof apiParams.facet_filter != 'undefined') {
+                            apiParams.facet_filter.forEach((index) => {
+                                let string = index.split(',');
+                                if(targetMessage != "") {
+                                    targetMessage += ", ";
+                                }
+                                targetMessage += string[0]+ " : "+ string[2];
+                            });
+                        }
+
+                        this.messageTarget.innerHTML = "Search Refinements: " + targetMessage;
+
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:
                         //     pagination_client_items_per_page: true
@@ -775,7 +789,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         if(searchPanesRaw.length == 0) {
             apiData.facets = {};
             this.columns.forEach((column, index) => {
-                console.log(column);
                 if ( column.browsable ) {
                     apiData.facets[column.name] = 1;
                     // apiData['facets'][column.name][0]['total'] = 0;

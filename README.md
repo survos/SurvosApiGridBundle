@@ -45,7 +45,7 @@ For those columns you want to add searchPanes add browsable: true
 
 For those columns you want to add searchable: true
 
-**3) For search you need to inclide below **
+**3) For search you need to inclide below**
 ```
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 
@@ -54,11 +54,18 @@ use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 ```
 Here name and code are columns in which you need to search
 
-**4) Use below for doctrine searchpane filters
+**4) Use below for doctrine searchpane filters**
 ```
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 
 
 #[ApiFilter(FacetsFieldSearchFilter::class, properties: ['facet_filter'])]
 ```
-Use above for searchpane filters
+
+**5) Use below for doctrine order filters**
+```
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+
+
+#[ApiFilter(OrderFilter::class, properties: ['id','objectCount','countryCode'])]
+```

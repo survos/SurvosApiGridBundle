@@ -15,6 +15,7 @@ use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
 use Meilisearch\Search\SearchResult;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
@@ -27,6 +28,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     public function __construct(
         private $contextBuilder,
         ResourceClassResolverInterface $resourceClassResolver,
+        private RequestStack $requestStack, // hack!
+
         private readonly IriConverterInterface $iriConverter,
         private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null,
         array $defaultContext = []
@@ -161,10 +164,17 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         foreach ($object as $obj) {
             if ($iriOnly) {
-                $data['hydra:member'][] = $this->iriConverter->getIriFromResource($obj);
+                $normalizedData =  $this->iriConverter->getIriFromResource($obj);
             } else {
-                $data['hydra:member'][] = $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
+                $normalizedData =  $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }
+            // hack -- this should be its own normalizer.  Plus, this needs to be recursive
+            if (array_key_exists('rp', $normalizedData)) {
+                $request = $this->requestStack->getCurrentRequest();
+                $normalizedData['rp']['_locale'] = $request->getLocale();
+
+            }
+            $data['hydra:member'][] = $normalizedData;
         }
 
         return $data;

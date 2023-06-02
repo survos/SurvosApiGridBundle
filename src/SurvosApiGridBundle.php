@@ -66,6 +66,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
             ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+            ->setArgument('$requestStack', new Reference('request_stack'))
+
             ->setArgument('$resourceMetadataCollectionFactory', null)
             ->addTag('serializer.normalizer', ['priority' => -985]);
 
@@ -125,9 +127,6 @@ class SurvosApiGridBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('stimulus_controller')->defaultValue('@survos/api-grid-bundle/api_grid')->end()
-            ->scalarNode('widthFactor')->defaultValue(2)->end()
-            ->scalarNode('height')->defaultValue(30)->end()
-            ->scalarNode('foregroundColor')->defaultValue('green')->end()
             ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
             ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
             ->end();;

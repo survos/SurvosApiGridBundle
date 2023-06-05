@@ -516,7 +516,7 @@ export default class extends Controller {
                             });
                         }
 
-                        this.messageTarget.innerHTML = "Search Refinements: " + targetMessage;
+                        this.messageTarget.innerHTML = targetMessage;
 
                         // if next page isn't working, make sure api_platform.yaml is correctly configured
                         // defaults:

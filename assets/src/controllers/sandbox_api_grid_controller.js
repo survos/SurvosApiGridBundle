@@ -40,7 +40,12 @@ import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/pu
 Routing.setRoutingData(routes);
 
 import Twig from 'twig/twig.min';
-
+import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
+import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
+import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
+import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
+import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
@@ -391,12 +396,24 @@ export default class extends Controller {
             apiPlatformHeaders['X-LOCALE'] = this.locale;
         }
 
+        let language = enLanguage;
+        if(this.locale == 'en') {
+            language = enLanguage;
+        } else if(this.locale == 'es') {
+            language = esLanguage;
+        }else if(this.locale == 'uk') {
+            language = ukLanguage;
+        }else if(this.locale == 'de') {
+            language = deLanguage;
+        }else if(this.locale == 'hu') {
+            language = huLanguage;
+        }else if(this.locale == 'hi') {
+            language = hilanguage;
+        }
 
         let setup = {
             // let dt = new DataTable(el, {
-            language: {
-                searchPlaceholder: 'srch: '// + this.searchableFields.join(',')
-            },
+            language: language,
             createdRow: this.createdRow,
             // paging: true,
             scrollY: '70vh', // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/

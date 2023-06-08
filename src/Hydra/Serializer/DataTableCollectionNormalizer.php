@@ -20,6 +20,8 @@ use Symfony\Component\HttpFoundation\RequestStack;
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
     public const FORMAT = 'jsonld';
+
+    public const FACETFORMAT = 'facet_format';
     public const IRI_ONLY = 'iri_only';
     private array $defaultContext = [
         self::IRI_ONLY => false,
@@ -206,7 +208,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $facetsData[$key] = $data;
         }
 
-        $returnData['searchPanes']['options'] = $facetsData;
+        $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT);
 
         return $returnData;
     }

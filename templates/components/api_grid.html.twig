@@ -27,9 +27,7 @@
     api_call:  apiCall,
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: locale,
-    globals: {
-        locale: locale
-    },
+    globals: globals,
     columnConfiguration: columns|json_encode,
     dom: this.dom|default(false),
     index: this.index|default(false),

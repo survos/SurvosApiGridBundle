@@ -45,7 +45,9 @@ class MeilliSearchStateProvider implements ProviderInterface
 
             $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
-
+            $body['attributesToHighlight'] = ['_translations'];
+            $body['highlightPreTag'] = '<em class="bg-info">';
+            $body['highlightPostTag'] =  '</em>';
 //            dd($uriVariables, $context);
             $locale = $context['filters']['_locale'] ?? null;
 

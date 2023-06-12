@@ -12,6 +12,7 @@ class Column
         public ?string $route = null,
         public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
+        public ?string $internalCode = null, // e.g. label, description, type
         public bool $searchable = false,
         public bool $browsable = false,
         public bool $sortable = false,

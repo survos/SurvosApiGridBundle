@@ -111,7 +111,7 @@ export default class extends Controller {
                     let globals = JSON.parse(this.globalsValue);
                     Object.assign(row, );
                     row.locale = this.localeValue;
-                    return template.render({data: data, row: row, globals: globals, field_name: c.name})
+                    return template.render({data: data, row: row, globals: globals, column: c, field_name: c.name})
                 }
             }
 

@@ -61,6 +61,8 @@ class DatatableService
                 $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];
             }
             assert(is_array($c));
+            unset($c['propertyConfig']);
+//            dd($c);
             $column = new Column(...$c);
             if (in_array($columnName, $settings)) {
                 $options = (new OptionsResolver())

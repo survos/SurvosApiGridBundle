@@ -76,11 +76,7 @@ class MeilliSearchStateProvider implements ProviderInterface
 
     private function getSearchIndexObject(string $class, ?string $locale=null) {
         $class = explode("\\",$class);
-        $lastKey = strtolower(end($class));
-        if ($locale) {
-            $lastKey .= '-' . $locale;
-        }
-        return $lastKey;
+        return end($class);
     }
 
     private function denormalizeObject(SearchResult $data, $resourceClass) {

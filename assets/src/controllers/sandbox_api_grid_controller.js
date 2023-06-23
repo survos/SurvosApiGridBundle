@@ -9,6 +9,7 @@ import 'datatables.net-responsive';
 // import 'datatables.net-responsive-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-searchpanes-bs5';
+import 'datatables.net-datetime';
 import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
@@ -17,7 +18,6 @@ import 'datatables.net-buttons/js/buttons.print.min';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
-// import 'datatables.net-datetime';
 // import 'datatables.net-searchbuilder-bs5';
 // import 'datatables.net-fixedheader-bs5';
 // import 'datatables.net-responsive-bs5';
@@ -49,7 +49,8 @@ import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
 
-        // delete routeParams._keys; // seems to be added by twigjs
+        console.error(routeParams);
+        delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
         //     console.error(route);
@@ -110,7 +111,11 @@ export default class extends Controller {
                     let globals = JSON.parse(this.globalsValue);
                     Object.assign(row, );
                     row.locale = this.localeValue;
-                    return template.render({data: data, row: row, globals: globals, column: c, field_name: c.name})
+
+                    let params = {data: data, row: row, globals: globals, column: c, field_name: c.name};
+                    params._keys = null;
+                    console.error(params);
+                    return template.render(params);
                 }
             }
 

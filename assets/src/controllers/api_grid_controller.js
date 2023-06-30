@@ -112,7 +112,11 @@ export default class extends Controller {
                     let globals = JSON.parse(this.globalsValue);
                     Object.assign(row, );
                     row.locale = this.localeValue;
-                    return template.render({data: data, row: row, globals: globals, column: c, field_name: c.name})
+
+                    let params = {data: data, row: row, globals: globals, column: c, field_name: c.name};
+                    params._keys = null;
+                    // console.error(params);
+                    return template.render(params);
                 }
             }
 
@@ -347,9 +351,9 @@ export default class extends Controller {
         let options = [];
 
         this.columns.forEach((column, index) => {
-            console.log(column);
+            // console.log(column);
             if (column.browsable) {
-                console.error(index);
+                // console.error(index);
                 searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }

@@ -48,8 +48,7 @@ import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
 import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
-
-        console.error(routeParams);
+        // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
@@ -114,7 +113,7 @@ export default class extends Controller {
 
                     let params = {data: data, row: row, globals: globals, column: c, field_name: c.name};
                     params._keys = null;
-                    console.error(params);
+                    // console.error(params);
                     return template.render(params);
                 }
             }
@@ -350,10 +349,9 @@ export default class extends Controller {
         let options = [];
 
         this.columns.forEach((column, index) => {
-            console.log(column);
+            // console.log(column);
             if (column.browsable) {
-                console.error(index);
-
+                // console.error(index);
                 searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }

@@ -449,7 +449,9 @@ export default class extends Controller {
                 // console.log(xapi);
                 // console.log(xapi.table);
                 // this.addRowClickListener(dt);
-                this.addButtonClickListener(dt);
+                let searchPane = dt.searchPanes.panes[6];
+                searchPane.selected.push('inactive');
+                dt.search(dt.columns().search()).draw();
             },
 
             dom: this.dom,
@@ -570,6 +572,10 @@ export default class extends Controller {
         };
         let dt = new DataTables(el, setup);
         dt.searchPanes();
+
+        if (this.filter.hasOwnProperty('q')) {
+            dt.search(this.filter.q).draw();
+        }
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
 
@@ -580,7 +586,9 @@ export default class extends Controller {
         // console.error(searchPanesColumns);
         return [
             {
-                searchPanes: {show: true}, targets: searchPanesColumns,
+                searchPanes:
+                    {show: true},
+                    targets: searchPanesColumns
             },
             {targets: [0, 1], visible: true},
             // defaultContent is critical! Otherwise, lots of stuff fails.
@@ -748,10 +756,11 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // was apiData.itemsPerPage = params.length;
             apiData.limit = params.length;
         }
-
+        let facetsUrl = [];
         // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
         if (params.search && params.search.value) {
             apiData['search'] = params.search.value;
+            facetsUrl.push( 'q=' + params.search.value);
         }
 
         let order = {};
@@ -769,12 +778,28 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // console.error(c, order, o.column, o.dir);
         });
 
+        let currentUrl = window.location.href;
+
+        // Remove the protocol and domain
+        let urlWithoutProtocolAndDomain = currentUrl.replace(/^.*\/\/[^\/]+/, '');
+
+        // Extract the path
+        let path = urlWithoutProtocolAndDomain.split('?')[0];
         let facetsFilter = [];
         for (const [key, value] of Object.entries(params.searchPanes)) {
             if (Object.values(value).length) {
                 facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
+                facetsUrl.push(key + '=' + Object.values(value).join('|'));
             }
         }
+
+        if(facetsUrl.length > 0) {
+            path +="?"+facetsUrl.join('&');
+            history.replaceState(null, "", path);
+        } else {
+            history.replaceState(null, "", path);
+        }
+
         if(facetsFilter.length > 0) {
             apiData['facet_filter'] = facetsFilter;
         }

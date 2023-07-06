@@ -108,8 +108,8 @@ export default class extends Controller {
                 });
                 render = (data, type, row, meta) => {
                     let globals = JSON.parse(this.globalsValue);
-                    Object.assign(row, );
-                    row.locale = this.localeValue;
+                    // Object.assign(row, );
+                    // row.locale = this.localeValue;
 
                     let params = {data: data, row: row, globals: globals, column: c, field_name: c.name};
                     params._keys = null;

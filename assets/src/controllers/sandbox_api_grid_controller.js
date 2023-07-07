@@ -448,9 +448,9 @@ export default class extends Controller {
                 // console.log(xapi);
                 // console.log(xapi.table);
                 // this.addRowClickListener(dt);
-                let searchPane = dt.searchPanes.panes[6];
-                searchPane.selected.push('inactive');
-                dt.search(dt.columns().search()).draw();
+                // let searchPane = dt.searchPanes.panes[6];
+                // searchPane.selected.push('inactive');
+                // dt.search(dt.columns().search()).draw();
             },
 
             dom: this.dom,

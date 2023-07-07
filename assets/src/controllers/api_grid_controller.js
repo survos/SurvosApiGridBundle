@@ -349,14 +349,28 @@ export default class extends Controller {
         // console.error(lookup);
         let searchFieldsByColumnNumber = [];
         let options = [];
+        let preSelectArray = [];
 
         this.columns.forEach((column, index) => {
+            let name = "";
+            if(typeof column == 'string') {
+                name = column;
+            } else {
+                name = column.name;
+            }
+            if (this.filter.hasOwnProperty(name)) {
+                preSelectArray.push({
+                    column : index,
+                    rows: this.filter[name].split("|")
+                });
+            }
             // console.log(column);
             if (column.browsable) {
                 // console.error(index);
                 searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }
+            //this.sortableFields.push(index);
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
             // if (column.browsable && (column.name in fields)) {
@@ -466,7 +480,9 @@ export default class extends Controller {
                 show: true,
 //                cascadePanes: true,
                 viewTotal: true,
-                showZeroCounts: true
+                showZeroCounts: true,
+                preSelect: preSelectArray
+
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
@@ -576,6 +592,7 @@ export default class extends Controller {
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
+        this.filter = [];
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
 
@@ -791,6 +808,13 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
                 facetsUrl.push(key + '=' + Object.values(value).join('|'));
             }
+        }
+
+        for (const [key, value] of Object.entries(this.filter)) {
+            if(key != 'q') {
+                facetsFilter.push(key + ',in,' + value);
+            }
+            facetsUrl.push(key + '=' + value);
         }
 
         if(facetsUrl.length > 0) {

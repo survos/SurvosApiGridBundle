@@ -62,7 +62,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
             if(isset($params['facets']) && is_array($params['facets'])) {
-                $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution());
+                $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
             }
             $object = $object['data']->getHits();
         }
@@ -81,7 +81,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     }
                 }
 
-                $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets);
+                $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
             }
         }
 
@@ -190,7 +190,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         return $context;
     }
 
-    private function getFacetsData(array $facets, ?array $params) :array {
+    private function getFacetsData(array $facets, ?array $params, ?array $context) :array {
         $facetsData = [];
 
         foreach($params as $key => $facet) {
@@ -208,7 +208,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $facetsData[$key] = $data;
         }
 
-        $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT);
+        $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
 
         return $returnData;
     }

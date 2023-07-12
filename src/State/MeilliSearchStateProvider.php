@@ -54,10 +54,11 @@ class MeilliSearchStateProvider implements ProviderInterface
             if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
                 $indexName = $this->getSearchIndexObject($operation->getClass(), $locale);
             }
+            // this seems problematic, since it's probably defined by the application, we're getting it again here.
+            try {
             $client = new Client($this->meiliHost, $this->meiliKey);
             $index = $client->index($indexName);
             //dd($body);
-            try {
                 $data = $index->search($searchQuery, $body);
                 $data = $this->denormalizeObject($data, $resourceClass);
             } catch (\Exception $exception) {

@@ -20,6 +20,7 @@ class Column
         public bool $modal = false,
         public bool|string $locale = false,
         public int $order = 0,
+        public bool $condition = true
 //        public ?string $propertyConfig,
     ) {
         if (empty($this->title)) {

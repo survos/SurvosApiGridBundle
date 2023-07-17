@@ -75,7 +75,10 @@ class DatatableService
                 $column->sortable = $options['sortable'];
                 $column->browsable = $options['browsable'];
             }
-            $normalizedColumns[] = $column;
+            if ($column->condition) {
+                $normalizedColumns[] = $column;
+            }
+
             //            $normalizedColumns[$column->name] = $column;
         }
         return $normalizedColumns;

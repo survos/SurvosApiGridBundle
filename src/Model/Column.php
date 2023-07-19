@@ -14,7 +14,8 @@ class Column
         public ?string $prefix = null,
         public ?string $internalCode = null, // e.g. label, description, type
         public bool $searchable = false,
-        public bool $browsable = false,
+        public bool $browsable = false, // browseOrder = 100 if true unless set
+        public int $browseOrder = 0, // if 0, same as false, so we can deprecate browsable
         public bool $sortable = false,
         public ?array $actions = null,
         public bool $modal = false,

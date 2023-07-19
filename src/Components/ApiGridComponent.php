@@ -91,14 +91,14 @@ END;
                     $crawler = new Crawler($componentHtml);
                     $crawler->registerNamespace('twig','fake');
                     foreach (['twig:block', 'alert', 'Alter', 'twig|alert', 'twig|block', 'twig', 'block'] as $hack) {
-                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
+//                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
                     }
 
-                    dd($componentHtml);
+//                    dd($componentHtml);
 //                    $componentHtml = "<html>$componentHtml</html>";
 
                 } else {
-                    dd($source);
+//                    dd($source);
                     $twigBlocks = $source;
                 }
 
@@ -123,12 +123,28 @@ END;
 //            });
 //
 //            dd($path, $source, $sourceContext);
+            $componentHtml = str_replace(['twig:', 'xmlns:twig="http://example.com/twig"'], '', $twigBlocks);
+
+            $crawler = new Crawler();
+            $crawler->addHtmlContent($componentHtml);
+            $allTwigBlocks = [];
+
+            if ($crawler->filterXPath('//block')->count() > 0) {
+                $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
+                    return [$node->attr('name') => $node->html()];
+                });
+            }
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
                 foreach ($mm as $m) {
                     [$all, $columnName, $twigCode] = $m;
                     $customColumnTemplates[$columnName] = trim($twigCode);
                 }
+            }
+        }
+        foreach($allTwigBlocks as $allTwigBlock) {
+            foreach ($allTwigBlock as $key => $value) {
+                $customColumnTemplates[$key] = $value;
             }
         }
         return $customColumnTemplates;

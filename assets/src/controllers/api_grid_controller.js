@@ -102,7 +102,11 @@ export default class extends Controller {
     // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
-        let x = this.columns.map(c => {
+        let columns = this.columns.sort(function(a, b) {
+            return   a.order - b.order; // Sort in ascending order
+        });
+
+        let x = columns.map(c => {
             let render = null;
             if (c.twigTemplate) {
                 let template = Twig.twig({
@@ -367,7 +371,12 @@ export default class extends Controller {
             // console.log(column);
             if (column.browsable) {
                 // console.error(index);
-                searchFieldsByColumnNumber.push(index);
+                if(column.browseOrder) {
+                    searchFieldsByColumnNumber[index] = column.browseOrder;
+                } else {
+                    searchFieldsByColumnNumber[index] = 0;
+                }
+                //searchFieldsByColumnNumber.push(index);
                 //rawFacets.push(column.name);
             }
             //this.sortableFields.push(index);
@@ -393,7 +402,14 @@ export default class extends Controller {
             // }
         });
         let searchPanesRaw = [];
+        searchFieldsByColumnNumber.sort(function (a, b) {
+            return a.browseOrder - b.browseOrder;
+        });
 
+        // Retrieve the sorted index values
+        searchFieldsByColumnNumber = searchFieldsByColumnNumber.map(function (item) {
+            return item.index;
+        });
         console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -593,6 +609,13 @@ export default class extends Controller {
             dt.search(this.filter.q).draw();
         }
         this.filter = [];
+
+        this.columns.forEach((column, index) => {
+            if(column.order == 0) {
+                dt.column(index).visible(false);
+            }
+        });
+
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
 
@@ -605,7 +628,8 @@ export default class extends Controller {
             {
                 searchPanes:
                     {show: true},
-                    targets: searchPanesColumns
+                    order: searchPanesColumns
+
             },
             {targets: [0, 1], visible: true},
             // defaultContent is critical! Otherwise, lots of stuff fails.

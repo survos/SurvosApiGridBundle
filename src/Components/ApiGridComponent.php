@@ -111,6 +111,29 @@ END;
                 $twigBlocks = $source;
             }
 
+            $componentHtml = str_replace(['twig:', 'xmlns:twig="http://example.com/twig"'], '', $source);
+
+            $crawler = new Crawler();
+            $crawler->addHtmlContent($componentHtml);
+            $allTwigBlocks = [];
+
+            if ($crawler->filterXPath('//api_grid')->count() > 0) {
+                $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
+                    return urldecode($node->html());
+                });
+                if(is_array($twigBlocks)) {
+                    $twigBlocks = $twigBlocks[0];
+                }
+            } else {
+                $twigBlocks = $source;
+            }
+
+            if ($crawler->filterXPath('//block')->count() > 0) {
+                $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
+                    return [$node->attr('name') => urldecode($node->html())];
+                });
+            }
+//            $twigBlocks = $source;
 //            dump($twigBlocks);
 //            $crawler = new Crawler($twigBlocks);
 //            dd($crawler);
@@ -123,17 +146,7 @@ END;
 //            });
 //
 //            dd($path, $source, $sourceContext);
-            $componentHtml = str_replace(['twig:', 'xmlns:twig="http://example.com/twig"'], '', $twigBlocks);
 
-            $crawler = new Crawler();
-            $crawler->addHtmlContent($componentHtml);
-            $allTwigBlocks = [];
-
-            if ($crawler->filterXPath('//block')->count() > 0) {
-                $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
-                    return [$node->attr('name') => $node->html()];
-                });
-            }
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
                 foreach ($mm as $m) {
@@ -147,6 +160,7 @@ END;
                 $customColumnTemplates[$key] = $value;
             }
         }
+
         return $customColumnTemplates;
     }
 

@@ -49,6 +49,7 @@ class DatatableService
             }
             if (is_string($c)) {
                 $c = [
+                    'order' => ($idx+1) * 10,
                     'name' => $c,
                 ];
             }
@@ -63,6 +64,7 @@ class DatatableService
             assert(is_array($c));
             unset($c['propertyConfig']);
 //            dd($c);
+
             $column = new Column(...$c);
             if (in_array($columnName, $settings)) {
                 $options = (new OptionsResolver())

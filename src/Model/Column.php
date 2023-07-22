@@ -20,7 +20,7 @@ class Column
         public ?array $actions = null,
         public bool $modal = false,
         public bool|string $locale = false,
-        public int $order = 0,
+        public int $order = 100,
         public bool $condition = true
 //        public ?string $propertyConfig,
     ) {

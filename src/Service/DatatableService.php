@@ -80,6 +80,8 @@ class DatatableService
             if ($column->condition) {
                 $normalizedColumns[] = $column;
             }
+//                            if ($c['name'] == 'image_count') dd($c, $column);
+
 
             //            $normalizedColumns[$column->name] = $column;
         }

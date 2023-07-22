@@ -58,6 +58,7 @@ class ApiGridComponent
     private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];
+        $allTwigBlocks = [];
         if ($this->caller) {
             //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
@@ -76,33 +77,34 @@ class ApiGridComponent
 
             // first, get the component twig
 
-            if (0) {
-
-                if (preg_match('|<twig:api_grid.*?>(.*?)</twig:api_grid>|ms', $source, $mm)) {
-                    $twigBlocks = $mm[1];
-                    $componentHtml = $mm[0];
-                    $componentHtml = <<<END
-    <twig:Alert>
-        <twig:block name="footer">
-            <button class="btn btn-primary">Claim your prize</button>
-        </twig:block>
-    </twig:Alert>
-END;
-                    $crawler = new Crawler($componentHtml);
-                    $crawler->registerNamespace('twig','fake');
-                    foreach (['twig:block', 'alert', 'Alter', 'twig|alert', 'twig|block', 'twig', 'block'] as $hack) {
-//                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
-                    }
-
-//                    dd($componentHtml);
-//                    $componentHtml = "<html>$componentHtml</html>";
-
-                } else {
-//                    dd($source);
-                    $twigBlocks = $source;
-                }
-
-            }
+//            if (0)
+//            {
+//
+/*                if (preg_match('|<twig:api_grid.*?>(.*?)</twig:api_grid>|ms', $source, $mm)) {*/
+//                    $twigBlocks = $mm[1];
+//                    $componentHtml = $mm[0];
+//                    $componentHtml = <<<END
+//    <twig:Alert>
+//        <twig:block name="footer">
+//            <button class="btn btn-primary">Claim your prize</button>
+//        </twig:block>
+//    </twig:Alert>
+//END;
+//                    $crawler = new Crawler($componentHtml);
+//                    $crawler->registerNamespace('twig','fake');
+//                    foreach (['twig:block', 'alert', 'Alter', 'twig|alert', 'twig|block', 'twig', 'block'] as $hack) {
+////                        $crawler->filterXPath($hack)->each(fn(Crawler $node) => dd($node, $node->nodeName(), $source));
+//                    }
+//
+////                    dd($componentHtml);
+////                    $componentHtml = "<html>$componentHtml</html>";
+//
+//                } else {
+////                    dd($source);
+//                    $twigBlocks = $source;
+//                }
+//
+//            }
 
             // this blows up with nested blocks.
             if (preg_match('/component.*?%}(.*?) endcomponent/ms', $source, $mm)) {
@@ -119,7 +121,9 @@ END;
 
             if ($crawler->filterXPath('//api_grid')->count() > 0) {
                 $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
+//                    dd($node->html());
                     return urldecode($node->html());
+//                    return html_entity_decode($node->html());
                 });
                 if(is_array($twigBlocks)) {
                     $twigBlocks = $twigBlocks[0];
@@ -127,14 +131,32 @@ END;
             } else {
                 $twigBlocks = $source;
             }
-
             if ($crawler->filterXPath('//block')->count() > 0) {
+
                 $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
-                    return [$node->attr('name') => urldecode($node->html())];
+//                    https://stackoverflow.com/questions/15133541/get-raw-html-code-of-element-with-symfony-domcrawler
+                    $blockName = $node->attr('name');
+                    $html = rawurldecode($node->html());
+                    // hack for twig > and <
+                    $html = str_replace(['&lt;','&gt;'], ['<', '>'], $html);
+//                    if ($blockName == 'image_count') {
+//                    dd(
+//                        html: $html,
+//                        urldecode: rawurldecode($node->html()),
+//                        htmlentity: html_entity_decode($node->html()),
+//                        text: $node->text(),
+//                        innerText: $node->innerText(), node: $node);
+//                    }
+//
+
+//                    return [$node->attr('name') => $html];
+                    return [$blockName => $html];
+////                        html_entity_decode($node->html())
+//                        ];
                 });
             }
 //            $twigBlocks = $source;
-//            dump($twigBlocks);
+//            dd($twigBlocks);
 //            $crawler = new Crawler($twigBlocks);
 //            dd($crawler);
 //            foreach ($crawler as $domElement) {
@@ -160,6 +182,7 @@ END;
                 $customColumnTemplates[$key] = $value;
             }
         }
+//        dd(array_keys($customColumnTemplates), $customColumnTemplates);
 
         return $customColumnTemplates;
     }

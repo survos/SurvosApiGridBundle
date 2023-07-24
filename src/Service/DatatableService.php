@@ -70,6 +70,7 @@ class DatatableService
                 $options = (new OptionsResolver())
                     ->setDefaults([
                         'searchable' => false,
+                        'order' => 100,
                         'sortable' => false,
                         'browsable' => false
                     ])->resolve($settings);

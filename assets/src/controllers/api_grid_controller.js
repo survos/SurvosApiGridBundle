@@ -355,6 +355,16 @@ export default class extends Controller {
         let options = [];
         let preSelectArray = [];
 
+        let filterColuns = this.columns;
+        filterColuns.sort(function (a, b) {
+            return a.browseOrder - b.browseOrder;
+
+        });
+        filterColuns.forEach((column, index) => {
+            if (column.browsable) {
+                searchFieldsByColumnNumber.push(index);
+            }
+        });
         this.columns.forEach((column, index) => {
             let name = "";
             if(typeof column == 'string') {
@@ -369,16 +379,16 @@ export default class extends Controller {
                 });
             }
             // console.log(column);
-            if (column.browsable) {
-                // console.error(index);
-                if(column.browseOrder) {
-                    searchFieldsByColumnNumber[index] = column.browseOrder;
-                } else {
-                    searchFieldsByColumnNumber[index] = 0;
-                }
-                //searchFieldsByColumnNumber.push(index);
-                //rawFacets.push(column.name);
-            }
+            // if (column.browsable) {
+            //     // console.error(index);
+            //     if(column.browseOrder) {
+            //         searchFieldsByColumnNumber[index] = column.browseOrder;
+            //     } else {
+            //         searchFieldsByColumnNumber[index] = 0;
+            //     }
+            //     // searchFieldsByColumnNumber.push(index);
+            //     //rawFacets.push(column.name);
+            // }
             //this.sortableFields.push(index);
             options = fields;
             // this is specific to museado, but needs to be generalized with a field structure.
@@ -402,15 +412,10 @@ export default class extends Controller {
             // }
         });
         let searchPanesRaw = [];
-        searchFieldsByColumnNumber.sort(function (a, b) {
-            return a.browseOrder - b.browseOrder;
-        });
+        // searchFieldsByColumnNumber.sort(function (a, b) {
+        //     return a.browseOrder - b.browseOrder;
+        // });
 
-        // Retrieve the sorted index values
-        searchFieldsByColumnNumber = searchFieldsByColumnNumber.map(function (item) {
-            return item.index;
-        });
-        console.error(options);
         // console.error('searchFields', searchFieldsByColumnNumber);
 
         let apiPlatformHeaders = {
@@ -628,7 +633,7 @@ export default class extends Controller {
             {
                 searchPanes:
                     {show: true},
-                    order: searchPanesColumns
+                    target: searchPanesColumns,
 
             },
             {targets: [0, 1], visible: true},
@@ -811,7 +816,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
-            if (c.data) {
+            // console.log(c);
+            if (c.data && c.orderable && c.orderable == true) {
                 order[c.data] = o.dir;
                 // apiData.order = order;
                 apiData['order[' + c.data + ']'] = o.dir;

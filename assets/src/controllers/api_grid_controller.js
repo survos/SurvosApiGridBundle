@@ -559,12 +559,12 @@ export default class extends Controller {
                         }
                         let searchPanes = {};
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
-                           searchPanes = hydraData['hydra:facets']['searchPanes'];
-                           //searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
+                           searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
                         } else {
-                            searchPanes = {
+                           searchPanes = {
                                 options: options
-                            };
+                           };
                         }
 
                         let targetMessage = "";
@@ -906,6 +906,44 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // apiData['marking'] = ['fetch_success'];
 
         return apiData;
+    }
+
+    sequenceSearchPanes(data) {
+        let newOrderdata = [];
+        let searchPanesOrder = this.columns.filter(function(columnConfig) {
+            return columnConfig.browsable === true;
+        });
+
+        searchPanesOrder = searchPanesOrder.sort(function (a, b) {
+            if(a.browseOrder != b.browseOrder) {
+                return a.browseOrder - b.browseOrder;
+            }
+            let aData = 0;
+            let bData = 0;
+
+            if(typeof data[a.name] != 'undefined') {
+                aData = data[a.name].length;
+            }
+
+            if(typeof data[b.name] != 'undefined') {
+                bData = data[b.name].length;
+            }
+
+            return  bData - aData;
+        });
+        console.log(searchPanesOrder);
+        searchPanesOrder.forEach(function (index){
+            console.log(index.name);
+           if(typeof data[index.name] != 'undefined') {
+               console.log(data[index.name].length);
+               newOrderdata[index.name] =  data[index.name];
+           }
+        });
+
+        let newOptionOrderData = [];
+        newOptionOrderData['options'] = newOrderdata;
+        console.log(newOptionOrderData);
+        return newOptionOrderData;
     }
 
     initFooter(el) {

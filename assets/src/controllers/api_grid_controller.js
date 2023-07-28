@@ -34,6 +34,13 @@ let routes = false;
 // if live
 import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 routes = require('../../../../../public/js/fos_js_routes.json');
+// if local
+// routes = require('../../public/js/fos_js_routes.json');
+// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+
+Routing.setRoutingData(routes);
+
+import Twig from 'twig/twig.min';
 import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
 import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
 import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';

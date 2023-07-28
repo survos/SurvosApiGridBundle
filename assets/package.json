@@ -11,8 +11,8 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
-          "perfectscroll-bar/dist/perfectscroll-bar.min.js": true,
-          "perfectscroll-bar/css/perfectscroll.css": true,
+          "perfectscroll-bar/dist/perfect-scrollbar.min.js": true,
+          "perfectscroll-bar/css/perfect-scrollbar.css": true,
           "datatables.net-datetime/dist/dataTables.dateTime.min.js": true,
           "datatables.net-datetime/dist/dataTables.dateTime.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,

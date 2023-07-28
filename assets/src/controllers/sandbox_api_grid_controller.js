@@ -14,7 +14,7 @@ import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
-
+import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
@@ -349,6 +349,7 @@ export default class extends Controller {
         //     lookup[field.jsonKeyCode] = field;
         // });
         // console.error(lookup);
+
         let searchFieldsByColumnNumber = [];
         let options = [];
         let preSelectArray = [];
@@ -617,6 +618,10 @@ export default class extends Controller {
 
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
+        const contentContainer = document.getElementsByClassName('search-panes');
+        if (contentContainer.length > 0) {
+            const ps = new PerfectScrollbar(contentContainer[0]);
+        }
         return dt;
     }
 

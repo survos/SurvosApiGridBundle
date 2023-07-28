@@ -14,7 +14,7 @@ import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
-
+import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
@@ -40,17 +40,9 @@ import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
 import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
 import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
 import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
-// if local
-// routes = require('../../public/js/fos_js_routes.json');
-// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-
-Routing.setRoutingData(routes);
-
-import Twig from 'twig/twig.min';
-
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
-
+        // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
         // if (route == 'category_show') {
@@ -411,10 +403,8 @@ export default class extends Controller {
             //     // console.warn("Missing " + column.name, Object.keys(lookup));
             // }
         });
+
         let searchPanesRaw = [];
-        // searchFieldsByColumnNumber.sort(function (a, b) {
-        //     return a.browseOrder - b.browseOrder;
-        // });
 
         // console.error('searchFields', searchFieldsByColumnNumber);
 
@@ -503,7 +493,6 @@ export default class extends Controller {
                 viewTotal: true,
                 showZeroCounts: true,
                 preSelect: preSelectArray
-
             },
             searchBuilder: {
                 columns: this.searchBuilderFields,
@@ -609,7 +598,6 @@ export default class extends Controller {
         };
         let dt = new DataTables(el, setup);
         dt.searchPanes();
-
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
@@ -623,20 +611,23 @@ export default class extends Controller {
 
         // console.log('moving panes.');
         $("div.search-panes").append(dt.searchPanes.container());
-
+        const contentContainer = document.getElementsByClassName('search-panes');
+        if (contentContainer.length > 0) {
+            const ps = new PerfectScrollbar(contentContainer[0]);
+        }
         return dt;
     }
 
     columnDefs(searchPanesColumns) {
-        // console.error(searchPanesColumns);
         return [
             {
                 searchPanes:
                     {show: true},
-                    target: searchPanesColumns,
+                    target: searchPanesColumns
 
             },
             {targets: [0, 1], visible: true},
+            // {targets: '_all',  order:  },
             // defaultContent is critical! Otherwise, lots of stuff fails.
             {targets: '_all', visible: true, sortable: false, "defaultContent": "~~"}
         ];
@@ -816,7 +807,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
-            // console.log(c);
             if (c.data && c.orderable && c.orderable == true) {
                 order[c.data] = o.dir;
                 // apiData.order = order;
@@ -887,7 +877,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
-        console.log(searchPanesRaw.length);
         if(searchPanesRaw.length == 0) {
             apiData.facets = {};
             this.columns.forEach((column, index) => {
@@ -1017,6 +1006,5 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         // see http://live.datatables.net/giharaka/1/edit for moving the footer to below the header
     }
-
 
 }

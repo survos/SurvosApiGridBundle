@@ -1,8 +1,8 @@
 {
   "name": "@survos/api-grid-bundle",
-  "description": "integrate php and javascript helpers for DataTables.net",
+  "description": "integrate php and javascript helpers for DataTables.net           \"perfectscroll-bar/dist/perfect-scrollbar.min.js\": true,\n          \"perfectscroll-bar/css/perfect-scrollbar.css\": true,\n",
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "symfony": {
     "controllers": {
       "api_grid": {
@@ -11,8 +11,6 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
-          "perfectscroll-bar/dist/perfect-scrollbar.min.js": true,
-          "perfectscroll-bar/css/perfect-scrollbar.css": true,
           "datatables.net-datetime/dist/dataTables.dateTime.min.js": true,
           "datatables.net-datetime/dist/dataTables.dateTime.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,

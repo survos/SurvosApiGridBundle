@@ -868,27 +868,14 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
         });
 
-        if (params.start) {
-            // was apiData.page = Math.floor(params.start / params.length) + 1;
-            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
-        }
         apiData.offset = params.start;
-        if(searchPanesRaw.length === 0) {
-            apiData.facets = {};
-            this.columns.forEach((column, index) => {
-                if ( column.browsable ) {
-                    apiData.facets[column.name] = 1;
-                    // apiData['facets'][column.name][0]['total'] = 0;
-                }
-            });
-        } else {
-            apiData.facets = searchPanesRaw;
-        }
-
-        // console.error(apiData);
-
-        // add our own filters
-        // apiData['marking'] = ['fetch_success'];
+        apiData.facets = {};
+        this.columns.forEach((column, index) => {
+            if (column.browsable) {
+                apiData.facets[column.name] = 1;
+                // this seems odd, it should be a pipe-delimited list
+            }
+        });
 
         return apiData;
     }

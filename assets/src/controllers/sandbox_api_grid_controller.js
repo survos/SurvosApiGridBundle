@@ -51,11 +51,6 @@ Twig.extend(function (Twig) {
         // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
-        // if (route == 'category_show') {
-        //     console.error(route);
-        //     console.warn(routeParams);
-        //     console.log(path);
-        // }
         return path;
     });
 });
@@ -162,10 +157,6 @@ export default class extends Controller {
 
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
 
-        // console.log(this.hasTableTarget ? 'table target exists' : 'missing table target')
-        // console.log(this.hasModalTarget ? 'target exists' : 'missing modalstarget')
-        // // console.log(this.fieldSearch ? 'target exists' : 'missing fieldSearch')
-        // console.log(this.sortableFieldsValue);
         console.assert(this.hasModalTarget, "Missing modal target");
         this.that = this;
         this.tableElement = false;
@@ -209,14 +200,13 @@ export default class extends Controller {
     }
 
     notify(message) {
-        console.log(message);
         this.messageTarget.innerHTML = message;
     }
 
 
     handleTrans(el) {
         let transitionButtons = el.querySelectorAll('button.transition');
-        // console.log(transitionButtons);
+
         transitionButtons.forEach(btn => btn.addEventListener('click', (event) => {
             const isButton = event.target.nodeName === 'BUTTON';
             if (!isButton) {
@@ -880,27 +870,13 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
         });
 
-        if (params.start) {
-            // was apiData.page = Math.floor(params.start / params.length) + 1;
-            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
-        }
         apiData.offset = params.start;
-        if(searchPanesRaw.length == 0) {
-            apiData.facets = {};
-            this.columns.forEach((column, index) => {
-                if ( column.browsable ) {
-                    apiData.facets[column.name] = 1;
-                    // apiData['facets'][column.name][0]['total'] = 0;
-                }
-            });
-        } else {
-            apiData.facets = searchPanesRaw;
-        }
-
-        // console.error(apiData);
-
-        // add our own filters
-        // apiData['marking'] = ['fetch_success'];
+        apiData.facets = {};
+        this.columns.forEach((column, index) => {
+            if ( column.browsable ) {
+                apiData.facets[column.name] = 1;
+            }
+        });
 
         return apiData;
     }
@@ -928,18 +904,15 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
             return  bData - aData;
         });
-        console.log(searchPanesOrder);
+
         searchPanesOrder.forEach(function (index){
-            console.log(index.name);
            if(typeof data[index.name] != 'undefined') {
-               console.log(data[index.name].length);
                newOrderdata[index.name] =  data[index.name];
            }
         });
 
         let newOptionOrderData = [];
         newOptionOrderData['options'] = newOrderdata;
-        console.log(newOptionOrderData);
         return newOptionOrderData;
     }
 

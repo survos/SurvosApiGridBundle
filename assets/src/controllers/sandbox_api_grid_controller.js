@@ -206,7 +206,6 @@ export default class extends Controller {
 
     handleTrans(el) {
         let transitionButtons = el.querySelectorAll('button.transition');
-
         transitionButtons.forEach(btn => btn.addEventListener('click', (event) => {
             const isButton = event.target.nodeName === 'BUTTON';
             if (!isButton) {
@@ -616,7 +615,6 @@ export default class extends Controller {
     }
 
     columnDefs(searchPanesColumns) {
-        console.error(searchPanesColumns);
         return [
             {
                 searchPanes:
@@ -870,13 +868,27 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
         });
 
+        if (params.start) {
+            // was apiData.page = Math.floor(params.start / params.length) + 1;
+            // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
+        }
         apiData.offset = params.start;
-        apiData.facets = {};
-        this.columns.forEach((column, index) => {
-            if ( column.browsable ) {
-                apiData.facets[column.name] = 1;
-            }
-        });
+        if(searchPanesRaw.length === 0) {
+            apiData.facets = {};
+            this.columns.forEach((column, index) => {
+                if ( column.browsable ) {
+                    apiData.facets[column.name] = 1;
+                    // apiData['facets'][column.name][0]['total'] = 0;
+                }
+            });
+        } else {
+            apiData.facets = searchPanesRaw;
+        }
+
+        // console.error(apiData);
+
+        // add our own filters
+        // apiData['marking'] = ['fetch_success'];
 
         return apiData;
     }

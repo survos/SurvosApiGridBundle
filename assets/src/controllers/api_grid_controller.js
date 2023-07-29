@@ -18,7 +18,6 @@ import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
-// import 'datatables.net-datetime';
 // import 'datatables.net-searchbuilder-bs5';
 // import 'datatables.net-fixedheader-bs5';
 // import 'datatables.net-responsive-bs5';
@@ -52,11 +51,6 @@ Twig.extend(function (Twig) {
         // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);
-        // if (route == 'category_show') {
-        //     console.error(route);
-        //     console.warn(routeParams);
-        //     console.log(path);
-        // }
         return path;
     });
 });
@@ -163,10 +157,6 @@ export default class extends Controller {
 
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
 
-        // console.log(this.hasTableTarget ? 'table target exists' : 'missing table target')
-        // console.log(this.hasModalTarget ? 'target exists' : 'missing modalstarget')
-        // // console.log(this.fieldSearch ? 'target exists' : 'missing fieldSearch')
-        // console.log(this.sortableFieldsValue);
         console.assert(this.hasModalTarget, "Missing modal target");
         this.that = this;
         this.tableElement = false;
@@ -210,14 +200,12 @@ export default class extends Controller {
     }
 
     notify(message) {
-        console.log(message);
         this.messageTarget.innerHTML = message;
     }
 
 
     handleTrans(el) {
         let transitionButtons = el.querySelectorAll('button.transition');
-        // console.log(transitionButtons);
         transitionButtons.forEach(btn => btn.addEventListener('click', (event) => {
             const isButton = event.target.nodeName === 'BUTTON';
             if (!isButton) {
@@ -350,6 +338,7 @@ export default class extends Controller {
         //     lookup[field.jsonKeyCode] = field;
         // });
         // console.error(lookup);
+
         let searchFieldsByColumnNumber = [];
         let options = [];
         let preSelectArray = [];
@@ -884,7 +873,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // apiData.page = Math.floor(params.start / apiData.itemsPerPage) + 1;
         }
         apiData.offset = params.start;
-        if(searchPanesRaw.length == 0) {
+        if(searchPanesRaw.length === 0) {
             apiData.facets = {};
             this.columns.forEach((column, index) => {
                 if ( column.browsable ) {
@@ -927,18 +916,15 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
             return  bData - aData;
         });
-        console.log(searchPanesOrder);
+
         searchPanesOrder.forEach(function (index){
-            console.log(index.name);
            if(typeof data[index.name] != 'undefined') {
-               console.log(data[index.name].length);
                newOrderdata[index.name] =  data[index.name];
            }
         });
 
         let newOptionOrderData = [];
         newOptionOrderData['options'] = newOrderdata;
-        console.log(newOptionOrderData);
         return newOptionOrderData;
     }
 

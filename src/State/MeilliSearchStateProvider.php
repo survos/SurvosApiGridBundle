@@ -59,11 +59,11 @@ class MeilliSearchStateProvider implements ProviderInterface
             $client = new Client($this->meiliHost, $this->meiliKey);
             $index = $client->index($indexName);
             //dd($body);
-                $data = $index->search($searchQuery, $body);
-                $data = $this->denormalizeObject($data, $resourceClass);
             } catch (\Exception $exception) {
                 throw new \Exception($index->getUid() . ' ' . $exception->getMessage());
             }
+            $data = $index->search($searchQuery, $body);
+            $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);
             $body['limit'] = 0;
             $body['offset'] = 0;

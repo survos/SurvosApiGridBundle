@@ -610,6 +610,11 @@ export default class extends Controller {
         if (contentContainer.length > 0) {
             const ps = new PerfectScrollbar(contentContainer[0]);
         }
+        // hide the filter, something like this, and move the whole box to outside the scroller
+        // console.error('hide filter');
+        // const box = document.getElementsByClassName('dtsp-title')[0];
+        // box.style.visibility = 'none';
+
         return dt;
     }
 

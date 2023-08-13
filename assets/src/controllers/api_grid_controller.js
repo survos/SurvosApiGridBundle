@@ -466,6 +466,12 @@ export default class extends Controller {
                     console.log('A selection has been made and the table has been updated.');
                 });
                 this.handleTrans(el);
+
+                const box = document.getElementsByClassName('dtsp-title');
+                if (box.length) {
+                    box[0].style.display = "none";
+                }
+
                 // let xapi = new DataTable.Api(obj);
                 // console.log(xapi);
                 // console.log(xapi.table);
@@ -483,6 +489,7 @@ export default class extends Controller {
             buttons: [], // this.buttons,
             columns: this.cols(),
             searchPanes: {
+                initCollapsed: true,
                 layout: 'columns-1',
                 show: true,
 //                cascadePanes: true,
@@ -559,7 +566,17 @@ export default class extends Controller {
                                 if(targetMessage != "") {
                                     targetMessage += ", ";
                                 }
-                                targetMessage += string[0]+ " : "+ string[2];
+                                let splitValue = string[2].split("|");
+                                let returnValue = [];
+                                splitValue.forEach((index) => {
+                                    searchPanes['options'][string[0]].forEach((array) => {
+                                        if(index == array.value) {
+                                            returnValue.push(array.label);
+                                            return false;
+                                        }
+                                    });
+                                });
+                                targetMessage += string[0]+ " : "+ returnValue.join('|');
                             });
                         }
 

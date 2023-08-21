@@ -85,6 +85,7 @@ export default class extends Controller {
         columnConfiguration: {type: String, default: '[]'},
         globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
@@ -524,6 +525,10 @@ export default class extends Controller {
                 if (this.indexValue) {
                     apiParams['_index'] = this.indexValue;
                 }
+                if (this.styleValue) {
+                    apiParams['_style'] = this.styleValue;
+                    console.error(this.style, apiParams);
+                }
 
                 // console.warn(apiPlatformHeaders);
                 console.log("calling API " + this.apiCallValue, apiParams);
@@ -817,6 +822,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         if (params.searchBuilder) {
             apiData['searchBuilder'] = params.searchBuilder;
         }
+        if (params.style) {
+            apiData['_style'] = params.style;
+        }
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
@@ -844,7 +852,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
 
         for (const [key, value] of Object.entries(this.filter)) {
-            if(key != 'q') {
+            if(key !== 'q') {
                 facetsFilter.push(key + ',in,' + value);
             }
             facetsUrl.push(key + '=' + value);
@@ -873,6 +881,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facets.push(column.name);
             }
         });
+        // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {
 
             if (column.search && column.search.value) {

@@ -15,6 +15,17 @@ import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
 import PerfectScrollbar from 'perfect-scrollbar';
+import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+import Twig from 'twig/twig.min';
+import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
+import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
+import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
+import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
+import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
+// import {Modal} from "bootstrap"; !!
+// https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
+import Modal from 'bootstrap/js/dist/modal';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
@@ -35,17 +46,9 @@ let routes = false;
 // routes = require('../../../../../public/js/fos_js_routes.json');
 // if local
 routes = require('../../public/js/fos_js_routes.json');
-import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 
 Routing.setRoutingData(routes);
 
-import Twig from 'twig/twig.min';
-import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
-import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
-import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
-import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
-import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
-import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
         // console.error(routeParams);
@@ -56,9 +59,6 @@ Twig.extend(function (Twig) {
 });
 
 
-// import {Modal} from "bootstrap"; !!
-// https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
-import Modal from 'bootstrap/js/dist/modal';
 // import cb from "../js/app-buttons";
 
 
@@ -84,6 +84,7 @@ export default class extends Controller {
         columnConfiguration: {type: String, default: '[]'},
         globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
+        style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
         dom: {type: String, default: 'Plfrtip'},
         filter: String
@@ -466,7 +467,6 @@ export default class extends Controller {
                 });
                 this.handleTrans(el);
 
-                console.error('hide filter');
                 const box = document.getElementsByClassName('dtsp-title');
                 if (box.length) {
                     box[0].style.display = "none";
@@ -523,6 +523,10 @@ export default class extends Controller {
                 }
                 if (this.indexValue) {
                     apiParams['_index'] = this.indexValue;
+                }
+                if (this.styleValue) {
+                    apiParams['_style'] = this.styleValue;
+                    console.error(this.style, apiParams);
                 }
 
                 // console.warn(apiPlatformHeaders);
@@ -819,6 +823,9 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         if (params.searchBuilder) {
             apiData['searchBuilder'] = params.searchBuilder;
         }
+        if (params.style) {
+            apiData['_style'] = params.style;
+        }
         // https://jardin.wip/api/projects.jsonld?page=1&itemsPerPage=14&order[code]=asc
         params.order.forEach((o, index) => {
             let c = params.columns[o.column];
@@ -847,7 +854,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         }
 
         for (const [key, value] of Object.entries(this.filter)) {
-            if(key != 'q') {
+            if(key !== 'q') {
                 facetsFilter.push(key + ',in,' + value);
             }
             facetsUrl.push(key + '=' + value);
@@ -876,20 +883,19 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facets.push(column.name);
             }
         });
+        // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {
 
             if (column.search && column.search.value) {
-                // console.error(column);
-                let value = column.search.value;
                 // check the first character for a range filter operator
-
                 // data is the column field, at least for right now.
-                apiData[column.data] = value;
+                apiData[column.data] = column.search.value;
             }
         });
 
         apiData.offset = params.start;
         apiData.facets = {};
+        // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
         this.columns.forEach((column, index) => {
             if (column.browsable) {
                 apiData.facets[column.name] = 1;

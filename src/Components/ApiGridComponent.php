@@ -46,6 +46,7 @@ class ApiGridComponent
     public array $filter = [];
 
     public ?string $source = null;
+    public ?string $style = 'spreadsheet';
 
     public ?string $locale = null; // shouldn't be necessary, but sanity for testing.
 
@@ -139,38 +140,13 @@ class ApiGridComponent
                     $html = rawurldecode($node->html());
                     // hack for twig > and <
                     $html = str_replace(['&lt;','&gt;'], ['<', '>'], $html);
-//                    if ($blockName == 'image_count') {
-//                    dd(
-//                        html: $html,
-//                        urldecode: rawurldecode($node->html()),
-//                        htmlentity: html_entity_decode($node->html()),
-//                        text: $node->text(),
-//                        innerText: $node->innerText(), node: $node);
-//                    }
-//
-
-//                    return [$node->attr('name') => $html];
                     return [$blockName => $html];
-////                        html_entity_decode($node->html())
-//                        ];
                 });
             }
-//            $twigBlocks = $source;
-//            dd($twigBlocks);
-//            $crawler = new Crawler($twigBlocks);
-//            dd($crawler);
-//            foreach ($crawler as $domElement) {
-//                dump($domElement);
-//            }
-//            $nodeValues = $crawler->each(function (Crawler $node, $i) {
-//                dump($node);
-//                return $node->text();
-//            });
-//
-//            dd($path, $source, $sourceContext);
 
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
+                // we could throw a deprecation here.
                 foreach ($mm as $m) {
                     [$all, $columnName, $twigCode] = $m;
                     $customColumnTemplates[$columnName] = trim($twigCode);

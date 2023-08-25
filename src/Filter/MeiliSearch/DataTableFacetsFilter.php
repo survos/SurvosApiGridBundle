@@ -15,12 +15,12 @@ final class DataTableFacetsFilter extends AbstractSearchFilter implements Filter
     public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, ?NameConverterInterface $nameConverter = null, private readonly string $orderParameterName = 'filter', ?array $properties = null)
     {
         parent::__construct($propertyNameCollectionFactory, $propertyMetadataFactory, $resourceClassResolver, $nameConverter, $properties);
-    } 
+    }
 
     public function apply(array $clauseBody, string $resourceClass, ?Operation $operation = null, array $context = []): array {
         if(isset($context['filters']['facets'])) {
             if(is_array($context['filters']['facets'])) {
-                $clauseBody['facets'] = array_keys($context['filters']['facets']);
+                $clauseBody['facets'] = array_values($context['filters']['facets']);
             }
         }
 

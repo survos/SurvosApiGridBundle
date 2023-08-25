@@ -56,12 +56,13 @@ class MeilliSearchStateProvider implements ProviderInterface
             }
             // this seems problematic, since it's probably defined by the application, we're getting it again here.
             try {
-            $client = new Client($this->meiliHost, $this->meiliKey);
-            $index = $client->index($indexName);
+                $client = new Client($this->meiliHost, $this->meiliKey);
+                $index = $client->index($indexName);
             //dd($body);
             } catch (\Exception $exception) {
-                throw new \Exception($index->getUid() . ' ' . $exception->getMessage());
+                throw new \Exception($indexName . ' ' . $exception->getMessage());
             }
+
             $data = $index->search($searchQuery, $body);
             $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);

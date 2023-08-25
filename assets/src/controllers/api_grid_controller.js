@@ -90,6 +90,7 @@ export default class extends Controller {
         dom: {type: String, default: 'Plfrtip'},
         filter: String
     }
+
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
     // sortableFields: {type: String, default: '[]'},
     // searchableFields: {type: String, default: '[]'},
@@ -138,6 +139,9 @@ export default class extends Controller {
 
     connect() {
         super.connect(); //
+
+        this.apiParams = {}; // initialize
+        console.log(this.identifier);
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
 
@@ -308,6 +312,7 @@ export default class extends Controller {
                 this.modal.show();
                 console.assert(data.rp, "missing rp, add @Groups to entity")
                 let formUrl = Routing.generate(modalRoute, data.rp);
+
 
                 axios({
                     method: 'get', //you can set what request you want to be
@@ -487,7 +492,16 @@ export default class extends Controller {
 
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
-            buttons: [], // this.buttons,
+            buttons: [
+                {
+                    text: 'My button',
+                    action:  ( e, dt, node, config ) =>  {
+                        console.log("calling API " + this.apiCallValue, this.apiParams);
+                        const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});
+                        window.dispatchEvent(event);
+                    }
+                }
+                ],
             columns: this.cols(),
             searchPanes: {
                 initCollapsed: true,
@@ -512,28 +526,28 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                let apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
+                this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(params, apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
 
-                Object.assign(apiParams, this.filter);
+                Object.assign(this.apiParams, this.filter);
                 // yet another locale hack
                 if (this.locale !== '') {
-                    apiParams['_locale'] = this.locale;
+                    this.apiParams['_locale'] = this.locale;
                 }
                 if (this.indexValue) {
-                    apiParams['_index'] = this.indexValue;
+                    this.apiParams['_index'] = this.indexValue;
                 }
                 if (this.styleValue) {
-                    apiParams['_style'] = this.styleValue;
-                    console.error(this.style, apiParams);
+                    this.apiParams['_style'] = this.styleValue;
+                    console.error(this.style, this.apiParams);
                 }
 
                 // console.warn(apiPlatformHeaders);
-                console.log("calling API " + this.apiCallValue, apiParams);
+
                 axios.get(this.apiCallValue, {
-                    params: apiParams,
+                    params: this.apiParams,
                     headers: apiPlatformHeaders
                 })
                     .then((response) => {
@@ -565,8 +579,8 @@ export default class extends Controller {
                         }
 
                         let targetMessage = "";
-                        if(typeof apiParams.facet_filter != 'undefined') {
-                            apiParams.facet_filter.forEach((index) => {
+                        if(typeof this.apiParams.facet_filter != 'undefined') {
+                            this.apiParams.facet_filter.forEach((index) => {
                                 let string = index.split(',');
                                 if(targetMessage != "") {
                                     targetMessage += ", ";
@@ -885,20 +899,19 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         params.columns.forEach(function (column, index) {
 
             if (column.search && column.search.value) {
-                // console.error(column);
-                let value = column.search.value;
                 // check the first character for a range filter operator
-
                 // data is the column field, at least for right now.
-                apiData[column.data] = value;
+                apiData[column.data] = column.search.value;
             }
         });
 
         apiData.offset = params.start;
-        apiData.facets = {};
+        apiData.facets = [];
+        // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
         this.columns.forEach((column, index) => {
             if (column.browsable) {
-                apiData.facets[column.name] = 1;
+                apiData.facets.push(column.name);
+                // apiData.facets[column.name] = 1; // old way
                 // this seems odd, it should be a pipe-delimited list
             }
         });

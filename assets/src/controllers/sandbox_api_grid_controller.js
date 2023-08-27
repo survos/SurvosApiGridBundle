@@ -6,7 +6,7 @@ import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
 import 'datatables.net-select-bs5';
 import 'datatables.net-responsive';
-// import 'datatables.net-responsive-bs5';
+import 'datatables.net-responsive-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-searchpanes-bs5';
 import 'datatables.net-datetime';
@@ -35,6 +35,7 @@ let routes = false;
 // routes = require('../../../../../public/js/fos_js_routes.json');
 // if local
 routes = require('../../public/js/fos_js_routes.json');
+import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 
 Routing.setRoutingData(routes);
 
@@ -457,6 +458,7 @@ export default class extends Controller {
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
+            responsive: true,
             // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
             //     // displayBuffer: 10,

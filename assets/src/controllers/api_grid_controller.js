@@ -87,7 +87,7 @@ export default class extends Controller {
         locale: {type: String, default: 'no-locale!'},
         style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
-        dom: {type: String, default: 'Plfrtip'},
+        dom: {type: String, default: 'BPlfrtip'},
         filter: String
     }
 
@@ -458,6 +458,7 @@ export default class extends Controller {
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
+            responsive: true,
             // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
             //     // displayBuffer: 10,

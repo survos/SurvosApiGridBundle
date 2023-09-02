@@ -14,6 +14,7 @@ import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
+import 'jszip';
 import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
@@ -494,8 +495,15 @@ export default class extends Controller {
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
             buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print',
                 {
-                    text: 'My button',
+                    extend: 'excelHtml5',
+                    autoFilter: true,
+                    sheetName: 'Exported data'
+                },
+                'pdf',
+                {
+                    text: 'labels',
                     action:  ( e, dt, node, config ) =>  {
                         console.log("calling API " + this.apiCallValue, this.apiParams);
                         const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});
@@ -900,6 +908,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         params.columns.forEach(function (column, index) {
 
             if (column.search && column.search.value) {
+                // check the first character for a range filter operator
                 // data is the column field, at least for right now.
                 apiData[column.data] = column.search.value;
             }

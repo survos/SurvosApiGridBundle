@@ -6,7 +6,7 @@ import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
 import 'datatables.net-select-bs5';
 import 'datatables.net-responsive';
-// import 'datatables.net-responsive-bs5';
+import 'datatables.net-responsive-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-searchpanes-bs5';
 import 'datatables.net-datetime';
@@ -14,6 +14,7 @@ import 'datatables.net-scroller-bs5';
 import 'datatables.net-buttons/js/buttons.colVis.min';
 import 'datatables.net-buttons/js/buttons.html5.min';
 import 'datatables.net-buttons/js/buttons.print.min';
+import 'jszip';
 import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
@@ -494,8 +495,15 @@ export default class extends Controller {
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
             buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print',
                 {
-                    text: 'My button',
+                    extend: 'excelHtml5',
+                    autoFilter: true,
+                    sheetName: 'Exported data'
+                },
+                'pdf',
+                {
+                    text: 'labels',
                     action:  ( e, dt, node, config ) =>  {
                         console.log("calling API " + this.apiCallValue, this.apiParams);
                         const event = new CustomEvent("changeSearchEvent", {detail: this.apiParams});

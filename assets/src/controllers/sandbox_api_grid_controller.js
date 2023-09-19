@@ -131,7 +131,8 @@ export default class extends Controller {
                 route: c.route,
                 locale: c.locale,
                 render: render,
-                sortable: (typeof c.sortable)?c.sortable:false
+                sortable: (typeof c.sortable)?c.sortable:false,
+                className: c.className
             })
         });
         return x;
@@ -726,6 +727,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
           locale = null,
           renderType = 'string',
           sortable = false,
+          className = null,
       } = {}) {
 
         if (render === null) {
@@ -778,6 +780,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         return {
             title: label,
+            className: className,
             data: propertyName || '',
             render: render,
             sortable: sortable

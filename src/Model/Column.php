@@ -13,6 +13,7 @@ class Column
         public ?string $type = null, // this is used for searchBuilder
         public ?string $prefix = null,
         public ?string $internalCode = null, // e.g. label, description, type
+        public ?string $className = null, // e.g. pull-right for numbers
         public bool $searchable = false,
         public bool $browsable = false, // browseOrder = 100 if true unless set
         public int $browseOrder = 0, // if 0, same as false, so we can deprecate browsable

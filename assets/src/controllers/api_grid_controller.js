@@ -591,21 +591,28 @@ export default class extends Controller {
                         let targetMessage = "";
                         if(typeof this.apiParams.facet_filter != 'undefined') {
                             this.apiParams.facet_filter.forEach((index) => {
-                                let string = index.split(',');
-                                if(targetMessage != "") {
+                                // format is (probably) facet,value1|value2
+                                if(targetMessage !== "") {
                                     targetMessage += ", ";
                                 }
+                                let string = index.split(',');
+                                if (string.length > 0) {
+                                    let firstPart = string[0];
                                 let splitValue = string[2].split("|");
                                 let returnValue = [];
                                 splitValue.forEach((index) => {
-                                    searchPanes['options'][string[0]].forEach((array) => {
-                                        if(index == array.value) {
+                                        if (firstPart in searchPanes['options']) {
+                                            searchPanes['options'][firstPart].forEach((array) => {
+                                                if(index === array.value) {
                                             returnValue.push(array.label);
                                             return false;
                                         }
                                     });
+                                        }
+
                                 });
                                 targetMessage += string[0]+ " : "+ returnValue.join('|');
+                                }
                             });
                         }
 

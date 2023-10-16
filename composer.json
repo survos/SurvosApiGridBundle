@@ -18,14 +18,15 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "survos/inspection-bundle": "^1.6",
+        "survos/inspection-bundle": "^1.5",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "symfony/config": "^6.1.0",
         "symfony/dependency-injection": "^6.1.0",
         "symfony/http-kernel": "^6.1.0",
         "symfony/options-resolver": "^6.1.0",
         "symfony/ux-twig-component": "^2.8",
-        "twig/twig": "^3.4"
+        "twig/twig": "^3.4",
+        "api-platform/core": "^3.2"
     },
     "autoload": {
         "psr-4": {
@@ -55,6 +56,5 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
     "prefer-stable": true
 }

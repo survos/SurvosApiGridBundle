@@ -2,7 +2,8 @@
 
 namespace Survos\ApiGrid\Hydra\Serializer;
 
-use ApiPlatform\Api\IriConverterInterface;
+//use ApiPlatform\Api\IriConverterInterface;
+use ApiPlatform\Symfony\Routing\IriConverter;
 use ApiPlatform\Api\ResourceClassResolverInterface;
 use ApiPlatform\Api\UrlGeneratorInterface;
 use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
@@ -32,7 +33,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         ResourceClassResolverInterface $resourceClassResolver,
         private RequestStack $requestStack, // hack!
 
-        private readonly IriConverterInterface $iriConverter,
+        private readonly IriConverter $iriConverter,
         private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null,
         array $defaultContext = []
     )

@@ -3,10 +3,9 @@
 namespace Survos\ApiGrid\Twig;
 
 use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Core\Api\IriConverterInterface as LegacyIriConverterInterface;
+//use ApiPlatform\Core\Api\IriConverterInterface as LegacyIriConverterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\GetCollection;
-use App\Entity\Media;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Survos\Grid\Attribute\Crud;
 use Symfony\Component\PropertyAccess\PropertyAccessor;

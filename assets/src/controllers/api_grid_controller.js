@@ -5,17 +5,17 @@ import {Controller} from "@hotwired/stimulus";
 import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
 import 'datatables.net-select-bs5';
-import 'datatables.net-responsive';
-import 'datatables.net-responsive-bs5';
-import 'datatables.net-buttons-bs5';
-import 'datatables.net-searchpanes-bs5';
-import 'datatables.net-datetime';
-import 'datatables.net-scroller-bs5';
-import 'datatables.net-buttons/js/buttons.colVis.min';
-import 'datatables.net-buttons/js/buttons.html5.min';
-import 'datatables.net-buttons/js/buttons.print.min';
-import 'jszip';
-import PerfectScrollbar from 'perfect-scrollbar';
+// import 'datatables.net-responsive';
+// import 'datatables.net-responsive-bs5';
+// import 'datatables.net-buttons-bs5';
+// import 'datatables.net-searchpanes-bs5';
+// import 'datatables.net-datetime';
+// import 'datatables.net-scroller-bs5';
+// import 'datatables.net-buttons/js/buttons.colVis.min';
+// import 'datatables.net-buttons/js/buttons.html5.min';
+// import 'datatables.net-buttons/js/buttons.print.min';
+// import 'jszip';
+// import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';
@@ -32,21 +32,23 @@ import PerfectScrollbar from 'perfect-scrollbar';
 let routes = false;
 
 // if live
-import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-routes = require('../../../../../public/js/fos_js_routes.json');
+// import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+// routes = require('../../../../../public/js/fos_js_routes.json');
 // if local
+import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+
+// import Routing from './vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+console.log('Routing js loaded.');
 // routes = require('../../public/js/fos_js_routes.json');
-// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+// Routing.setRoutingData(routes);
 
-Routing.setRoutingData(routes);
-
-import Twig from 'twig/twig.min';
-import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
-import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
-import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
-import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
-import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
-import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
+import Twig from 'twig';
+// import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
+// import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+// import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
+// import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
+// import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
+// import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams) => {
         // console.error(routeParams);
@@ -59,7 +61,7 @@ Twig.extend(function (Twig) {
 
 // import {Modal} from "bootstrap"; !!
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
-import Modal from 'bootstrap/js/dist/modal';
+// import Modal from 'bootstrap/js/dist/modal';
 // import cb from "../js/app-buttons";
 
 

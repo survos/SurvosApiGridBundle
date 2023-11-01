@@ -93,7 +93,7 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
         $container->services()->alias(SlicePaginationExtension::class,'api_platform.doctrine.orm.query_extension.pagination');
 
-        if (class_exists(Environment::class) && class_exists(StimulusTwigExtension::class)) {
+        if (class_exists(Environment::class)) {
             $builder
                 ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
                 ->addTag('twig.extension')

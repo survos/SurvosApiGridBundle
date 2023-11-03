@@ -12,6 +12,7 @@
         "enabled": true,
         "importmap": {
           "twig": "^1.16",
+          "axios": "^1.2.2",
           "datatables.net-bs5": "^1.13.6",
           "datatables.net-responsive": "^1.13.6",
           "datatables.net-select-bs5": "^1.13.6"

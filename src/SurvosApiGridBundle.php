@@ -115,8 +115,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->addArgument(new Reference('logger'))
             ->addTag('api_platform.filter');
 
-        //        $builder->register(GridComponent::class);
-        //        $builder->autowire(GridComponent::class);
+        //        $builder->register(SimpleDatatablesComponent::class);
+        //        $builder->autowire(SimpleDatatablesComponent::class);
 
         //        $definition->setArgument('$widthFactor', $config['widthFactor']);
         //        $definition->setArgument('$height', $config['height']);

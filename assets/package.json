@@ -10,17 +10,20 @@
         "webpackMode": "eager",
         "fetch": "lazy",
         "enabled": true,
-        "importmap": {
-          "twig": "^1.16",
-          "axios": "^1.2.2",
-          "datatables.net-bs5": "^1.13.6",
-          "datatables.net-responsive": "^1.13.6",
-          "datatables.net-select-bs5": "^1.13.6"
-        },
-
         "autoimport": {
+          "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+          "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
         }
       }
+    },
+    "importmap": {
+      "twig": "^1.16",
+      "axios": "^1.2.2",
+      "fos-routing": "^0.0.6",
+      "datatables.net-bs5": "^1.13.6",
+      "datatables.net-responsive": "^2.5.0",
+      "datatables.net-searchpanes-bs5": "^2.2.0",
+      "datatables.net-select-bs5": "^1.7.0"
     }
   },
   "peerDependencies": {

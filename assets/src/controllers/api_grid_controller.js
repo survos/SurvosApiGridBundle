@@ -1,14 +1,15 @@
 // during dev, from project_dir run
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import {Controller} from "@hotwired/stimulus";
+import $ from 'jquery';
 
 import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
-import 'datatables.net-select-bs5';
+// import 'datatables.net-select-bs5';
 // import 'datatables.net-responsive';
 // import 'datatables.net-responsive-bs5';
 // import 'datatables.net-buttons-bs5';
-// import 'datatables.net-searchpanes-bs5';
+// import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
 // import 'datatables.net-datetime';
 // import 'datatables.net-scroller-bs5';
 // import 'datatables.net-buttons/js/buttons.colVis.min';
@@ -35,7 +36,15 @@ let routes = false;
 // import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 // routes = require('../../../../../public/js/fos_js_routes.json');
 // if local
-import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
+import Routing from 'fos-routing';
+// import RoutingData from './../../../../../../public/js/fos_js_routes.js';
+import RoutingData from '/js/fos_js_routes.js';
+// import RoutingData from './x.js';
+Routing.setData(RoutingData);
+console.log(Routing.getHost());
+let path = Routing.generate('api_entrypoint');
+console.error(path);
 
 // import Routing from './vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 console.log('Routing js loaded.');
@@ -43,7 +52,7 @@ console.log('Routing js loaded.');
 // Routing.setRoutingData(routes);
 
 import Twig from 'twig';
-// import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
+import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
 // import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
 // import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
 // import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
@@ -90,7 +99,7 @@ export default class extends Controller {
         locale: {type: String, default: 'no-locale!'},
         style: {type: String, default: 'spreadsheet'},
         index: {type: String, default: ''},
-        dom: {type: String, default: 'BPlfrtip'},
+        dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
         filter: String
     }
 
@@ -432,19 +441,19 @@ export default class extends Controller {
         }
 
         let language = enLanguage;
-        if(this.locale == 'en') {
-            language = enLanguage;
-        } else if(this.locale == 'es') {
-            language = esLanguage;
-        }else if(this.locale == 'uk') {
-            language = ukLanguage;
-        }else if(this.locale == 'de') {
-            language = deLanguage;
-        }else if(this.locale == 'hu') {
-            language = huLanguage;
-        }else if(this.locale == 'hi') {
-            language = hilanguage;
-        }
+        // if(this.locale == 'en') {
+        //     language = enLanguage;
+        // } else if(this.locale == 'es') {
+        //     language = esLanguage;
+        // }else if(this.locale == 'uk') {
+        //     language = ukLanguage;
+        // }else if(this.locale == 'de') {
+        //     language = deLanguage;
+        // }else if(this.locale == 'hu') {
+        //     language = huLanguage;
+        // }else if(this.locale == 'hi') {
+        //     language = hilanguage;
+        // }
 
         let setup = {
             // let dt = new DataTable(el, {
@@ -648,7 +657,11 @@ export default class extends Controller {
             },
         };
         let dt = new DataTables(el, setup);
-        dt.searchPanes();
+
+
+        if (this.filter.hasOwnProperty('P')) {
+            dt.searchPanes();
+        }
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
@@ -661,7 +674,10 @@ export default class extends Controller {
         });
 
         // console.log('moving panes.');
-        $("div.search-panes").append(dt.searchPanes.container());
+
+        if (this.filter.hasOwnProperty('P')) {
+            $("div.search-panes").append(dt.searchPanes.container());
+        }
         const contentContainer = document.getElementsByClassName('search-panes');
         if (contentContainer.length > 0) {
             const ps = new PerfectScrollbar(contentContainer[0]);
@@ -879,10 +895,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         // Extract the path
         let path = urlWithoutProtocolAndDomain.split('?')[0];
         let facetsFilter = [];
-        for (const [key, value] of Object.entries(params.searchPanes)) {
-            if (Object.values(value).length) {
-                facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
-                facetsUrl.push(key + '=' + Object.values(value).join('|'));
+        if (params.searchPanes) {
+            for (const [key, value] of Object.entries(params.searchPanes)) {
+                if (Object.values(value).length) {
+                    facetsFilter.push(key + ',in,' + Object.values(value).join('|'));
+                    facetsUrl.push(key + '=' + Object.values(value).join('|'));
+                }
             }
         }
 

@@ -11,7 +11,8 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
-          "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+          "datatables/media/css/jquery.dataTables.min.css": true,
+          "datatables-select/dist/css/select.dataTables.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
         }
       }
@@ -20,10 +21,11 @@
       "twig": "^1.16",
       "axios": "^1.2.2",
       "fos-routing": "^0.0.6",
-      "datatables.net-bs5": "^1.13.6",
+      "datatables.net-plugins/i18n/en-GB.mjs": "^1.13.6",
+      "datatables.net-bs5": "^1.13.7",
       "datatables.net-responsive": "^2.5.0",
-      "datatables.net-searchpanes-bs5": "^2.2.0",
-      "datatables.net-select-bs5": "^1.7.0"
+      "datatables.net-select-bs5": "^1.7.0",
+      "datatables.net-select": "^1.1"
     }
   },
   "peerDependencies": {

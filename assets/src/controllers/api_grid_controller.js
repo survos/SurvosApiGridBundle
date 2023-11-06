@@ -5,11 +5,16 @@ import $ from 'jquery';
 
 import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
+import 'datatables.net-searchpanes';
+import 'datatables.net-select'; // fails with -bs5
+// import 'datatables.net-select-bs5'; // fails
+// import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
+
+
 // import 'datatables.net-select-bs5';
 // import 'datatables.net-responsive';
 // import 'datatables.net-responsive-bs5';
 // import 'datatables.net-buttons-bs5';
-// import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
 // import 'datatables.net-datetime';
 // import 'datatables.net-scroller-bs5';
 // import 'datatables.net-buttons/js/buttons.colVis.min';
@@ -32,24 +37,9 @@ import DataTables from "datatables.net-bs5";
 // if component
 let routes = false;
 
-// if live
-// import Routing from '../../../../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-// routes = require('../../../../../public/js/fos_js_routes.json');
-// if local
-// import Routing from '../../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
 import Routing from 'fos-routing';
-// import RoutingData from './../../../../../../public/js/fos_js_routes.js';
 import RoutingData from '/js/fos_js_routes.js';
-// import RoutingData from './x.js';
 Routing.setData(RoutingData);
-console.log(Routing.getHost());
-let path = Routing.generate('api_entrypoint');
-console.error(path);
-
-// import Routing from './vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
-console.log('Routing js loaded.');
-// routes = require('../../public/js/fos_js_routes.json');
-// Routing.setRoutingData(routes);
 
 import Twig from 'twig';
 import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
@@ -154,7 +144,6 @@ export default class extends Controller {
         super.connect(); //
 
         this.apiParams = {}; // initialize
-        console.log(this.identifier);
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
 
@@ -345,7 +334,6 @@ export default class extends Controller {
     initDataTable(el, fields) {
 
         let lookup = [];
-        console.error(fields);
         // for (const property in fields) {
         //     lookup[property] = field;
         //     console.error(property, fields[property]);
@@ -557,12 +545,11 @@ export default class extends Controller {
                 if (this.locale !== '') {
                     this.apiParams['_locale'] = this.locale;
                 }
-                if (this.indexValue) {
+                if (this.hasIndexValue) {
                     this.apiParams['_index'] = this.indexValue;
                 }
-                if (this.styleValue) {
+                if (this.hasStyleValue) {
                     this.apiParams['_style'] = this.styleValue;
-                    console.error(this.style, this.apiParams);
                 }
 
                 // console.warn(apiPlatformHeaders);

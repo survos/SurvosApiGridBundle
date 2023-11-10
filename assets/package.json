@@ -11,7 +11,7 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
-          "datatables/media/css/jquery.dataTables.min.css": true,
+          "datatables.net-select-bs5/css/select.bootstrap5.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
         }
       }

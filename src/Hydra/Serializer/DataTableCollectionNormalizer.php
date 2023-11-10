@@ -67,21 +67,24 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $object = $object['data']->getHits();
         }
 
+        $facets = [];
         if ($object instanceof PaginatorInterface) {
-            parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
-            $em = $object->getQuery()->getEntityManager();
-            $metadata = $em->getClassMetadata($context['operation']->getClass());
-            $repo = $em->getRepository($context['operation']->getClass());
-            if(isset($params['facets']) && is_array($params['facets'])) {
-                $doctrineFacets = [];
-                foreach($params['facets'] as $key => $facet) {
-                    $keyArray = array_keys($metadata->getReflectionProperties());
-                    if(in_array($key, $keyArray)) {
-                        $doctrineFacets[$key] = $repo->getCounts($key);
+            if ($context['request_uri']) {
+                parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+                $em = $object->getQuery()->getEntityManager();
+                $metadata = $em->getClassMetadata($context['operation']->getClass());
+                $repo = $em->getRepository($context['operation']->getClass());
+                if(isset($params['facets']) && is_array($params['facets'])) {
+                    $doctrineFacets = [];
+                    foreach($params['facets'] as $key => $facet) {
+                        $keyArray = array_keys($metadata->getReflectionProperties());
+                        if(in_array($key, $keyArray)) {
+                            $doctrineFacets[$key] = $repo->getCounts($key);
+                        }
                     }
-                }
 
-                $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
+                    $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
+                }
             }
         }
 

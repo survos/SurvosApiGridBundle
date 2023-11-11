@@ -49,7 +49,7 @@ import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
 // import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
 // import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
-    Twig._function.extend('path', (route, routeParams) => {
+    Twig._function.extend('path', (route, routeParams={}) => {
         // console.error(routeParams);
         delete routeParams._keys; // seems to be added by twigjs
         let path = Routing.generate(route, routeParams);

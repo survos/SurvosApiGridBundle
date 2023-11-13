@@ -495,11 +495,6 @@ export default class extends Controller {
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',
             buttons: [
                 'copy', 'csv', 'excel', 'pdf', 'print',
-                {
-                    extend: 'excelHtml5',
-                    autoFilter: true,
-                    sheetName: 'Exported data'
-                },
                 'pdf',
                 {
                     text: 'labels',

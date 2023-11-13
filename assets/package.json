@@ -11,8 +11,10 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
+          "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
+          "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
           "datatables.net-select-bs5/css/select.bootstrap5.min.css": true,
-          "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true
+          "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true
         }
       }
     },
@@ -22,9 +24,9 @@
       "fos-routing": "^0.0.6",
       "datatables.net-plugins/i18n/en-GB.mjs": "^1.13.6",
       "datatables.net-bs5": "^1.13.7",
-      "datatables.net-responsive": "^2.5.0",
+      "datatables.net-responsive-bs5": "^2.5.0",
       "datatables.net-select-bs5": "^1.7.0",
-      "datatables.net-select": "^1.1"
+      "datatables.net-scroller-bs5": "^2.3.0"
     }
   },
   "peerDependencies": {

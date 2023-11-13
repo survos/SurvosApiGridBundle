@@ -6,7 +6,8 @@ import $ from 'jquery';
 import {default as axios} from "axios";
 import DataTables from "datatables.net-bs5";
 import 'datatables.net-searchpanes';
-import 'datatables.net-select'; // fails with -bs5
+import 'datatables.net-select-bs5';
+import 'datatables.net-scroller-bs5';
 // import 'datatables.net-select-bs5'; // fails
 // import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
 
@@ -16,7 +17,6 @@ import 'datatables.net-select'; // fails with -bs5
 // import 'datatables.net-responsive-bs5';
 // import 'datatables.net-buttons-bs5';
 // import 'datatables.net-datetime';
-// import 'datatables.net-scroller-bs5';
 // import 'datatables.net-buttons/js/buttons.colVis.min';
 // import 'datatables.net-buttons/js/buttons.html5.min';
 // import 'datatables.net-buttons/js/buttons.print.min';

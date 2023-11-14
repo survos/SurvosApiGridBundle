@@ -18,7 +18,7 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "survos/inspection-bundle": "^1.6",
+        "survos/inspection-bundle": "^1.5.82",
         "friendsofsymfony/jsrouting-bundle": "^3.2",
         "symfony/config": "^6.3 || ^7.0",
         "symfony/dependency-injection": "^6.3 || ^7.0",
@@ -26,7 +26,8 @@
         "symfony/options-resolver": "^6.3 || ^7.0",
         "symfony/ux-twig-component": "^2.8",
         "twig/twig": "^3.4",
-        "api-platform/core": "^3.2"
+        "api-platform/core": "^3.2",
+        "symfony/dom-crawler": "^6.3"
     },
     "autoload": {
         "psr-4": {

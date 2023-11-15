@@ -122,9 +122,7 @@ class ApiGridComponent
 
             if ($crawler->filterXPath('//api_grid')->count() > 0) {
                 $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
-//                    dd($node->html());
                     return urldecode($node->html());
-//                    return html_entity_decode($node->html());
                 });
                 if(is_array($twigBlocks)) {
                     $twigBlocks = $twigBlocks[0];
@@ -146,7 +144,6 @@ class ApiGridComponent
 
 
             if (preg_match_all('/{% block (.*?) %}(.*?){% endblock/ms', $twigBlocks, $mm, PREG_SET_ORDER)) {
-                // we could throw a deprecation here.
                 foreach ($mm as $m) {
                     [$all, $columnName, $twigCode] = $m;
                     $customColumnTemplates[$columnName] = trim($twigCode);

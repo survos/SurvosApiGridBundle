@@ -26,7 +26,8 @@ class Column
 //        public ?string $propertyConfig,
     ) {
         if (empty($this->title)) {
-            $this->title = ucwords($this->name);
+            // the title of the column!
+            $this->title = $this->name; // ucwords($this->name);
         }
     }
 

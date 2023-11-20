@@ -107,7 +107,7 @@ class ApiGridComponent
 //
 //            }
 
-            // this blows up with nested blocks.
+            // this blows up with nested blocks.  Also, issue with {% block title %}
             if (preg_match('/component.*?%}(.*?) endcomponent/ms', $source, $mm)) {
                 $twigBlocks = $mm[1];
             } else {
@@ -118,6 +118,7 @@ class ApiGridComponent
 
             $crawler = new Crawler();
             $crawler->addHtmlContent($componentHtml);
+//            dd($componentHtml, $twigBlocks);
             $allTwigBlocks = [];
 
             if ($crawler->filterXPath('//api_grid')->count() > 0) {

@@ -1,6 +1,7 @@
 {# templates/components/datatable.html.twig #}
 
 {% set columns = this.normalizedColumns %}
+{#{% set columns = this.col %}#}
 {% set templates = [] %}
 {#    {% if block(c.name) is defined %} #}
 {#        {% set templates[c.name] = block(c.name) %} #}
@@ -36,7 +37,7 @@
 }) }}>
 
     {% block modal %}
-        {{ include('@SurvosGrid/_modal.html.twig', {
+        {{ include('@SurvosApiGrid/_modal.html.twig', {
             formUrl: '/',
             aaController: this.stimulusController,
             modalController: 'modal-form',

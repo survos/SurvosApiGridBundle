@@ -15,6 +15,11 @@ class Column
         public ?string $internalCode = null, // e.g. label, description, type
         public ?string $className = null, // e.g. pull-right for numbers
         public bool $searchable = false,
+        public bool $useDatatables = true,
+
+        public bool $translateValue = false,
+        // @todo: consolidate these two
+        public bool $inSearchPane = false,
         public bool $browsable = false, // browseOrder = 100 if true unless set
         public int $browseOrder = 0, // if 0, same as false, so we can deprecate browsable
         public bool $sortable = false,

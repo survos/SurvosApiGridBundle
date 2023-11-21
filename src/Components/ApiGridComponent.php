@@ -42,8 +42,13 @@ class ApiGridComponent
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public string $apiGetCollectionUrl;
+    public bool $trans = true;
+    public string|bool|null $domain = null;
 
-    public array $filter = [];
+    public bool $search = true;
+    public string $scrollY = '70vh';
+        public array $filter = [];
+    public bool $useDatatables = true;
 
     public ?string $source = null;
     public ?string $style = 'spreadsheet';
@@ -51,6 +56,10 @@ class ApiGridComponent
     public ?string $locale = null; // shouldn't be necessary, but sanity for testing.
 
     public ?string $path = null;
+    public bool $info = false;
+    public ?string $tableId = null;
+    public string $tableClasses = '';
+
 
     public function getLocale(): string
     {
@@ -172,5 +181,44 @@ class ApiGridComponent
 
         return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
+
+    public function searchPanesColumns(): int
+    {
+        $count = 0;
+        // count the number, if > 6 we could figured out the best layout
+        foreach ($this->normalizedColumns() as $column) {
+//            dd($column);
+            if ($column->inSearchPane) {
+                $count++;
+            }
+        }
+        $count = min($count, 6);
+        return $count;
+    }
+
+    /**
+     * @return array<string, Column>
+     */
+    public function GridNormalizedColumns(): iterable
+    {
+        $normalizedColumns = [];
+        foreach ($this->columns as $c) {
+            if (empty($c)) {
+                continue;
+            }
+            if (is_string($c)) {
+                $c = [
+                    'name' => $c,
+                ];
+            }
+            assert(is_array($c));
+            $column = new Column(...$c);
+            if ($column->condition) {
+                $normalizedColumns[$column->name] = $column;
+            }
+        }
+        return $normalizedColumns;
+    }
+
 
 }

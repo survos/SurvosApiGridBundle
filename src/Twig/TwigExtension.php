@@ -38,6 +38,11 @@ class TwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
+            new TwigFunction('setAttribute', function (array $object, $attribute, $value) {
+                $object[$attribute] = $value;
+                return $object;
+            }),
         ];
     }
+
 }

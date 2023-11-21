@@ -4,27 +4,25 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
-use Survos\GridGroupBundle\Service\GridGroupService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
-use Symfony\WebpackEncoreBundle\Twig\StimulusTwigExtension;
 use Twig\Environment;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
-use ApiPlatform\Hydra\Serializer\PartialCollectionViewNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class SurvosApiGridBundle extends AbstractBundle
@@ -36,6 +34,30 @@ class SurvosApiGridBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        if (class_exists(Environment::class)) {
+            $builder
+                ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
+                ->addTag('twig.extension')
+                ->setPublic(false);
+        }
+
+        $builder->register(GridComponent::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+            ->setArgument('$twig', new Reference('twig'))
+            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
+            ->setArgument('$registry', new Reference('doctrine'))
+        ;
+
+        $builder->register(ItemGridComponent::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+        ;
+
+
+
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)
             ->addTag('meilli_search_filter')
@@ -93,13 +115,6 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
         $container->services()->alias(SlicePaginationExtension::class,'api_platform.doctrine.orm.query_extension.pagination');
 
-        if (class_exists(Environment::class)) {
-            $builder
-                ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
-                ->addTag('twig.extension')
-                ->setPublic(false);
-        }
-
         $builder->register(DatatableService::class)->setAutowired(true)->setAutoconfigured(true);
 
         $builder->register(ApiGridComponent::class)
@@ -129,6 +144,7 @@ class SurvosApiGridBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('stimulus_controller')->defaultValue('@survos/api-grid-bundle/api_grid')->end()
+            ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
             ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
             ->end();;

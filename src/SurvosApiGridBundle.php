@@ -89,6 +89,7 @@ class SurvosApiGridBundle extends AbstractBundle
         $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
+//            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
 

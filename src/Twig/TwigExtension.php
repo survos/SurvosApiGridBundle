@@ -32,8 +32,13 @@ class TwigExtension extends AbstractExtension
             // If your filter generates SAFE HTML, you should add a third
             // parameter: ['is_safe' => ['html']]
             // Reference: https://twig.symfony.com/doc/3.x/advanced.html#automatic-escaping
+            new TwigFilter('datatable', [$this, 'datatable'], [
+                'needs_environment' => true,
+                'is_safe' => ['html'],
+            ]),
         ];
     }
+
 
     public function getFunctions(): array
     {
@@ -43,6 +48,11 @@ class TwigExtension extends AbstractExtension
                 return $object;
             }),
         ];
+    }
+
+    public function datatable($data)
+    {
+        return "For now, call grid instead.";
     }
 
 }

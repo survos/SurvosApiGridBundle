@@ -3,8 +3,8 @@
 namespace Survos\ApiGrid\State;
 
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\ProviderInterface;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\State\ProviderInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;

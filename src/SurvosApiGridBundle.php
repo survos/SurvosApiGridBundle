@@ -5,6 +5,7 @@ namespace Survos\ApiGrid;
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Components\GridComponent;
+use Survos\ApiGrid\Components\ItemGridComponent;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
@@ -55,8 +56,6 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
         ;
-
-
 
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)

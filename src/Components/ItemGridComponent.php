@@ -3,7 +3,7 @@
 namespace Survos\ApiGrid\Components;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Survos\Grid\Model\Column;
+use Survos\ApiGrid\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PostMount;

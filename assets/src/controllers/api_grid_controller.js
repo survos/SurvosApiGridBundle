@@ -22,7 +22,7 @@ import '../datatables-plugins.js';
 // import 'datatables.net-buttons/js/buttons.html5.min';
 // import 'datatables.net-buttons/js/buttons.print.min';
 // import 'jszip';
-// import PerfectScrollbar from 'perfect-scrollbar';
+import PerfectScrollbar from 'perfect-scrollbar';
 // shouldn't these be automatically included (from package.json)
 // import 'datatables.net-scroller';
 // import 'datatables.net-scroller-bs5';

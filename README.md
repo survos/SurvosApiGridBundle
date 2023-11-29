@@ -7,6 +7,7 @@ requires survos/grid-bundle, which loads the datatables libraries.
 composer req survos/api-grid-bundle
 ```
 
+
 ## 
 
 ## Ideas
@@ -45,7 +46,7 @@ For those columns you want to add searchPanes add browsable: true
 
 For those columns you want to add searchable: true
 
-**3) For search you need to inclide below**
+**3) For search you need to include below**
 ```
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 

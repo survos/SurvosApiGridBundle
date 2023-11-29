@@ -666,10 +666,10 @@ export default class extends Controller {
             }
         });
 
-        // console.log('moving panes.');
-
+        console.log('moving panes to div.search-panes');
+        $("div.dtsp-verticalPanes").append(dt.searchPanes.container());
+        // $("div.search-panes").append(dt.searchPanes.container());
         if (this.filter.hasOwnProperty('P')) {
-            $("div.search-panes").append(dt.searchPanes.container());
         }
         const contentContainer = document.getElementsByClassName('search-panes');
         if (contentContainer.length > 0) {

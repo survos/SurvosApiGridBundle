@@ -272,6 +272,7 @@ export default class extends Controller {
         };
 
         dom = `<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>`;
+        dom = '<"dtsp-dataTable"frtip>';
         console.log("DOM: " + dom);
         setup = {
             retrieve: true, // avoid datatable has been initialized
@@ -294,12 +295,21 @@ export default class extends Controller {
             ]
         };
 
+        // var table = $('#example').DataTable({
+        //     searchPanes: {
+        //         layout: 'columns-1'
+        //     },
+        //     dom: '<"dtsp-dataTable"frtip>',
+        //     pageLength: 20
+        // });
+
         let table = new DataTables(el, setup);
         // if (this.dom.hasOwnProperty('P'))
         {
-            // dt.searchPanes();
-            console.log('moving panes to #searchPanesVerticalContainer');
-            // $("div.dtsp-verticalPanes").append(table.searchPanes.container());
+            table.searchPanes()
+            // let container = table.searchPanes.container();
+            // $("div.dtsp-verticalPanes").append(container);
+            $("div.dtsp-verticalPanes").append(table.searchPanes.container());
 
             // @todo: move to stimulus target
 // Move stuff

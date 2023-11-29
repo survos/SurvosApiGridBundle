@@ -3,7 +3,6 @@
 namespace Survos\ApiGrid\Components;
 
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
-use DOMDocument;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Model\Column;
 use Survos\ApiGrid\Service\DatatableService;

@@ -6,7 +6,6 @@ use ApiPlatform\Api\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\PropertyInfo\Type;
 

@@ -6,7 +6,6 @@ use ApiPlatform\Api\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
-use phpDocumentor\Reflection\Types\Boolean;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\PropertyInfo\Type;
 
@@ -15,7 +14,7 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
     public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, ?NameConverterInterface $nameConverter = null, private readonly string $orderParameterName = 'filter', ?array $properties = null)
     {
         parent::__construct($propertyNameCollectionFactory, $propertyMetadataFactory, $resourceClassResolver, $nameConverter, $properties);
-    } 
+    }
 
     public function apply(array $clauseBody, string $resourceClass, ?Operation $operation = null, array $context = []): array {
 
@@ -44,7 +43,7 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
         $query = " ( ";
         foreach($criterias as $criteria) {
             if(isset($criteria["condition"])) {
-                $query .= " ".$this->matchConditionWithName($criteria)." ".$logic ;                
+                $query .= " ".$this->matchConditionWithName($criteria)." ".$logic ;
             }
         }
         $query = rtrim($query, $logic)." ) ";
@@ -57,7 +56,7 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
     }
 
     public function matchConditionWithName(array $condition) {
-         
+
         switch($condition["condition"]) {
             case "=":
                 return $condition["origData"]." = ".$condition["value1"];
@@ -85,7 +84,7 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
     }
 
     private function betweenCondtion(?string $value1, ?string $value2, $keyName){
-        
+
         $firstPart = "";
 
         if($value1 > $value2) {

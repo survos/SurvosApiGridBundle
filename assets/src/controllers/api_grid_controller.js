@@ -100,6 +100,7 @@ export default class extends Controller {
     // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
+        // see https://javascript.plainenglish.io/are-javascript-object-keys-ordered-and-iterable-5147eedb26ce
         const map1 = new Map();
 
         map1.set('a', 1);

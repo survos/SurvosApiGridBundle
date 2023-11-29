@@ -3,12 +3,11 @@ import {Controller} from "@hotwired/stimulus";
 // HTML datatable controller, works with SimpleDatatablesComponent, which generates an HTML table.
 // see api_grid_controller for remote data loading use API Platform
 
-// import $ from 'jquery'; // for datatables.
+import $ from 'jquery'; // for datatables.
 // // import {SurvosDataTable} from 'survos-datatables';
 
 // import jquery from 'jquery';
 // console.log('local jquery');
-// const $ = jquery;
 
 // import 'bootstrap';
 
@@ -272,6 +271,7 @@ export default class extends Controller {
             // buttons: this.buttons,
         };
 
+        dom = `<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>`;
         console.log("DOM: " + dom);
         setup = {
             retrieve: true, // avoid datatable has been initialized
@@ -284,9 +284,9 @@ export default class extends Controller {
             responsive: true,
             pageLength: this.pageLengthValue,
             columnDefs: this.columnDefs(),
-            // searchPanes:{
-            //     layout: 'columns-' + this.searchPanesColumns,
-            // },
+            searchPanes:{
+                layout: 'columns-' + 1 // this.searchPanesColumns,
+            },
             buttons: [
                 'colvis',
                 'csvHtml5',
@@ -295,11 +295,18 @@ export default class extends Controller {
         };
 
         let table = new DataTables(el, setup);
-        // if (this.dom.hasOwnProperty('P')) {
+        // if (this.dom.hasOwnProperty('P'))
+        {
             // dt.searchPanes();
-            // console.log('moving panes.');
+            console.log('moving panes to #searchPanesVerticalContainer');
             // $("div.dtsp-verticalPanes").append(table.searchPanes.container());
-        // }
+
+            // @todo: move to stimulus target
+// Move stuff
+//             let msg = document.querySelector('#searchPanesVerticalContainer');
+//             msg.innerHTML = 'this is where the searchpanes should be.';
+//             msg.replaceWith(table.searchPanes.container());
+        }
 
         return table;
 

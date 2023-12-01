@@ -56,11 +56,21 @@ use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 Here name and code are columns in which you need to search
 
 **4) Use below for doctrine searchpane filters**
+
+First, make sure you have the necessary counts method by adding the helper trait to the repository class
+
+```php
+class OfficialRepository extends ServiceEntityRepository implements QueryBuilderHelperInterface
+{
+    use QueryBuilderHelperTrait;
 ```
+
+Then add the filterable properties to the entity class.  You may want to index them to speed up the count query
+```php
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 
 
-#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['facet_filter'])]
+#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['gender','state'])]
 ```
 
 **5) Use below for doctrine order filters**

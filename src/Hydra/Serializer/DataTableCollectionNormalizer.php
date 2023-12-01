@@ -74,13 +74,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $repo = $em->getRepository($context['operation']->getClass());
                 if(isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
-                    foreach($params['facets'] as $key => $facet) {
+                    foreach($params['facets'] as $facet) {
                         $keyArray = array_keys($metadata->getReflectionProperties());
-                        if(in_array($key, $keyArray)) {
-                            $doctrineFacets[$key] = $repo->getCounts($key);
+                        if(in_array($facet, $keyArray)) {
+                            $doctrineFacets[$facet] = $repo->getCounts($facet);
                         }
                     }
-
                     $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
                 }
             }
@@ -193,7 +192,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     private function getFacetsData(array $facets, ?array $params, ?array $context) :array {
         $facetsData = [];
-
         foreach($params as $key => $facet) {
             $data = [];
             foreach($facet as $facetKey => $facetValue) {

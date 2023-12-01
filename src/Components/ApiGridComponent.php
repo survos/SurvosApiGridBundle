@@ -23,6 +23,7 @@ class ApiGridComponent
         private DatatableService $datatableService,
         public ?string $stimulusController
     ) {
+        $this->filter = $this->requestStack->getCurrentRequest()->query->all();
         //        ='@survos/grid-bundle/api_grid';
     }
 
@@ -46,7 +47,7 @@ class ApiGridComponent
 
     public bool $search = true;
     public string $scrollY = '70vh';
-        public array $filter = [];
+    public array $filter = [];
     public bool $useDatatables = true;
 
     public ?string $source = null;

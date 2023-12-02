@@ -14,9 +14,12 @@ use Picqer\Barcode\BarcodeGeneratorHTML;
 use Picqer\Barcode\BarcodeGeneratorJPG;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Picqer\Barcode\BarcodeGeneratorSVG;
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use function Symfony\Component\String\u;
 
 class DatatableService
@@ -42,7 +45,6 @@ class DatatableService
 //        $sortableFields = $this->sortableFields($class);
 //        $searchableFields = $this->searchableFields($class);
 
-
         foreach ($columns as $idx => $c) {
             if (empty($c)) {
                 continue;
@@ -66,18 +68,22 @@ class DatatableService
 //            dd($c);
 
             $column = new Column(...$c);
-            if (in_array($columnName, $settings)) {
-                $options = (new OptionsResolver())
-                    ->setDefaults([
-                        'searchable' => false,
-                        'order' => 100,
-                        'sortable' => false,
-                        'browsable' => false
-                    ])->resolve($settings);
-                $column->searchable = $options['searchable'];
-                $column->sortable = $options['sortable'];
-                $column->browsable = $options['browsable'];
+
+            if (in_array($columnName, array_keys($settings))) {
+//                $options = (new OptionsResolver())
+//                    ->setDefaults([
+//                        'searchable' => false,
+//                        'order' => 100,
+//                        'sortable' => false,
+//                        'browsable' => false
+//                    ])->resolve($settings);
+
+                $column->searchable = $settings[$columnName]['searchable'];
+                $column->sortable = $settings[$columnName]['sortable'];
+                $column->browsable = $settings[$columnName]['browsable'];
+
             }
+
             if ($column->condition) {
                 $normalizedColumns[] = $column;
             }
@@ -91,9 +97,11 @@ class DatatableService
 
     public function getSettingsFromAttributes(string $class)
     {
+//        dd($class);
         assert(class_exists($class), $class);
         $reflector = new \ReflectionClass($class);
         $settings = [];
+        $filters = [];
         foreach ($reflector->getAttributes() as $attribute) {
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
@@ -108,10 +116,12 @@ class DatatableService
             /** @var FilterInterface $filter */
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
+            $filters[] = $filter;
             if (!array_key_exists('properties', $arguments)) {
                 continue;
 //                dd($arguments);
             }
+
             foreach ($arguments['properties'] as $fieldname) {
                 if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
                     $settings[$fieldname]['searchable'] = true;
@@ -125,12 +135,36 @@ class DatatableService
                 if (in_array($filter, [OrderFilter::class])) {
                     $settings[$fieldname]['sortable'] = true;
                 }
+
+                //Meili search filters
+                if (in_array($filter, [MeiliMultiFieldSearchFilter::class])) {
+                    $settings[$fieldname]['searchable'] = true;
+                }
+                if (in_array($filter, [FacetsFieldSearchFilter::class])) {
+                    $settings[$fieldname]['browsable'] = true;
+                }
+                if (in_array($filter, [SortFilter::class])) {
+                    $settings[$fieldname]['sortable'] = true;
+                }
             }
         }
-
-        return $settings;
+        return $this->addDefaultValues($settings);
     }
 
+    public function addDefaultValues(array $settings) {
+        foreach ($settings as $key => $value) {
+            if(!isset($settings[$key]['browsable'])) {
+                $settings[$key]['browsable'] = false;
+            }
+            if(!isset($settings[$key]['sortable'])) {
+                $settings[$key]['sortable'] = false;
+            }
+            if(!isset($settings[$key]['searchable'])) {
+                $settings[$key]['searchable'] = false;
+            }
+        }
+        return $settings;
+    }
 
     public function sortableFields(?string $class): array
     {

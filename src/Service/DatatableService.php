@@ -8,6 +8,7 @@ use ApiPlatform\Api\FilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use Doctrine\ORM\Mapping\Id;
 use Picqer\Barcode\BarcodeGenerator;
 use Picqer\Barcode\BarcodeGeneratorDynamicHTML;
 use Picqer\Barcode\BarcodeGeneratorHTML;
@@ -97,12 +98,12 @@ class DatatableService
 
     public function getSettingsFromAttributes(string $class)
     {
-//        dd($class);
         assert(class_exists($class), $class);
-        $reflector = new \ReflectionClass($class);
+        $reflectionClass = new \ReflectionClass($class);
         $settings = [];
         $filters = [];
-        foreach ($reflector->getAttributes() as $attribute) {
+        // the class attributes have groups of fields.  We will also go through each property and method.
+        foreach ($reflectionClass->getAttributes() as $attribute) {
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
@@ -116,13 +117,13 @@ class DatatableService
             /** @var FilterInterface $filter */
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
-            $filters[] = $filter;
             if (!array_key_exists('properties', $arguments)) {
                 continue;
-//                dd($arguments);
             }
+            $properties = $arguments['properties'] ;
+//            dump(props: $properties, filter: $filter);
 
-            foreach ($arguments['properties'] as $fieldname) {
+            foreach ($properties as $fieldname) {
                 if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
                     $settings[$fieldname]['searchable'] = true;
                 }
@@ -147,7 +148,19 @@ class DatatableService
                     $settings[$fieldname]['sortable'] = true;
                 }
             }
+//            dump(settings: $settings);
         }
+
+        // now go through each property, including getting the primary key
+        foreach ($reflectionClass->getProperties() as $property) {
+            $fieldname = $property->getName();
+            foreach ($property->getAttributes() as $attribute) {
+                if ($attribute->getName() == Id::class) {
+                    $settings[$fieldname]['is_primary'] = true;
+                }
+            }
+        }
+//        dd($settings);
         return $this->addDefaultValues($settings);
     }
 

@@ -36,6 +36,18 @@
     filter: this.filter
 }) }}>
 
+
+    <div class="dtsp-verticalContainer row">
+        <div class="dtsp-verticalPanes col-3">
+        </div>
+        <div class="col-9">
+            <h1>The table</h1>
+            <table class="table table-striped" {{ stimulus_target(this.stimulusController, 'table') }}>
+            </table>
+        </div>
+    </div>
+
+
     {% block modal %}
         {{ include('@SurvosApiGrid/_modal.html.twig', {
             formUrl: '/',
@@ -53,8 +65,6 @@
     </div>
 
 
-    <table class="table table-striped" {{ stimulus_target(this.stimulusController, 'table') }}>
-    </table>
 
 </div>
 

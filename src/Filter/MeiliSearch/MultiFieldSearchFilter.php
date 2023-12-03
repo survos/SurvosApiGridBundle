@@ -68,7 +68,7 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
                 'type' => 'string',
                 'required' => false,
                 'is_collection' => true,
-                'swagger' => [
+                'openapi' => [
                     'description' => 'Selects entities where each search term is found somewhere in at least one of the specified properties',
                 ],
             ],

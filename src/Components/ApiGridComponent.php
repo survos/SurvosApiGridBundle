@@ -28,6 +28,7 @@ class ApiGridComponent
     }
 
     public iterable $data;
+    public ?string $facets = 'left'; // left,right,top,button,null
 
     public array $columns = [];
     public array $globals = [];

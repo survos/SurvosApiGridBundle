@@ -4,16 +4,21 @@ namespace Survos\ApiGrid;
 
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Command\ApiIndexCommand;
+use Survos\ApiGrid\Command\IndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
 use Survos\ApiGrid\Service\DatatableService;
+use Survos\ApiGrid\Service\MeiliService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
@@ -26,15 +31,46 @@ use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
-class SurvosApiGridBundle extends AbstractBundle
+class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterface
 {
     use HasAssetMapperTrait;
-    // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
+
+    // The compiler pass
+    public function process(ContainerBuilder $container): void
+    {
+
+    }
+
+        // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
     /**
      * @param array<mixed> $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        $builder->register('survos_api_grid_datatable_service', DatatableService::class)
+            ->setAutowired(true);
+
+        $builder->register('api_meili_service', MeiliService::class)
+            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+            ->setArgument('$meiliHost',$config['meiliHost'])
+            ->setArgument('$meiliKey',$config['meiliKey'])
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setArgument('$bag', new Reference('parameter_bag'))
+            ->setAutowired(true)
+        ;
+
+        // check https://github.com/zenstruck/console-extra/issues/59
+        $definition = $builder->autowire(IndexCommand::class)
+            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+            ->setArgument('$bag', new Reference('parameter_bag'))
+            ->setArgument('$serializer', new Reference('serializer'))
+            ->setArgument('$meiliService', new Reference('api_meili_service'))
+            ->setArgument('$datatableService', new Reference('survos_api_grid_datatable_service'))
+//            ->setArgument('$normalizer', new Reference('normalizer'))
+            ->addTag('console.command')
+        ;
+//        $definition->addMethodCall('setInvokeContainer', [new Reference('container')]);
 
         if (class_exists(Environment::class)) {
             $builder
@@ -43,11 +79,13 @@ class SurvosApiGridBundle extends AbstractBundle
                 ->setPublic(false);
         }
 
+
+
         $builder->register(GridComponent::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
             ->setArgument('$registry', new Reference('doctrine'))
         ;

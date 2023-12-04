@@ -1,6 +1,6 @@
 {# templates/components/datatable.html.twig #}
 
-{% set columns = this.normalizedColumns %}
+{% set columns = this.getNormalizedColumns %}
 {#{% set columns = this.col %}#}
 {% set templates = [] %}
 {#    {% if block(c.name) is defined %} #}
@@ -41,7 +41,8 @@
         <div class="dtsp-verticalPanes col-3">
         </div>
         <div class="col-9">
-            <h1>The table</h1>
+            <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
+            </div>
             <table class="table table-striped" {{ stimulus_target(this.stimulusController, 'table') }}>
             </table>
         </div>
@@ -61,8 +62,6 @@
     {% endblock %}
 
 
-    <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
-    </div>
 
 
 

@@ -118,6 +118,7 @@ class DatatableService
             $arguments = $attribute->getArguments();
             $filter = $arguments[0];
             if (!array_key_exists('properties', $arguments)) {
+                dd($arguments);
                 continue;
             }
             $properties = $arguments['properties'] ;
@@ -148,7 +149,6 @@ class DatatableService
                     $settings[$fieldname]['sortable'] = true;
                 }
             }
-//            dump(settings: $settings);
         }
 
         // now go through each property, including getting the primary key
@@ -160,7 +160,6 @@ class DatatableService
                 }
             }
         }
-//        dd($settings);
         return $this->addDefaultValues($settings);
     }
 

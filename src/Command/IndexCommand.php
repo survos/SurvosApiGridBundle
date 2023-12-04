@@ -50,7 +50,7 @@ class IndexCommand extends Command
             ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
             ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the indexes')
             ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Batch size to meili', 100)
-            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 100)
+            ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 0)
         ;
     }
 

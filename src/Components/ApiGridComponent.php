@@ -17,12 +17,13 @@ use function Symfony\Component\String\u;
 class ApiGridComponent
 {
     public function __construct(
-        private Environment $twig,
-        private LoggerInterface $logger,
-        private RequestStack $requestStack,
+        private Environment      $twig,
+        private LoggerInterface  $logger,
+        private RequestStack     $requestStack,
         private DatatableService $datatableService,
-        public ?string $stimulusController
-    ) {
+        public ?string           $stimulusController
+    )
+    {
         $this->filter = $this->requestStack->getCurrentRequest()->query->all();
         //        ='@survos/grid-bundle/api_grid';
     }
@@ -39,8 +40,8 @@ class ApiGridComponent
 
     public ?string $class = null;
     public ?string $index = null; // name of the meili index
-    public string $dom='lfrtipP';
-    public int $pageLength=50;
+    public string $dom = 'lfrtipP';
+    public int $pageLength = 50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public string $apiGetCollectionUrl;
     public bool $trans = true;
@@ -66,6 +67,7 @@ class ApiGridComponent
     {
         return $this->requestStack->getParentRequest()->getLocale();
     }
+
     private function getTwigBlocks(): array
     {
         $customColumnTemplates = [];
@@ -91,7 +93,7 @@ class ApiGridComponent
 //            if (0)
 //            {
 //
-/*                if (preg_match('|<twig:api_grid.*?>(.*?)</twig:api_grid>|ms', $source, $mm)) {*/
+            /*                if (preg_match('|<twig:api_grid.*?>(.*?)</twig:api_grid>|ms', $source, $mm)) {*/
 //                    $twigBlocks = $mm[1];
 //                    $componentHtml = $mm[0];
 //                    $componentHtml = <<<END
@@ -135,7 +137,7 @@ class ApiGridComponent
                 $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
                     return urldecode($node->html());
                 });
-                if(is_array($twigBlocks)) {
+                if (is_array($twigBlocks)) {
                     $twigBlocks = $twigBlocks[0];
                 }
             } else {
@@ -148,7 +150,7 @@ class ApiGridComponent
                     $blockName = $node->attr('name');
                     $html = rawurldecode($node->html());
                     // hack for twig > and <
-                    $html = str_replace(['&lt;','&gt;'], ['<', '>'], $html);
+                    $html = str_replace(['&lt;', '&gt;'], ['<', '>'], $html);
                     return [$blockName => $html];
                 });
             }
@@ -161,7 +163,7 @@ class ApiGridComponent
                 }
             }
         }
-        foreach($allTwigBlocks as $allTwigBlock) {
+        foreach ($allTwigBlocks as $allTwigBlock) {
             foreach ($allTwigBlock as $key => $value) {
                 $customColumnTemplates[$key] = $value;
             }
@@ -175,11 +177,10 @@ class ApiGridComponent
     {
         // really we're getting the schema from the PHP Attributes here.
         if ($this->class) {
-                $settings = $this->datatableService->getSettingsFromAttributes($this->class);
-            } else {
-                $settings = []; // really settings should probably be passed in via a json schema or something like that.
-            }
-
+            $settings = $this->datatableService->getSettingsFromAttributes($this->class);
+        } else {
+            $settings = []; // really settings should probably be passed in via a json schema or something like that.
+        }
         return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
 

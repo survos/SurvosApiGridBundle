@@ -52,6 +52,9 @@ use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 
 
 #[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
+#[ApiFilter(MultiFieldSearchFilter::class, properties: ['firstName', 'lastName', 'officialName'])]
+#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['gender', 'currentParty'])]
+
 ```
 Here name and code are columns in which you need to search
 

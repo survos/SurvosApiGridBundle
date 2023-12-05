@@ -8,6 +8,7 @@ use Survos\ApiGrid\Command\ApiIndexCommand;
 use Survos\ApiGrid\Command\IndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
+use Survos\ApiGrid\Controller\GridController;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
@@ -29,6 +30,7 @@ use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
+
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterface
@@ -48,8 +50,17 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
 
+
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
+
+        $builder->autowire(GridController::class)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+        ;
+
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
@@ -162,10 +173,11 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
             ->setArgument('$logger', new Reference('logger'))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
+
         $builder->register(MultiFieldSearchFilter::class)
-            ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
-            ->addArgument(new Reference('request_stack'))
-            ->addArgument(new Reference('logger'))
+            ->setArgument('$managerRegistry', new Reference('doctrine'))
+//            ->setArgument(new Reference('request_stack'))
+            ->setArgument('$logger', new Reference('logger'))
             ->addTag('api_platform.filter');
 
         //        $builder->register(SimpleDatatablesComponent::class);

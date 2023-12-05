@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\State\Pagination\Pagination;
 use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
-use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 
 class MeilliSearchStateProvider implements ProviderInterface
 {

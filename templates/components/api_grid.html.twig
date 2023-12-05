@@ -42,7 +42,19 @@
         </div>
         <div class="col-9">
             <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
+                message
             </div>
+{#            {{ component('menu', {#}
+{#                type: PAGE_MENU,#}
+{#                options: {#}
+{#                    columns: columns|json_encode#}
+{#                }#}
+{#            }) }}#}
+
+            {% for c in columns %}
+{#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
+                {{ c.name }}
+            {% endfor %}
             <table class="table table-striped" {{ stimulus_target(this.stimulusController, 'table') }}>
             </table>
         </div>

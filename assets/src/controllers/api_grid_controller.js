@@ -342,7 +342,6 @@ export default class extends Controller {
     }
 
     initDataTable(el, fields) {
-
         let lookup = [];
         // for (const property in fields) {
         //     lookup[property] = field;
@@ -366,9 +365,10 @@ export default class extends Controller {
             return a.browseOrder - b.browseOrder;
 
         });
+        console.log(filterColumns);
         filterColumns.forEach((column, index) => {
             if (column.browsable) {
-                searchFieldsByColumnNumber.push(index);
+                searchFieldsByColumnNumber.push(index+1);
             }
         });
         this.columns.forEach((column, index) => {
@@ -619,7 +619,6 @@ export default class extends Controller {
                                 }
                             });
                         }
-
                         this.messageTarget.innerHTML = targetMessage;
 
                         // if next page isn't working, make sure api_platform.yaml is correctly configured

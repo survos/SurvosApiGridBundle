@@ -365,12 +365,13 @@ export default class extends Controller {
             return a.browseOrder - b.browseOrder;
 
         });
-        console.log(filterColumns);
-        filterColumns.forEach((column, index) => {
-            if (column.browsable) {
-                searchFieldsByColumnNumber.push(index+1);
-            }
+        // do not use foreach on object
+        Object.entries(filterColumns).forEach(entry => {
+            const [key, value] = entry;
+            searchFieldsByColumnNumber.push(key);
+            console.log(key, value);
         });
+
         this.columns.forEach((column, index) => {
             let name = "";
             if(typeof column == 'string') {

@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Index {{ indexName }} ({{ stats.numberOfDocuments }} objects)</h1>
+
+    <table class="table">
+        <thead>
+
+        <tr>
+            <th>Name</th>
+            <th>Settings</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for name, values in settings %}
+            {% if name matches('/Attributes$/') %}
+                <tr>
+                    <td>
+                        <a href="{{ path('') }}"
+                        {{ name }}
+                    </td>
+                    <td>{{ values|join(',') }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

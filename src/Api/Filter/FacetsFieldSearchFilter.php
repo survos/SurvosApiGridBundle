@@ -82,7 +82,7 @@ class FacetsFieldSearchFilter extends AbstractFilter implements FilterInterface
                 'type' => 'string',
                 'is_collection' => true,
                 'required' => false,
-                'openapi' => [
+                'swagger' => [
                     'description' => 'Selects entities where each search term is found somewhere in at least one of the specified properties',
                 ],
             ],

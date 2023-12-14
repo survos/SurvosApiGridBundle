@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
+use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Service\MeiliService;
@@ -35,6 +36,7 @@ class IndexCommand extends Command
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
         private SerializerInterface $serializer,
+        private LoggerInterface $logger,
         private MeiliService $meiliService,
         private DatatableService $datatableService,
         private NormalizerInterface $normalizer,
@@ -47,7 +49,7 @@ class IndexCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('arg1', InputArgument::OPTIONAL, 'Argument description')
+            ->addArgument('class', InputArgument::OPTIONAL, 'Class to index', null)
             ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the indexes')
             ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Batch size to meili', 100)
             ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 0)
@@ -57,21 +59,26 @@ class IndexCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
-        $classes = [];
-        // https://abendstille.at/blog/?p=163
-        $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
-        foreach ($metas as $meta) {
-            foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
-                $args = $attribute->getArguments();
-                if (array_key_exists('normalizationContext', $args)) {
-                    $groups = $args['normalizationContext']['groups'];
-                    if (is_string($groups)) {
-                        $groups = [$groups];
+        $class = $input->getArgument('class');
+            $classes = [];
+            // https://abendstille.at/blog/?p=163
+            $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
+            foreach ($metas as $meta) {
+                foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
+                    $args = $attribute->getArguments();
+                    if (array_key_exists('normalizationContext', $args)) {
+                        $groups = $args['normalizationContext']['groups'];
+                        if (is_string($groups)) {
+                            $groups = [$groups];
+                        }
+                        if ($class && ($meta->getName() <> $class)) {
+                            continue;
+                        }
+                        $classes[$meta->getName()] = $groups;
                     }
-                    $classes[$meta->getName()] = $groups;
                 }
             }
-        }
+
         $this->io = new SymfonyStyle($input, $output);
 
         foreach ($classes as $class=>$groups) {
@@ -89,43 +96,52 @@ class IndexCommand extends Command
 
         }
         $this->meiliService->waitUntilFinished($index);
+
+        if ($this->io->isVerbose()) {
+            $stats = $this->meiliService->getIndex($indexName)->stats();
+            dump($indexName, stats: $stats);
+        }
         $this->io->success('app:index-entity ' . $class . ' success.');
-        return Command::SUCCESS;
+        return self::SUCCESS;
 
     }
 
     private function configureIndex(string $class, string $indexName): Indexes
     {
 
-
-        $reflection = new \ReflectionClass($class);
-        $classAttributes = $reflection->getAttributes();
-        $filterAttributes = [];
-        $sortableAttributes = [];
+//        $reflection = new \ReflectionClass($class);
+//        $classAttributes = $reflection->getAttributes();
+//        $filterAttributes = [];
+//        $sortableAttributes = [];
         $settings = $this->datatableService->getSettingsFromAttributes($class);
-        $primaryKey = 'id'; // ?? code?
+        $primaryKey = 'id'; // default, check for is_primary));
+        $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
+        if (count($idFields)) $primaryKey = $idFields[0];
+//        dd($settings, $filterAttributes);
+//
+//        foreach ($settings as $fieldname=>$classAttributes) {
+//            if ($classAttributes['browsable']) {
+//                $filterAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['sortable']) {
+//                $sortableAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['searchable']) {
+////                $searchAttributes[] = $fieldname;
+//            }
+//            if ($classAttributes['is_primary']??null) {
+//                $primaryKey = $fieldname;
+//            }
+//        }
 
-        foreach ($settings as $fieldname=>$classAttributes) {
-            if ($classAttributes['browsable']) {
-                $filterAttributes[] = $fieldname;
-            }
-            if ($classAttributes['sortable']) {
-                $sortableAttributes[] = $fieldname;
-            }
-            if ($classAttributes['searchable']) {
-//                $searchAttributes[] = $fieldname;
-            }
-            if ($classAttributes['is_primary']??null) {
-                $primaryKey = $fieldname;
-            }
-        }
-
-        // @todo: define the meili key as an attribute, e.g. code
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
-        $index->updateFilterableAttributes($filterAttributes);
-        $index->updateSortableAttributes($sortableAttributes);
+        $index->updateFilterableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'browsable'));
+        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
-//        $stats = $this->waitUntilFinished($index, $this->io());
+        $stats = $this->meiliService->waitUntilFinished($index);
+        if ($this->io->isVerbose()) {
+            dump(stats: $stats, indexSettings: $index->getSettings());
+        }
         return $index;
     }
 
@@ -171,6 +187,8 @@ class IndexCommand extends Command
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
             if (!array_key_exists($primaryKey, $data)) {
+                $this->logger->error("No primary key for " . $class);
+                break;
                 dd($data, $class, $r);
             }
             $data['id'] = $data[$primaryKey];

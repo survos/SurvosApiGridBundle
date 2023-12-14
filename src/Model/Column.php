@@ -27,7 +27,8 @@ class Column
         public bool $modal = false,
         public bool|string $locale = false,
         public int $order = 100,
-        public bool $condition = true
+        public bool $condition = true,
+        public string|bool|null $domain = null,
 //        public ?string $propertyConfig,
     ) {
         if (empty($this->title)) {

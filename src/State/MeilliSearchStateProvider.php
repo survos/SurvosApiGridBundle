@@ -10,10 +10,12 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;
 use Meilisearch\Client;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Tagged;
+use ApiPlatform\Util\Inflector;
 use ApiPlatform\State\Pagination\Pagination;
 use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
-use Symfony\Component\DependencyInjection\ServiceLocator;
+use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 
 class MeilliSearchStateProvider implements ProviderInterface
 {
@@ -50,7 +52,7 @@ class MeilliSearchStateProvider implements ProviderInterface
             $locale = $context['filters']['_locale'] ?? null;
 
             if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
-                $indexName = $this->getSearchIndexObject($operation->getClass(), $locale);
+                $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
             // this seems problematic, since it's probably defined by the application, we're getting it again here.
             try {
@@ -74,7 +76,7 @@ class MeilliSearchStateProvider implements ProviderInterface
         return null;
     }
 
-    private function getSearchIndexObject(string $class, ?string $locale=null) {
+    public static function getSearchIndexObject(string $class, ?string $locale=null) {
         $class = explode("\\",$class);
         return end($class);
     }

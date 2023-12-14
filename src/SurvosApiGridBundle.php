@@ -17,50 +17,40 @@ use Survos\ApiGrid\Service\MeiliService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\UX\Chartjs\Builder\ChartBuilder;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Twig\Environment;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeilliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
-
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
-class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterface
+class SurvosApiGridBundle extends AbstractBundle
 {
     use HasAssetMapperTrait;
-
-    // The compiler pass
-    public function process(ContainerBuilder $container): void
-    {
-
-    }
-
-        // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
+    // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
     /**
      * @param array<mixed> $config
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
 
-
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
 
-        $builder->autowire(GridController::class)
-            ->addTag('container.service_subscriber')
-            ->addTag('controller.service_arguments')
-            ->setAutoconfigured(true)
-            ->setPublic(true)
-        ;
-
+//        if (class_exists(ChartBuilderInterface::class)) {
+//        $definition = $builder->register('chart_builder', ChartBuilderInterface::class)
+//            ->setAutoconfigured(true)
+//            ->setAutowired(true);
+//        }
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
@@ -69,7 +59,20 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$bag', new Reference('parameter_bag'))
             ->setAutowired(true)
+            ->setAutoconfigured(true)
         ;
+
+//        dump(new Reference('chart_builder'));
+        $definition = $builder->autowire(GridController::class)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setArgument('$meili', new Reference('api_meili_service'))
+            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setAutoconfigured(true)
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
+
 
         // check https://github.com/zenstruck/console-extra/issues/59
         $definition = $builder->autowire(IndexCommand::class)
@@ -83,6 +86,16 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
         ;
 //        $definition->addMethodCall('setInvokeContainer', [new Reference('container')]);
 
+        $definition = $builder->autowire(ApiIndexCommand::class)
+            ->setAutoconfigured(true)
+            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+            ->setArgument('$bag', new Reference('parameter_bag'))
+            ->setArgument('$serializer', new Reference('serializer'))
+//            ->setArgument('$normalizer', new Reference('normalizer'))
+            ->addTag('console.command')
+        ;
+
+
         if (class_exists(Environment::class)) {
             $builder
                 ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
@@ -90,13 +103,11 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
                 ->setPublic(false);
         }
 
-
-
         $builder->register(GridComponent::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setArgument('$logger', new Reference('logger'))
             ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
             ->setArgument('$registry', new Reference('doctrine'))
         ;
@@ -173,11 +184,10 @@ class SurvosApiGridBundle extends AbstractBundle  implements CompilerPassInterfa
             ->setArgument('$logger', new Reference('logger'))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
-
         $builder->register(MultiFieldSearchFilter::class)
-            ->setArgument('$managerRegistry', new Reference('doctrine'))
-//            ->setArgument(new Reference('request_stack'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
+            ->addArgument(new Reference('request_stack'))
+            ->addArgument(new Reference('logger'))
             ->addTag('api_platform.filter');
 
         //        $builder->register(SimpleDatatablesComponent::class);

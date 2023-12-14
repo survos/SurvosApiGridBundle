@@ -146,25 +146,46 @@ class MeiliService
         return $client;
     }
 
-    public function getIndex(string $indexName, string $key = 'id'): Indexes
+    public function getIndex(string $indexName, string $key = 'id', bool $autoCreate=true): ?Indexes
     {
+        $this->loadExistingIndexes();
         static $indexes = [];
-        if (!$index = $indexes[$indexName] ?? false) {
-            $index = $this->getOrCreateIndex($indexName, $key);
-            $indexes[$indexName] = $index;
+        if (!$index = $indexes[$indexName] ?? null) {
+            if ($autoCreate) {
+                $index = $this->getOrCreateIndex($indexName, $key);
+                $indexes[$indexName] = $index;
+            }
         }
         return $index;
     }
 
-    public function getOrCreateIndex(string $indexName, string $key = 'id'): Indexes
+    public function loadExistingIndexes()
+    {
+        return;
+        $client = $this->getMeiliClient();
+        do {
+            $indexes = $client->getIndexes();
+            dd($indexes);
+        } while ($nextPage);
+    }
+
+    public function getOrCreateIndex(string $indexName, string $key = 'id', bool $autoCreate=true): ?Indexes
     {
         $client = $this->getMeiliClient();
         try {
             $index = $client->getIndex($indexName);
-        } catch (\Exception) {
-            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]));
+        } catch (ApiException $exception) {
+            if ($exception->httpStatus === 404) {
+                if ($autoCreate) {
+                    $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]));
 //            $this->getMeiliClient()->createIndex($indexName, ['primaryKey' => $key]);
-            $index = $client->getIndex($indexName);
+                    $index = $client->getIndex($indexName);
+                } else {
+                    $index = null;
+                }
+            } else {
+                dd($exception, $exception::class);
+            }
         }
         return $index;
 

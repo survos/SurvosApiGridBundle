@@ -158,7 +158,7 @@ export default class extends Controller {
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
-        console.error(this.columns);
+        // console.error(this.columns);
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
@@ -360,16 +360,14 @@ export default class extends Controller {
         let preSelectArray = [];
 
         let filterColumns = this.columns;
-        console.log(filterColumns, typeof filterColumns);
-        filterColumns.sort(function (a, b) {
-            return a.browseOrder - b.browseOrder;
-
-        });
+        // console.log(filterColumns, typeof filterColumns);
+        // filterColumns.sort(function (a, b) {
+        //     return a.browseOrder - b.browseOrder;
+        // });
         // do not use foreach on object
         Object.entries(filterColumns).forEach(entry => {
             const [key, value] = entry;
             searchFieldsByColumnNumber.push(key);
-            console.log(key, value);
         });
 
         this.columns.forEach((column, index) => {
@@ -542,9 +540,9 @@ export default class extends Controller {
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             ajax: (params, callback, settings) => {
-                this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
+                    this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
-                // console.error(params, apiParams);
+                console.error(searchPanesRaw, this.apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
 
                 Object.assign(this.apiParams, this.filter);
@@ -929,13 +927,13 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         });
         // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {
-
             if (column.search && column.search.value) {
                 // check the first character for a range filter operator
                 // data is the column field, at least for right now.
                 apiData[column.data] = column.search.value;
             }
         });
+        console.error(apiData);
 
         apiData.offset = params.start;
         apiData.facets = [];
@@ -947,6 +945,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 // this seems odd, it should be a pipe-delimited list
             }
         });
+        console.error('apiData.facets', apiData.facets);
 
         return apiData;
     }

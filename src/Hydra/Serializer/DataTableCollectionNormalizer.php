@@ -14,6 +14,7 @@ use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
 use Meilisearch\Search\SearchResult;
+use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
@@ -74,12 +75,21 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $repo = $em->getRepository($context['operation']->getClass());
                 if(isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
-                    foreach($params['facets'] as $facet) {
+                    foreach($params['facets'] as $key => $facet) {
                         $keyArray = array_keys($metadata->getReflectionProperties());
                         if(in_array($facet, $keyArray)) {
-                            $doctrineFacets[$facet] = $repo->getCounts($facet);
+                            assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
+                                $repo::class . " must implement QueryBuilderHelperInterface");
+                            try {
+                                $counts = $repo->getCounts($facet);
+                                $doctrineFacets[$facet] = $counts;
+                            } catch (\Exception $exception) {
+                                // @todo: handle arrays in doctrine, etc.
+
+                            }
                         }
                     }
+
                     $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
                 }
             }
@@ -192,6 +202,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     private function getFacetsData(array $facets, ?array $params, ?array $context) :array {
         $facetsData = [];
+
         foreach($params as $key => $facet) {
             $data = [];
             foreach($facet as $facetKey => $facetValue) {

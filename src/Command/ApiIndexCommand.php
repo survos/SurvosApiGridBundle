@@ -22,6 +22,7 @@ use Zenstruck\Console\RunsCommands;
 use Zenstruck\Console\RunsProcesses;
 use ApiPlatform\Metadata\ApiFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use ApiPlatform\Metadata\ApiResource;
 
 #[AsCommand('api:index', 'Create a meili index for a doctrine entity', aliases: ['app:index-db'])]
 final class ApiIndexCommand extends InvokableServiceCommand
@@ -44,11 +45,6 @@ final class ApiIndexCommand extends InvokableServiceCommand
         // custom injections
         // UserRepository $repo,
         // expand the arguments and options
-        #[Option('owners', description: 'Include Owners')] ?bool $owners = false,
-        #[Option('projects', description: 'Include Owners')] ?bool $projects = true,
-        #[Option('owner', description: 'specific owner code, e.g. penn')] ?string $ownerCode = null,
-        #[Option(name: 'owner-id', description: 'id in source, e.g. 100 in digmus')] ?string $ownerId = null,
-        #[Option('coll', description: 'The project subdomain')] ?string $subdomain = null,
         #[Option(description: 'the maximum number of entities to index')] int $limit = 0,
         #[Option(name: 'batch', description: 'the batch size for submitting to meili, default:500')] int $batchSize = 500,
         #[Option(name: 'min', description: 'minimum number of meili objects')] int $minMeiliCount = 0,
@@ -56,13 +52,15 @@ final class ApiIndexCommand extends InvokableServiceCommand
     ): void {
 
         $entityClasses = [];
-        if ($owners) {
-            $entityClasses[] = Owner::class;
+        $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
+        foreach ($metas as $meta) {
+            foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
+                dd($attribute);
+
+            }
         }
-        if ($projects) {
-            $entityClasses[] = Project::class;
-        }
-        foreach ($entityClasses as $class) {
+
+                foreach ($entityClasses as $class) {
             $indexName = (new \ReflectionClass($class))->getShortName();
             if ($reset) {
                 $this->reset($indexName);

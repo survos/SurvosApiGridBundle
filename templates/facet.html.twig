@@ -1,0 +1,49 @@
+{% extends "base.html.twig" %}
+{% block body %}
+
+
+    <div class="row">
+        <div class="col-8">
+            <div style="height: 300px;">
+                {{ chart ? render_chart(chart) : 'composer require symfony/ux-chartjs ' }}
+            </div>
+            {#            <div {{ stimulus_controller('highchart', {#}
+            {#                'data': chartData,#}
+            {#                'title': field.label|default(field.code)#}
+            {#            }) }}>#}
+            {#                <div {{ stimulus_target('highchart', 'piechart') }}>Pie chart here.</div>#}
+            {#                <div {{ stimulus_target('highchart', 'datatable') }}></div>#}
+            {#            </div>#}
+
+        </div>
+        <div class="col-4">
+{#            {{ dump(tableData) }}#}
+            {{ block('table_data') }}
+        </div>
+    </div>
+
+    {% endblock %}
+
+{% block table_data %}
+            {% component grid with {
+                data: tableData,
+                dom: 'fT',
+                columns: [
+                    {name: 'label' },
+                    {name: 'count'}
+                ]
+            } %}
+
+                {% block label %}
+                    {{ row.label|slice(0, 20) }}
+                {% endblock %}
+
+
+            {% endcomponent %}
+
+        </div>
+    </div>
+
+
+{% endblock %}
+

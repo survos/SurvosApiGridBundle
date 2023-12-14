@@ -48,7 +48,8 @@
         "symfony/framework-bundle": "^6.3 || ^7.0",
         "symfony/phpunit-bridge": "^6.3 || ^7.0",
         "symfony/twig-bundle": "^6.3 || ^7.0",
-        "symfony/var-dumper": "^6.3 || ^7.0"
+        "symfony/var-dumper": "^6.3 || ^7.0",
+        "symfony/ux-chartjs": "^2.13"
     },
     "config": {
         "allow-plugins": {

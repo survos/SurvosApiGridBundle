@@ -108,7 +108,7 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
                 'property' => implode(', ', array_keys($props)),
                 'type' => 'string',
                 'required' => false,
-                'openapi' => [
+                'swagger' => [
                     'description' => 'Selects entities where each search term is found somewhere in at least one of the specified properties',
                 ],
             ],

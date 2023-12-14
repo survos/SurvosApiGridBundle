@@ -16,8 +16,9 @@
             {% if name matches('/Attributes$/') %}
                 <tr>
                     <td>
-                        <a href="{{ path('') }}"
-                        {{ name }}
+                        <a href="{{ path('survos_index_stats', {indexName: indexName}) }}">
+                            {{ name }}
+                        </a>
                     </td>
                     <td>{{ values|join(',') }}</td>
                 </tr>

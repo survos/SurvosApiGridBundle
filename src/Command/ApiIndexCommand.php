@@ -165,7 +165,6 @@ final class ApiIndexCommand extends InvokableServiceCommand
             // maybe these should come from the ApiPlatform normalizer.
             $data = $this->normalizer->normalize($r, null, ['groups' => ['rp', 'project.read', 'owner.read', 'marking', 'translation']]);
             $data['id'] = $data['code'];
-//            dump($data);
             if (array_key_exists('keyedTranslations', $data)) {
                 $data['_translations'] = $data['keyedTranslations'];
                 $data['targetLocales'] = array_keys($data['_translations']);

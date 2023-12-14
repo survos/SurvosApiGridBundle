@@ -35,7 +35,6 @@ class GridController extends AbstractController
 
         $facetDistributionCounts = $data['facetDistribution'][$fieldName];
 //        $translations = $projectService->getNonObjectTranslations($project->getCode(), $field->getCoreCode(), $locale); // , '=');
-//        dump($translations);
         $counts = [];
             foreach ($facetDistributionCounts as $label => $count) {
                 $counts[] = [
@@ -47,13 +46,6 @@ class GridController extends AbstractController
         foreach (array_slice($counts, 0, $max) as $count) {
             $chartData[$count['label'] ?? $count['code']] = $count['count'];
         }
-//        dd($max, $chartData);
-//        dump($chartData, $counts);
-//dd($counts, $fieldData);
-//        $repository = $this->entityManager->getRepository(Translation::class);
-//        $translations = $repository->findTranslations($field);
-
-//        dd($chartData);
         $chart = null;
         if ($this->chartBuilder) {
             $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);

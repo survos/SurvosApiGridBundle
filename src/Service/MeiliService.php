@@ -97,7 +97,6 @@ class MeiliService
                 }
             };
             if ($status == 'failed') {
-                dump(task: $task, data: $dataToDump);
                 if ($stopOnError) {
                     throw new \Exception("Task has failed " . $task['error']['message']);
                 }

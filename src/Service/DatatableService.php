@@ -243,7 +243,6 @@ class DatatableService
 //                    dd($searchFields, $filter);
                 }
                 foreach ($normalizedColumns as $idx => $column) {
-//                    dump($column->name);
                     if (in_array($column->name, $searchFields)) {
                         $columnNumbers[] = $idx;
                     }

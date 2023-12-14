@@ -99,7 +99,6 @@ class IndexCommand extends Command
 
         if ($this->io->isVerbose()) {
             $stats = $this->meiliService->getIndex($indexName)->stats();
-            dump($indexName, stats: $stats);
         }
         $this->io->success('app:index-entity ' . $class . ' success.');
         return self::SUCCESS;
@@ -139,9 +138,6 @@ class IndexCommand extends Command
         $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
         $stats = $this->meiliService->waitUntilFinished($index);
-        if ($this->io->isVerbose()) {
-            dump(stats: $stats, indexSettings: $index->getSettings());
-        }
         return $index;
     }
 
@@ -192,7 +188,6 @@ class IndexCommand extends Command
                 dd($data, $class, $r);
             }
             $data['id'] = $data[$primaryKey];
-//            dump($data);
             if (array_key_exists('keyedTranslations', $data)) {
                 $data['_translations'] = $data['keyedTranslations'];
                 $data['targetLocales'] = array_keys($data['_translations']);

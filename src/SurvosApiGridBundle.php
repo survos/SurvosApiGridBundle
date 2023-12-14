@@ -62,8 +62,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutoconfigured(true)
         ;
 
-//        dump(new Reference('chart_builder'));
-        $definition = $builder->autowire(GridController::class)
+        $builder->autowire(GridController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
             ->setArgument('$meili', new Reference('api_meili_service'))

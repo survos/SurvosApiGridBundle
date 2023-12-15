@@ -25,6 +25,7 @@ class ApiGridComponent implements TwigBlocksInterface
         private DatatableService $datatableService,
         public ?string $stimulusController
     ) {
+        $this->filter = $this->requestStack->getCurrentRequest()->query->all();
         //        ='@survos/grid-bundle/api_grid';
     }
 
@@ -48,7 +49,7 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public bool $search = true;
     public string $scrollY = '70vh';
-        public array $filter = [];
+    public array $filter = [];
     public bool $useDatatables = true;
 
     public ?string $source = null;

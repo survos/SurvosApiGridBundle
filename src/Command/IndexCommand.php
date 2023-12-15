@@ -93,9 +93,9 @@ class IndexCommand extends Command
 
             $stats = $this->indexClass($class, $index, $batchSize, $indexName, $groups, $input->getOption('limit'));
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
+            $this->meiliService->waitUntilFinished($index);
 
         }
-        $this->meiliService->waitUntilFinished($index);
 
         if ($this->io->isVerbose()) {
             $stats = $this->meiliService->getIndex($indexName)->stats();
@@ -194,11 +194,11 @@ class IndexCommand extends Command
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
 //            if (count($data['keywords'])) dd($data);
             if (!array_key_exists($primaryKey, $data)) {
-                $this->logger->error("No primary key for " . $class);
+//                dd($data, $primaryKey);
+                $this->logger->error("No primary key $primaryKey for " . $class);
                 break;
-                dd($data, $class, $r);
             }
-            $data['id'] = $data[$primaryKey];
+            $data['id'] = $data[$primaryKey]; // ??
             if (array_key_exists('keyedTranslations', $data)) {
                 $data['_translations'] = $data['keyedTranslations'];
                 $data['targetLocales'] = array_keys($data['_translations']);
@@ -217,7 +217,7 @@ class IndexCommand extends Command
 //            }
 //
             $records[] = $data;
-            if (count($data['tags']??[]) == 0) { continue; dd($data['tags'], $r->getTags()); }
+//            if (count($data['tags']??[]) == 0) { continue; dd($data['tags'], $r->getTags()); }
 
             if (( ($progress = $progressBar->getProgress()) % $batchSize) === 0) {
                 $task = $index->addDocuments($records, $primaryKey);

@@ -134,10 +134,20 @@ class IndexCommand extends Command
 //        }
 
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
-        $index->updateFilterableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'browsable'));
-        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
+//        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
-        $stats = $this->meiliService->waitUntilFinished($index);
+
+            $results = $index->updateSettings($settings = [
+                'displayedAttributes' => ['*'],
+                'filterableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),
+                'sortableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'sortable'),
+                "faceting" => [
+                    "sortFacetValuesBy" => ["*" => "count"],
+                    "maxValuesPerFacet" => $this->meiliService->getConfig()['maxValuesPerFacet']
+                ],
+            ]);
+
+            $stats = $this->meiliService->waitUntilFinished($index);
         return $index;
     }
 
@@ -182,6 +192,7 @@ class IndexCommand extends Command
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
+//            if (count($data['keywords'])) dd($data);
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error("No primary key for " . $class);
                 break;
@@ -206,9 +217,11 @@ class IndexCommand extends Command
 //            }
 //
             $records[] = $data;
+            if (count($data['tags']??[]) == 0) { continue; dd($data['tags'], $r->getTags()); }
 
             if (( ($progress = $progressBar->getProgress()) % $batchSize) === 0) {
                 $task = $index->addDocuments($records, $primaryKey);
+                // wait for the first record, so we fail early and catch the error, e.g. meili down, no index, etc.
                 if (!$progress) {
                     $this->meiliService->waitForTask($task);
                 }

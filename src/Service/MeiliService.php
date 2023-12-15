@@ -19,6 +19,7 @@ use Meilisearch\Client;
 use Meilisearch\Contracts\DocumentsQuery;
 use Meilisearch\Endpoints\Indexes;
 use Meilisearch\Exceptions\ApiException;
+use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Survos\GridGroupBundle\CsvSchema\Parser;
 use Survos\GridGroupBundle\Model\Property;
@@ -34,6 +35,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use function Symfony\Component\String\u;
 
 class MeiliService
@@ -42,11 +44,23 @@ class MeiliService
     public function __construct(
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
+        protected ClientInterface $httpClient,
         private string $meiliHost,
         private string $meiliKey,
+        private array $config=[],
         private ?LoggerInterface $logger = null,
     )
     {
+    }
+
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    public function setConfig(array $config): void
+    {
+        $this->config = $config;
     }
 
 
@@ -138,9 +152,9 @@ class MeiliService
         static $client;
         if (!$client) {
             if (!class_exists('Meilisearch\\Client')) {
-                throw new \Exception("Meili client not installed, please run\n\n composer require meilisearch/meilisearch-php symfony/http-client nyholm/psr7:^1.0");
+                throw new \Exception("Meili client not installed, run\n\n composer require meilisearch/meilisearch-php symfony/http-client nyholm/psr7:^1.0");
             }
-            $client = new Client($this->meiliHost, $this->meiliKey);
+            $client = new Client($this->meiliHost, $this->meiliKey, httpClient: $this->httpClient);
         }
         return $client;
     }

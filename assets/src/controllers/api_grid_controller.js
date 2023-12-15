@@ -7,34 +7,7 @@ import {default as axios} from "axios";
 
 import DataTables from "datatables.net-bs5";
 import '../datatables-plugins.js';
-// import 'datatables.net-searchpanes-bs5';
-// import 'datatables.net-select-bs5';
-// import 'datatables.net-scroller-bs5';
-// import 'datatables.net-responsive-bs5';
-// import 'datatables.net-buttons-bs5';
-// import DataTablesSearchPanes from 'datatables.net-searchpanes-bs5';
-
-
-// import 'datatables.net-select-bs5';
-// import 'datatables.net-responsive';
-// import 'datatables.net-datetime';
-// import 'datatables.net-buttons/js/buttons.colVis.min';
-// import 'datatables.net-buttons/js/buttons.html5.min';
-// import 'datatables.net-buttons/js/buttons.print.min';
-// import 'jszip';
 import PerfectScrollbar from 'perfect-scrollbar';
-// shouldn't these be automatically included (from package.json)
-// import 'datatables.net-scroller';
-// import 'datatables.net-scroller-bs5';
-// import 'datatables.net-searchbuilder-bs5';
-// import 'datatables.net-fixedheader-bs5';
-// import 'datatables.net-responsive-bs5';
-// const DataTable = require('datatables.net');
-// import('datatables.net-buttons-bs5');
-
-// import('datatables.net-bs5');
-// import('datatables.net-select-bs5');
-
 // if component
 let routes = false;
 
@@ -585,11 +558,14 @@ export default class extends Controller {
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
+                           console.error(searchPanes, searchPanesRaw);
                         } else {
                            searchPanes = {
                                 options: options
                            };
+                            console.error(options);
                         }
+                        console.error('searchpanes', searchPanes);
 
                         let targetMessage = "";
                         if(typeof this.apiParams.facet_filter != 'undefined') {

@@ -5,6 +5,9 @@ namespace Survos\ApiGrid\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
+use Psr\Http\Client\ClientInterface;
+use Survos\ApiGrid\Service\MeiliService;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Meilisearch\Bundle\SearchService;
@@ -24,6 +27,8 @@ class MeilliSearchStateProvider implements ProviderInterface
         private EntityManagerInterface $em,
         private Pagination $pagination,
         private ServiceLocator $meilliSearchFilter,
+        protected ClientInterface $httpClient,
+        protected MeiliService $meili,
         private string $meiliHost,
         private string $meiliKey,
         private readonly DenormalizerInterface $denormalizer
@@ -51,19 +56,21 @@ class MeilliSearchStateProvider implements ProviderInterface
 //            dd($uriVariables, $context);
             $locale = $context['filters']['_locale'] ?? null;
 
+            //
             if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
-            // this seems problematic, since it's probably defined by the application, we're getting it again here.
             try {
-                $client = new Client($this->meiliHost, $this->meiliKey);
-                $index = $client->index($indexName);
+//                $client = $this->meili->getMeiliClient();
+//                $index = $client->index($indexName);
+                $index = $this->meili->getIndex($indexName);
             //dd($body);
             } catch (\Exception $exception) {
                 throw new \Exception($indexName . ' ' . $exception->getMessage());
             }
 
             $data = $index->search($searchQuery, $body);
+//            dd($data, $body, $searchQuery);
             $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);
             $body['limit'] = 0;
@@ -90,7 +97,8 @@ class MeilliSearchStateProvider implements ProviderInterface
         $returnObject['query'] = $data->getQuery();
         $returnObject['facetDistribution'] = $data->getFacetDistribution();
         $returnObject['facetStats'] = $data->getFacetStats();
-//        dd($returnObject['facetDistribution'], $returnObject['facetStats']);
+//        dd($returnObject['facetDistribution']['keywords'], $returnObject['facetStats']);
+
 
         return new SearchResult($returnObject);
     }

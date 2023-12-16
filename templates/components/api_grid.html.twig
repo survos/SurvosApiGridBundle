@@ -21,6 +21,8 @@
 {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}
 
+<h1>URL: {{ apiCall }}</h1>
+
 <div {{ stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,

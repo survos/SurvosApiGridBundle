@@ -51,6 +51,10 @@ class DatatableService
                     'name' => $c,
                 ];
             }
+            if (!array_key_exists('name', $c)) {
+                dd($columns, $idx, $c);
+            }
+            assert(array_key_exists('name', $c), json_encode($c));
             $columnName = $c['name'];
             if (!$block = $c['block'] ?? false) {
                 $block = $columnName;

@@ -6,7 +6,7 @@ use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Components\Common\TwigBlocksInterface;
 use Survos\ApiGrid\Model\Column;
 use Survos\ApiGrid\Service\DatatableService;
-use Survos\ApiGrid\State\MeilliSearchStateProvider;
+use Survos\ApiGrid\State\MeiliSearchStateProvider;
 use Survos\ApiGrid\TwigBlocksTrait;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -72,7 +72,7 @@ class ApiGridComponent implements TwigBlocksInterface
     {
         if ($this->class) {
             if (!$this->index) {
-                $this->index =  MeilliSearchStateProvider::getSearchIndexObject($this->class);
+                $this->index =  MeiliSearchStateProvider::getSearchIndexObject($this->class);
             }
         }
         // really we're getting the schema from the PHP Attributes here.

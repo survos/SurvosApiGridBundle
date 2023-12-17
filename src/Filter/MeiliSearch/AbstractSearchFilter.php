@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
 use ApiPlatform\Api\ResourceClassResolverInterface;
-use Survos\ApiGrid\Filter\MeiliSearch\MeilliSearchUtilTrait;
+use Survos\ApiGrid\Filter\MeiliSearch\MeilISearchUtilTrait;
 use ApiPlatform\Exception\PropertyNotFoundException;
 use ApiPlatform\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;

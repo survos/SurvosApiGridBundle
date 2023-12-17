@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ _self }}{% endblock %}
+
+{% block PAGE_MENU %}
+    {% set options = {
+        entityClass: class
+    } %}
+
+    <twig:menu :type="PAGE_MENU" :caller="_self" :options="options">
+    </twig:menu>
+
+{% endblock %}
+
+{% block body %}
+
+    <h1>{{ apiCall }}</h1>
+    @todo: toggle between doctrine and meili
+
+    <twig:api_grid
+            dom="P<'dtsp-dataTable'rQfti>l"
+            :class="class"
+            :caller="_self"
+            :columns="columns"
+            :apiGetCollectionUrl="apiCall"
+    >
+    </twig:api_grid>
+{% endblock %}

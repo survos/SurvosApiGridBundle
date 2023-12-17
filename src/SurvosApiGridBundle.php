@@ -29,7 +29,7 @@ use Twig\Environment;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
-use Survos\ApiGrid\State\MeilliSearchStateProvider;
+use Survos\ApiGrid\State\MeiliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
@@ -61,6 +61,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$bag', new Reference('parameter_bag'))
             ->setAutowired(true)
+            ->setPublic(true)
             ->setAutoconfigured(true)
         ;
 
@@ -120,24 +121,24 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)
-            ->addTag('meilli_search_filter')
+            ->addTag('meilI_search_filter')
         ;
         $builder->register(MeiliMultiFieldSearchFilter::class)
             ->setAutowired(true)
-            ->addTag('meilli_search_filter')
+            ->addTag('meilI_search_filter')
         ;
         $builder->register(DataTableFacetsFilter::class)
             ->setAutowired(true)
-            ->addTag('meilli_search_filter')
+            ->addTag('meilI_search_filter')
         ;
 
         $builder->register(SortFilter::class)
             ->setAutowired(true)
-            ->addTag('meilli_search_filter')
+            ->addTag('meilI_search_filter')
         ;
 
-        $builder->register(MeilliSearchStateProvider::class)
-            ->setArgument('$meilliSearchFilter',tagged_locator('meilli_search_filter'))
+        $builder->register(MeiliSearchStateProvider::class)
+            ->setArgument('$meiliSearchFilter',tagged_locator('meilI_search_filter'))
             ->setArgument('$meili', new Reference('api_meili_service'))
             ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])

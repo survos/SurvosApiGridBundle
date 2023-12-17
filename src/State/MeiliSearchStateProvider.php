@@ -20,17 +20,17 @@ use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 
-class MeilliSearchStateProvider implements ProviderInterface
+class MeiliSearchStateProvider implements ProviderInterface
 {
     public function __construct(
-        private NormalizerInterface $normalizer,
-        private EntityManagerInterface $em,
-        private Pagination $pagination,
-        private ServiceLocator $meilliSearchFilter,
-        protected ClientInterface $httpClient,
-        protected MeiliService $meili,
-        private string $meiliHost,
-        private string $meiliKey,
+        private NormalizerInterface            $normalizer,
+        private EntityManagerInterface         $em,
+        private Pagination                     $pagination,
+        private ServiceLocator                 $meiliSearchFilter,
+        protected ClientInterface              $httpClient,
+        protected MeiliService                 $meili,
+        private string                         $meiliHost,
+        private string                         $meiliKey,
         private readonly DenormalizerInterface $denormalizer
     )
     {
@@ -42,8 +42,8 @@ class MeilliSearchStateProvider implements ProviderInterface
             $resourceClass = $operation->getClass();
             $body = [];
 
-            foreach ($this->meilliSearchFilter->getProvidedServices() as $meilliSearchFilter) {
-                $body = $this->meilliSearchFilter->get($meilliSearchFilter)->apply($body, $resourceClass, $operation, $context);
+            foreach ($this->meiliSearchFilter->getProvidedServices() as $meiliSearchFilter) {
+                $body = $this->meiliSearchFilter->get($meiliSearchFilter)->apply($body, $resourceClass, $operation, $context);
             }
 
             $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";

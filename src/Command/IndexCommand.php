@@ -53,6 +53,7 @@ class IndexCommand extends Command
             ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the indexes')
             ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Batch size to meili', 100)
             ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 0)
+            ->addOption('dump', null, InputOption::VALUE_REQUIRED, 'dump the nth item', 0)
         ;
     }
 
@@ -91,7 +92,10 @@ class IndexCommand extends Command
             $index = $this->configureIndex($class, $indexName);
             $batchSize = $input->getOption('batch-size');
 
-            $stats = $this->indexClass($class, $index, $batchSize, $indexName, $groups, $input->getOption('limit'));
+            $stats = $this->indexClass($class, $index, $batchSize, $indexName, $groups,
+                $input->getOption('limit'),
+                $input->getOption('dump'),
+            );
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
             $this->meiliService->waitUntilFinished($index);
 
@@ -154,9 +158,8 @@ class IndexCommand extends Command
     private function indexClass(string  $class, Indexes $index, int $batchSize, ?string $indexName=null,
                                 array $groups=[],
                                 int $limit=0,
-                                ?string $ownerID=null,
+                                int $dump=0,
                                 ?string $subdomain=null,
-                                ?int $minMeiliCount=0,
     ): array
     {
 
@@ -215,6 +218,10 @@ class IndexCommand extends Command
 //                $language = Languages::getName($projectLocale);
 //                $data['language'] = $language;
 //            }
+
+            if ($dump === ($idx+1)) {
+                dd($data);
+            }
 //
             $records[] = $data;
 //            if (count($data['tags']??[]) == 0) { continue; dd($data['tags'], $r->getTags()); }

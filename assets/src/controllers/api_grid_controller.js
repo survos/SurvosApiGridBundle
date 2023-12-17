@@ -74,16 +74,12 @@ export default class extends Controller {
 
     cols() {
         // see https://javascript.plainenglish.io/are-javascript-object-keys-ordered-and-iterable-5147eedb26ce
-        const map1 = new Map();
-
-        map1.set('a', 1);
-        map1.set('b', 2);
-        map1.set('c', 3);
-
+        // const map1 = new Map();
+        // map1.set('a', 1);
         let columns = this.columns.sort(function(a, b) {
             return   a.order - b.order; // Sort in ascending order
         });
-        console.error(columns);
+        // console.error(columns);
 
         let x = columns.map(c => {
             let render = null;
@@ -144,10 +140,8 @@ export default class extends Controller {
         // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
 
         this.locale = this.localeValue;
-
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
-
-        console.assert(this.hasModalTarget, "Missing modal target");
+        // console.assert(this.hasModalTarget, "Missing modal target");
         this.that = this;
         this.tableElement = false;
         if (this.hasTableTarget) {
@@ -909,7 +903,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[column.data] = column.search.value;
             }
         });
-        console.error(apiData);
+        console.log(apiData);
 
         apiData.offset = params.start;
         apiData.facets = [];

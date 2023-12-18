@@ -68,7 +68,16 @@ class ApiGridComponent implements TwigBlocksInterface
         return $this->requestStack->getParentRequest()->getLocale();
     }
 
-    public function getNormalizedColumns()
+    public function getDefaultColumns()
+    {
+        if ($this->class) {
+            $settings = $this->datatableService->getSettingsFromAttributes($this->class);
+        } else {
+            $settings = []; // really settings should probably be passed in via a json schema or something like that.
+        }
+        return $settings;
+    }
+    public function getNormalizedColumns(): iterable
     {
         if ($this->class) {
             if (!$this->index) {
@@ -76,12 +85,8 @@ class ApiGridComponent implements TwigBlocksInterface
             }
         }
         // really we're getting the schema from the PHP Attributes here.
-        if ($this->class) {
-                $settings = $this->datatableService->getSettingsFromAttributes($this->class);
-            } else {
-                $settings = []; // really settings should probably be passed in via a json schema or something like that.
-            }
 
+        $settings = $this->getDefaultColumns();
         return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
 

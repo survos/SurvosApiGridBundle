@@ -72,6 +72,7 @@ class DatatableService
             if ($existingSettings) {
                 $options = (new OptionsResolver())
                     ->setDefaults([
+                        'name' => null,
                         'searchable' => false,
                         'order' => 100,
                         'sortable' => false,
@@ -136,6 +137,7 @@ class DatatableService
             foreach ($properties as $property) {
                 if (!array_key_exists($property, $settings)) {
                     $settings[$property] = [
+                        'name' => $property,
                         'browsable' => false,
                         'sortable' => false,
                         'searchable' => false

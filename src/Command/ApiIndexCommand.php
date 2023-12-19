@@ -55,8 +55,8 @@ final class ApiIndexCommand extends InvokableServiceCommand
         $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
         foreach ($metas as $meta) {
             foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
+                assert(false);
                 dd($attribute);
-
             }
         }
 

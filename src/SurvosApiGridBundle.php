@@ -31,6 +31,7 @@ use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
 use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
 use Survos\ApiGrid\State\MeiliSearchStateProvider;
 use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class SurvosApiGridBundle extends AbstractBundle
@@ -45,12 +46,6 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
-
-//        if (class_exists(ChartBuilderInterface::class)) {
-//        $definition = $builder->register('chart_builder', ChartBuilderInterface::class)
-//            ->setAutoconfigured(true)
-//            ->setAutowired(true);
-//        }
 
         $builder->register('api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
@@ -121,24 +116,24 @@ class SurvosApiGridBundle extends AbstractBundle
 
         $builder->register(DataTableFilter::class)
             ->setAutowired(true)
-            ->addTag('meilI_search_filter')
+            ->addTag('meili_search_filter')
         ;
         $builder->register(MeiliMultiFieldSearchFilter::class)
             ->setAutowired(true)
-            ->addTag('meilI_search_filter')
+            ->addTag('meili_search_filter')
         ;
         $builder->register(DataTableFacetsFilter::class)
             ->setAutowired(true)
-            ->addTag('meilI_search_filter')
+            ->addTag('meili_search_filter')
         ;
 
         $builder->register(SortFilter::class)
             ->setAutowired(true)
-            ->addTag('meilI_search_filter')
+            ->addTag('meili_search_filter')
         ;
 
         $builder->register(MeiliSearchStateProvider::class)
-            ->setArgument('$meiliSearchFilter',tagged_locator('meilI_search_filter'))
+            ->setArgument('$meiliSearchFilters',tagged_iterator('meili_search_filter'))
             ->setArgument('$meili', new Reference('api_meili_service'))
             ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])
@@ -154,8 +149,6 @@ class SurvosApiGridBundle extends AbstractBundle
 //            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
-
-            ->setArgument('$resourceMetadataCollectionFactory', null)
             ->addTag('serializer.normalizer', ['priority' => -985]);
 
 //        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');

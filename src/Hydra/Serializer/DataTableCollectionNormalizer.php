@@ -28,20 +28,14 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private $contextBuilder,
-        ResourceClassResolverInterface $resourceClassResolver,
-        private RequestStack $requestStack, // hack!
-
-        private readonly IriConverterInterface $iriConverter,
-        private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null,
-        array $defaultContext = []
+        private                                                      $contextBuilder,
+        ResourceClassResolverInterface                               $resourceClassResolver,
+        private readonly RequestStack                                $requestStack, // hack to add locale
+        private readonly IriConverterInterface                       $iriConverter,
+        array                                                        $defaultContext = []
     )
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
-
-        if ($this->resourceMetadataCollectionFactory) {
-            trigger_deprecation('api-platform/core', '3.0', sprintf('Injecting "%s" within "%s" is not needed anymore and this dependency will be removed in 4.0.', ResourceMetadataCollectionFactoryInterface::class, self::class));
-        }
 
         parent::__construct($resourceClassResolver, '');
     }

@@ -18,7 +18,8 @@
 
 {% set apiCall = this.apiGetCollectionUrl|default(false) %}
 {% if not apiCall %}
-{% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
+    apiGetCollectionUrl is now required!
+{#{% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}#}
 {% endif %}
 
 <h1>URL: {{ apiCall }}</h1>

@@ -68,7 +68,7 @@ class ApiGridComponent implements TwigBlocksInterface
         return $this->requestStack->getParentRequest()->getLocale();
     }
 
-    public function getDefaultColumns()
+    public function getDefaultColumns(): array
     {
         if ($this->class) {
             $settings = $this->datatableService->getSettingsFromAttributes($this->class);

@@ -26,7 +26,7 @@ class MeiliSearchStateProvider implements ProviderInterface
         private NormalizerInterface            $normalizer,
         private EntityManagerInterface         $em,
         private Pagination                     $pagination,
-        private ServiceLocator                 $meiliSearchFilter,
+        private iterable                 $meiliSearchFilters,
         protected ClientInterface              $httpClient,
         protected MeiliService                 $meili,
         private string                         $meiliHost,
@@ -42,8 +42,8 @@ class MeiliSearchStateProvider implements ProviderInterface
             $resourceClass = $operation->getClass();
             $body = [];
 
-            foreach ($this->meiliSearchFilter->getProvidedServices() as $meiliSearchFilter) {
-                $body = $this->meiliSearchFilter->get($meiliSearchFilter)->apply($body, $resourceClass, $operation, $context);
+            foreach ($this->meiliSearchFilters as $meiliSearchFilter) {
+                $body = $meiliSearchFilter->apply($body, $resourceClass, $operation, $context);
             }
 
             $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";

@@ -120,7 +120,6 @@ export default class extends Controller {
                     show: true
                 };
             }
-            console.error(column, c);
             return column;
         });
         return x;
@@ -518,7 +517,7 @@ export default class extends Controller {
             ajax: (params, callback, settings) => {
                     this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
-                console.error(searchPanesRaw, this.apiParams);
+                // console.error(searchPanesRaw, this.apiParams);
                 // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
 
                 Object.assign(this.apiParams, this.filter);
@@ -555,7 +554,7 @@ export default class extends Controller {
                         // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
                         let d = hydraData['hydra:member'];
                         if (d.length) {
-                            console.log(d[0]);
+                            console.log('first result', d[0]);
                         }
                         let searchPanes = {};
                         searchPanes = {
@@ -945,7 +944,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 // this seems odd, it should be a pipe-delimited list
             }
         });
-        console.error('apiData.facets', apiData.facets);
 
         return apiData;
     }

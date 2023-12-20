@@ -15,7 +15,7 @@
 {% block body %}
 
     <h1>{{ apiCall }}</h1>
-    @todo: toggle between doctrine and meili
+    {{ useMeili ? 'meili' : 'doctrine' }}
 
     <twig:api_grid
             dom="P<'dtsp-dataTable'rQfti>l"

@@ -45,29 +45,39 @@ class DatatableService
             if (empty($c)) {
                 continue;
             }
+            // if
+
             if (is_string($c)) {
                 $c = [
                     'order' => ($idx+1) * 10,
                     'name' => $c,
                 ];
             }
-            if (!array_key_exists('name', $c)) {
-                dd($columns, $idx, $c);
-            }
-            assert(array_key_exists('name', $c), json_encode($c));
-            $columnName = $c['name'];
-            if (!$block = $c['block'] ?? false) {
-                $block = $columnName;
-            }
-            $fixDotColumnName = str_replace('.', '_', $block);
-            if (array_key_exists($fixDotColumnName, $customColumnTemplates)) {
-                $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];
-            }
-            assert(is_array($c));
-            unset($c['propertyConfig']);
+            if (is_object($c)) {
+                assert($c::class == Column::class);
+                $column = $c;
+                $columnName = $column->name;
+
+            } else {
+                if (!array_key_exists('name', $c)) {
+                    dd($columns, $idx, $c);
+                }
+                assert(array_key_exists('name', $c), json_encode($c));
+                $columnName = $c['name'];
+                if (!$block = $c['block'] ?? false) {
+                    $block = $columnName;
+                }
+                $fixDotColumnName = str_replace('.', '_', $block);
+                if (array_key_exists($fixDotColumnName, $customColumnTemplates)) {
+                    $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];
+                }
+                assert(is_array($c));
+                unset($c['propertyConfig']);
 //            dd($c);
 
-            $column = new Column(...$c);
+                $column = new Column(...$c);
+
+            }
             $existingSettings = $settings[$columnName]??null;
             if ($existingSettings) {
                 $options = (new OptionsResolver())
@@ -115,7 +125,6 @@ class DatatableService
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-            // dd($attribute);
 
             // $filter = $attribute->getArguments()[0];
             // if (u($filter)->endsWith('OrderFilter')) {

@@ -12,7 +12,6 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
-use MartinGeorgiev\Doctrine\ORM\Query\AST\Functions\Arr;
 use Meilisearch\Search\SearchResult;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -67,13 +66,16 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $em = $object->getQuery()->getEntityManager();
                 $metadata = $em->getClassMetadata($context['operation']->getClass());
                 $repo = $em->getRepository($context['operation']->getClass());
+                assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
+                    $repo::class . " must implement QueryBuilderHelperInterface");
+
                 if(isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
+//                    dd($params['facets']);
                     foreach($params['facets'] as $key => $facet) {
+
                         $keyArray = array_keys($metadata->getReflectionProperties());
                         if(in_array($facet, $keyArray)) {
-                            assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
-                                $repo::class . " must implement QueryBuilderHelperInterface");
                             try {
                                 $counts = $repo->getCounts($facet);
                                 $doctrineFacets[$facet] = $counts;
@@ -170,7 +172,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         foreach ($object as $obj) {
             if ($iriOnly) {
-                $normalizedData =  $this->iriConverter->getIriFromResource($obj);
+                $normalizedData =  $this->iriConverter->getResourceFromIri($obj);
             } else {
                 $normalizedData =  $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }

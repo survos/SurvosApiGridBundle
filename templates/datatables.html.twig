@@ -1,4 +1,7 @@
+{# the generic datatables browser for meili and doctrine. for meili, the indexName is the shortName of the class #}
 {% extends 'base.html.twig' %}
+
+
 
 {% block title %}{{ _self }}{% endblock %}
 
@@ -16,13 +19,14 @@
 
     <h1>{{ apiCall }}</h1>
     {{ useMeili ? 'meili' : 'doctrine' }}
+    {% set params = useMeili ? {} : {dbIndexName: indexName} %}
 
     <twig:api_grid
             dom="P<'dtsp-dataTable'rQfti>l"
             :class="class"
             :caller="_self"
             :columns="columns"
-            :apiGetCollectionUrl="apiCall"
+            :meili="useMeili"
     >
     </twig:api_grid>
 {% endblock %}

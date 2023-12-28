@@ -1,0 +1,66 @@
+
+<div {{ apiCall ? stimulus_controller(this.stimulusController, {
+    schema: schema,
+    globals: this.globals,
+    api_call:  apiCall,
+    searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
+    locale: locale,
+    globals: globals,
+    columnConfiguration: columns|json_encode,
+    dom: this.dom|default(false),
+    style: this.style,
+    index: this.index|default(false),
+    pageLength: this.pageLength,
+    filter: this.filter
+}) }}>
+
+    <div class="dtsp-verticalContainer row">
+        <div class="dtsp-verticalPanes col-3">
+        </div>
+        <div class="col-9">
+            <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
+                message
+            </div>
+{#            {{ component('menu', {#}
+{#                type: PAGE_MENU,#}
+{#                options: {#}
+{#                    columns: columns|json_encode#}
+{#                }#}
+{#            }) }}#}
+
+{#            {% for c in columns %}#}
+{#                {% if c.browsable %}#}
+{#                <li>#}
+{#                    <a href="{{ path('survos_facet_show', {indexName: this.index, fieldName: c.name}) }}">#}
+{#                        {{ c.name }}#}
+{#                        {{ c.browsable ? 'B' }}#}
+{#                    </a>#}
+
+{#                </li>#}
+{#                {% endif %}#}
+{#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
+{#            {% endfor %}#}
+            <table class="table table-striped" {{ stimulus_target(this.stimulusController, 'table') }}>
+            </table>
+        </div>
+    </div>
+
+
+    {% block modal %}
+        {{ include('@SurvosApiGrid/_modal.html.twig', {
+            formUrl: '/',
+            aaController: this.stimulusController,
+            modalController: 'modal-form',
+            modalClass: 'modal-md',
+            modalTitle: this.caller,
+            buttonLabel: 'Show MODAL',
+            modalContent: 'really should load with ajax'
+        }) }}
+    {% endblock %}
+
+
+
+
+
+</div>
+

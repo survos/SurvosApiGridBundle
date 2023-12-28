@@ -99,12 +99,15 @@ class IndexCommand extends Command
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
             $this->meiliService->waitUntilFinished($index);
 
+            if ($this->io->isVerbose()) {
+                $stats = $index->stats();
+                // now what?
+
+            }
+            $this->io->success('app:index-entity ' . $class . ' success.');
+
         }
 
-        if ($this->io->isVerbose()) {
-            $stats = $this->meiliService->getIndex($indexName)->stats();
-        }
-        $this->io->success('app:index-entity ' . $class . ' success.');
         return self::SUCCESS;
 
     }

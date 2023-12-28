@@ -62,15 +62,17 @@ export default class extends Controller {
         globals: {type: String, default: '[]'},
         locale: {type: String, default: 'no-locale!'},
         style: {type: String, default: 'spreadsheet'},
-        index: {type: String, default: ''},
+        cascadePanes: {type: Boolean, default: false},
+        viewTotal: {type: Boolean, default: false},
+        index: {type: String, default: ''}, // meili
         dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
-        filter: String
+        searchBuilderFields: {type: String, default: '[]'},
+        filter: String // json, from queryString, e.g. party=dem
     }
 
     // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
     // sortableFields: {type: String, default: '[]'},
     // searchableFields: {type: String, default: '[]'},
-    // searchBuilderFields: {type: String, default: '[]'},
 
     cols() {
         // see https://javascript.plainenglish.io/are-javascript-object-keys-ordered-and-iterable-5147eedb26ce
@@ -148,6 +150,8 @@ export default class extends Controller {
         // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
 
         this.locale = this.localeValue;
+        this.viewTotal = true; // this.viewTotalValue;
+        this.cascadePanes = false; // never with serverSide: true! this.cascadePanesValue;
         console.log('hola from ' + this.identifier + ' locale: ' + this.localeValue);
         // console.assert(this.hasModalTarget, "Missing modal target");
         this.that = this;
@@ -451,7 +455,7 @@ export default class extends Controller {
             //     loadingIndicator: true,
             // },
             // "processing": true,
-            serverSide: true,
+            serverSide: true, // use grid for client-side
 
             initComplete: (obj, data) => {
                 dt.on('searchPanes.rebuildPane', function() {
@@ -496,9 +500,8 @@ export default class extends Controller {
                 initCollapsed: true,
                 layout: 'columns-1',
                 show: true,
-                cascadePanes: true,
+                cascadePanes: this.cascadePanes,
                 viewTotal: true,
-                showZeroCounts: true,
                 preSelect: preSelectArray
             },
             searchBuilder: {
@@ -561,29 +564,28 @@ export default class extends Controller {
                             initCollapsed: true,
                             layout: 'columns-1',
                             show: true,
-               cascadePanes: true,
-                            viewTotal: true,
+                            cascadePanes: this.cascadePanes,
+                            viewTotal: this.viewTotal,
                             showZeroCounts: true,
                             preSelect: preSelectArray
                         };
 
-                        options.threshold = 0.01;
-                        options.showZeroCounts = true;
-                        options.cascadePanes = true;
-                        options.viewTotal = true;
-                        options.show = true;
-                        console.error('searchpanes', searchPanes, options);
+                        // options.threshold = 0.01;
+                        // options.showZeroCounts = true;
+                        // options.cascadePanes = true;
+                        // options.viewTotal = true;
+                        // options.show = true;
+                        // console.error('searchpanes', searchPanes, options);
 
+                        // if searchPanes have been sent back from the results, sort them by browseOrder
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
                            console.error(searchPanes, searchPanesRaw);
                         } else {
-                           searchPanes = {
-                               options: options
-                           };
+                           searchPanes.options = options;
                         }
-                        searchPanes.threshold = 0.01;
+                        // searchPanes.threshold = 0.01;
                         searchPanes.showZeroCounts = true;
                         searchPanes.cascadePanes = true;
                         searchPanes.viewTotal = true;
@@ -852,6 +854,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             // was apiData.itemsPerPage = params.length;
             apiData.limit = params.length;
         }
+        // really this is the queryStringParameters
         let facetsUrl = [];
         // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
         if (params.search && params.search.value) {
@@ -900,7 +903,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             }
             facetsUrl.push(key + '=' + value);
         }
-
         if(facetsUrl.length > 0) {
             path +="?"+facetsUrl.join('&');
             history.replaceState(null, "", path);

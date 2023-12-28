@@ -286,7 +286,12 @@ export default class extends Controller {
             pageLength: this.pageLengthValue,
             columnDefs: this.columnDefs(),
             searchPanes:{
-                layout: 'columns-' + 1 // this.searchPanesColumns,
+                layout: 'columns-' + 1, // this.searchPanesColumns,
+                showTotals: true,
+                cascadePanes: true,
+                showZeroCounts: true,
+                viewTotal: true
+
             },
             buttons: [
                 'colvis',

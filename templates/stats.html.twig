@@ -20,7 +20,19 @@
                             {{ name }}
                         </a>
                     </td>
-                    <td>{{ values|join(',') }}</td>
+                    <td>
+                        {% if name matches('/filterableAttributes/') %}
+                            {% for fieldName in values %}
+                                <li>
+                                    <a href="{{ path('survos_facet_show', {indexName: indexName, fieldName: fieldName}) }}">
+                                        {{ fieldName }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                        {{ values|join(',') }}
+                            {% endif %}
+                            </td>
                 </tr>
             {% endif %}
         {% endfor %}

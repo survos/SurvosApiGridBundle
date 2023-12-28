@@ -9,6 +9,7 @@ use Survos\ApiGrid\Command\IndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
 use Survos\ApiGrid\Controller\GridController;
+use Survos\ApiGrid\Controller\MeiliController;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGrid\Components\ApiGridComponent;
 use Survos\ApiGrid\Paginator\SlicePaginationExtension;
@@ -16,6 +17,7 @@ use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Service\MeiliService;
 use Survos\ApiGrid\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\InspectionBundle\Services\InspectionService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -60,7 +62,18 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutoconfigured(true)
         ;
 
+        // doctrine entities and inspection
         $builder->autowire(GridController::class)
+            ->addTag('container.service_subscriber')
+            ->addTag('controller.service_arguments')
+            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setAutoconfigured(true)
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
+
+        // meili index stats, etc.
+        $builder->autowire(MeiliController::class)
             ->addTag('container.service_subscriber')
             ->addTag('controller.service_arguments')
             ->setArgument('$meili', new Reference('api_meili_service'))
@@ -69,7 +82,6 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setPublic(true)
         ;
-
 
         // check https://github.com/zenstruck/console-extra/issues/59
         $definition = $builder->autowire(IndexCommand::class)
@@ -179,6 +191,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$twig', new Reference('twig'))
             ->setArgument('$logger', new Reference('logger'))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
+            ->setArgument('$inspectionService', new Reference(InspectionService::class))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))

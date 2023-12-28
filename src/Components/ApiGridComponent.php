@@ -35,6 +35,7 @@ class ApiGridComponent implements TwigBlocksInterface
         public ?string $stimulusController,
         private bool $meili = false,
         private ?string $class = null,
+        private array $filter = [],
         private $collectionRoutes = [],
     ) {
         if ($this->class) {
@@ -53,8 +54,7 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public function getFilter(): array
     {
-        // @todo: be smarter with what's allowed
-        $this->filter = [];
+        // @todo: be smarter with what's allowed.  This don't really feel right
         if ($stack = $this->requestStack->getCurrentRequest()) {
             $this->filter = $stack->query->all();
         }

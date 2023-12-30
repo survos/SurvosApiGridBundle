@@ -498,6 +498,10 @@ export default class extends Controller {
             columns: this.cols(),
             searchPanes: {
                 initCollapsed: true,
+                dtOpts: {
+                    scrollCollapse: true,
+                    // paging: true
+                },
                 layout: 'columns-1',
                 show: true,
                 cascadePanes: this.cascadePanes,

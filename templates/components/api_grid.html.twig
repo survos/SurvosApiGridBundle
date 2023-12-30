@@ -22,7 +22,6 @@
 {#{% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}#}
 {% endif %}
 
-<h1>URL: {{ apiCall }}</h1>
 {% if apiCall %}
     {{ include('@SurvosApiGrid/components/_datatable_with_facets.html.twig') }}
     {% else %}
@@ -36,3 +35,6 @@
             </li>
         {% endfor %}
 {% endif %}
+<div class="text-muted">
+    URL: {{ apiCall }}
+</div>

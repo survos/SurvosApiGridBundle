@@ -123,7 +123,7 @@ class MeiliController extends AbstractController
         dd($indexName, $settings);
         // inspect the entity and colum?
         // this gets the facet data from meili, though it could get it from a dedicated Field entity in this bundle
-        dd($fieldCode, $index);
+//        dd($fieldCode, $index);
 
         return $this->render("@SurvosApiGrid/facet.html.twig", [
             'configs' => $this->helper->getWorkflowConfiguration(),

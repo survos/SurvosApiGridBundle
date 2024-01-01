@@ -204,6 +204,7 @@ class ApiGridComponent implements TwigBlocksInterface
             $urls = $this->inspectionService->getAllUrlsForResource($class);
             $routeKey = $apiRoute ?: array_key_first($urls);
             // the real route is the opname
+            assert(array_key_exists($routeKey, $routes), "Missing $routeKey in " . join(',', array_keys($routes)));
             $route = $routes[$routeKey]['opName'];
             $apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
 //            dd($this->apiGetCollectionUrl);

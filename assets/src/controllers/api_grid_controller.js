@@ -65,7 +65,7 @@ export default class extends Controller {
         cascadePanes: {type: Boolean, default: false},
         viewTotal: {type: Boolean, default: false},
         index: {type: String, default: ''}, // meili
-        dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
+        dom: {type: String, default: 'QBlfrtip'}, // use P for searchPanes
         searchBuilderFields: {type: String, default: '[]'},
         filter: String // json, from queryString, e.g. party=dem
     }
@@ -141,6 +141,7 @@ export default class extends Controller {
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
+        console.error(this.dom);
         // dom: 'Plfrtip',
         console.assert(this.dom, "Missing dom");
 
@@ -480,7 +481,6 @@ export default class extends Controller {
             },
 
             dom: this.dom,
-            // dom: 'Plfrtip',
 
             // dom: '<"js-dt-buttons"B><"js-dt-info"i>ft',
             // dom: 'Q<"js-dt-buttons"B><"js-dt-info"i>' + (this.searchableFields.length ? 'f' : '') + 't',

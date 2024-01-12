@@ -34,7 +34,7 @@ class GridComponent
     public bool $info = false;
     public bool $condition = true;
     public string $scrollY = '70vh';
-    public string $dom='?';
+    public string $dom='QlfrtipP';
     public array $searchPanesFields=[];
     public ?string $tableId = null;
     public ?string $rowAlias = null;
@@ -47,7 +47,6 @@ class GridComponent
         $resolver->setDefaults([
             'data' => null,
             'class' => null,
-            'dom' => 'Plfrt',
             'rowAlias' => null,
             'useDatatables' => true,
             'pageLength' => 20,

@@ -28,7 +28,7 @@ export default class extends Controller {
         search: true,
         info: false,
         pageLength: 15,
-        dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
+        dom: {type: String, default: 'QBlfrtip'}, // use P for searchPanes
 
         useDatatables: true,
         sortableFields: {type: String, default: '{}'},

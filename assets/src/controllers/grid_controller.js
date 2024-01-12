@@ -22,12 +22,14 @@ import '../datatables-plugins.js';
 
 /* stimulusFetch: 'lazy' */
 export default class extends Controller {
+    // dom: 'BPlfrtip',
     static targets = ['table', 'modal', 'modalBody', 'fieldSearch', 'message'];
     static values = {
         search: true,
         info: false,
         pageLength: 15,
-        dom: 'Plfrtip',
+        dom: {type: String, default: 'Blfrtip'}, // use P for searchPanes
+
         useDatatables: true,
         sortableFields: {type: String, default: '{}'},
         filter: {type: String, default: ''}
@@ -271,8 +273,8 @@ export default class extends Controller {
             // buttons: this.buttons,
         };
 
-        dom = `<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>`;
-        dom = '<"dtsp-dataTable"frtip>';
+        // dom = `<"dtsp-verticalContainer"<"dtsp-verticalPanes"P><"dtsp-dataTable"frtip>>`;
+        // dom = '<"dtsp-dataTable"frtip>';
         console.log("DOM: " + dom);
         setup = {
             retrieve: true, // avoid datatable has been initialized
@@ -285,6 +287,13 @@ export default class extends Controller {
             responsive: true,
             pageLength: this.pageLengthValue,
             columnDefs: this.columnDefs(),
+            searchBuilder: {
+                columns: [1,2], // this.searchBuilderFields,
+                depthLimit: 1,
+                threshold: 0,
+                showEmptyPanes: true
+            },
+
             searchPanes:{
                 layout: 'columns-' + 1, // this.searchPanesColumns,
                 showTotals: true,

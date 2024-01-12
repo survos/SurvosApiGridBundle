@@ -16,6 +16,7 @@
           "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
           "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,
           "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+          "datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.min.css": true,
           "datatables.net-select-bs5/css/select.bootstrap5.min.css": true
         }
       },
@@ -30,6 +31,7 @@
           "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
           "datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css": true,
           "datatables.net-searchpanes-bs5/css/searchPanes.bootstrap5.min.css": true,
+          "datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.min.css": true,
           "datatables.net-select-bs5/css/select.bootstrap5.min.css": true
         }
       }
@@ -46,6 +48,7 @@
       "datatables.net-responsive-bs5": "^2.5.0",
       "datatables.net-scroller-bs5": "^2.3.0",
       "datatables.net-searchpanes-bs5": "^2.2.0",
+      "datatables.net-searchbuilder": "^1.6.0",
       "datatables.net-select-bs5": "^1.7.0"
     }
   },

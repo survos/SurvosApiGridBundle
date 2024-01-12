@@ -47,7 +47,7 @@ class GridComponent
         $resolver->setDefaults([
             'data' => null,
             'class' => null,
-            'dom' => 'Plfrtip',
+            'dom' => 'Plfrt',
             'rowAlias' => null,
             'useDatatables' => true,
             'pageLength' => 20,

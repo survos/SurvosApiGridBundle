@@ -147,7 +147,8 @@ export default class extends Controller {
         this.filter = JSON.parse(this.filterValue || '[]')
         // this.sortableFields = JSON.parse(this.sortableFieldsValue);
         // this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        // this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        console.error(this.searchBuilderFields);
 
         this.locale = this.localeValue;
         this.viewTotal = true; // this.viewTotalValue;

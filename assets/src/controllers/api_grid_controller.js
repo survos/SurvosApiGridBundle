@@ -586,7 +586,6 @@ export default class extends Controller {
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
-                           console.error(searchPanes, searchPanesRaw);
                         } else {
                            searchPanes.options = options;
                         }
@@ -595,8 +594,6 @@ export default class extends Controller {
                         searchPanes.cascadePanes = true;
                         searchPanes.viewTotal = true;
                         searchPanes.show = true;
-                        console.error('searchpanes', searchPanes);
-
                         let targetMessage = "";
                         if(typeof this.apiParams.facet_filter != 'undefined') {
                             this.apiParams.facet_filter.forEach((index) => {

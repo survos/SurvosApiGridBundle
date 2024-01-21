@@ -16,11 +16,13 @@
 
 {% set locale = this.locale ?: (app.request.locale ?: 'xx') %}
 
-{% set apiCall = this.apiGetCollectionUrl|default(false) %}
+{% set apiCall = this.apiGetCollectionUrl|default(this.class ? api_route(this.class) : 'meilisearch') %}
 {% if not apiCall %}
     apiGetCollectionUrl is now required!
-{#{% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}#}
+    {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}
+
+<h1>apiCall: {{ apiCall }}</h1>
 
 {% if apiCall %}
     {{ include('@SurvosApiGrid/components/_datatable_with_facets.html.twig') }}

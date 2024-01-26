@@ -3,6 +3,7 @@
 namespace Survos\ApiGrid\Controller;
 
 use Survos\ApiGrid\Service\MeiliService;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
@@ -72,20 +73,24 @@ class MeiliController extends AbstractController
             ]);
     }
 
-    #[Route(path: '/stats/{indexName}', name: 'survos_index_stats', methods: ['GET'])]
+    #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats', methods: ['GET'])]
     public function stats(
         string  $indexName,
-        Request $request
+        Request $request,
+        string $_format='html'
     ): Response
     {
         $index = $this->meili->getIndex($indexName);
         $stats = $index->stats();
         // idea: meiliStats as a component?
-        return $this->render('@SurvosApiGrid/stats.html.twig', [
+        $data =  [
             'indexName' => $indexName,
             'settings' => $index->getSettings(),
             'stats' => $stats
-        ]);
+        ];
+        return $_format == 'json'
+            ? $this->json($data)
+            : $this->render('@SurvosApiGrid/stats.html.twig', $data);
 
         // Get the base URL
 //        $url = "/api/projects";//.$indexName;

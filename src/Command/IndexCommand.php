@@ -24,6 +24,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand(
     name: 'grid:index',
@@ -53,6 +54,7 @@ class IndexCommand extends Command
             ->addOption('reset', null, InputOption::VALUE_NONE, 'Reset the indexes')
             ->addOption('batch-size', null, InputOption::VALUE_REQUIRED, 'Batch size to meili', 100)
             ->addOption('limit', null, InputOption::VALUE_REQUIRED, 'limit', 0)
+            ->addOption('filter', null, InputOption::VALUE_REQUIRED, 'filter in yaml format')
             ->addOption('dump', null, InputOption::VALUE_REQUIRED, 'dump the nth item', 0)
         ;
     }
@@ -60,6 +62,8 @@ class IndexCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
 
+        $filter = $input->getOption('filter');
+        $filterArray = Yaml::parse($filter);
         $class = $input->getArgument('class');
             $classes = [];
             // https://abendstille.at/blog/?p=163
@@ -92,8 +96,11 @@ class IndexCommand extends Command
             $index = $this->configureIndex($class, $indexName);
             $batchSize = $input->getOption('batch-size');
 
+
+
             $stats = $this->indexClass($class, $index, $batchSize, $indexName, $groups,
                 $input->getOption('limit'),
+                $input->getOption('filter') ? $filterArray: null,
                 $input->getOption('dump'),
             );
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
@@ -161,6 +168,7 @@ class IndexCommand extends Command
     private function indexClass(string  $class, Indexes $index, int $batchSize, ?string $indexName=null,
                                 array $groups=[],
                                 int $limit=0,
+                                ?array $filter=[],
                                 int $dump=0,
                                 ?string $subdomain=null,
     ): array
@@ -173,6 +181,13 @@ class IndexCommand extends Command
         $qb = $repo->createQueryBuilder('r');
         $count = null;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
+        if ($filter) {
+            foreach ($filter as $var => $val) {
+                $qb->andWhere('e.' . $var . "= :$var")
+                    ->setParameter($var, $val);
+            }
+//            $qb->andWhere($filter);
+        }
         $results = $qb->getQuery()->toIterable();
         if (is_null($count)) {
             // slow if not filtered!

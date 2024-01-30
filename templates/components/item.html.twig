@@ -14,7 +14,28 @@
                         {% endwith %}
                     {% else %}
                         {# handle bools #}
-                        {{ attribute(data, c.name)|default() }}
+                        {% set value = attribute(data, c.name)|default() %}
+                        {% if value is iterable %}
+                            {% if value|array_is_list %}
+                                {% for v in value %}
+                                    {% if v is iterable %}
+                                    <twig:item_grid :data="v">
+
+                                    </twig:item_grid>
+                                    {% else %}
+                                        <b>{{ v }}</b>
+                                    {% endif %}
+                                {% endfor %}
+
+{#                                {{ value|join('|') }}#}
+                            {% else %}
+                                <twig:item_grid :data="value">
+
+                                </twig:item_grid>
+                            {% endif %}
+                        {% else %}
+                            {{ value }}
+                        {% endif %}
                     {% endif %}
                 </dd>
             {% endfor %}

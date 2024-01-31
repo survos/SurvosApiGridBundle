@@ -63,7 +63,7 @@ class IndexCommand extends Command
     {
 
         $filter = $input->getOption('filter');
-        $filterArray = Yaml::parse($filter);
+        $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
             $classes = [];
             // https://abendstille.at/blog/?p=163

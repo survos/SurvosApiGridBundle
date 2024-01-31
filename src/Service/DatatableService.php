@@ -67,6 +67,7 @@ class DatatableService
                 if (!$block = $c['block'] ?? false) {
                     $block = $columnName;
                 }
+//                if ($columnName <> $block) { dd($block, $columnName); }
                 $fixDotColumnName = str_replace('.', '_', $block);
                 if (array_key_exists($fixDotColumnName, $customColumnTemplates)) {
                     $c['twigTemplate'] = $customColumnTemplates[$fixDotColumnName];

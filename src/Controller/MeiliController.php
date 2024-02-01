@@ -69,7 +69,12 @@ class MeiliController extends AbstractController
         return $this->render('@SurvosApiGrid/facet.html.twig', get_defined_vars() + [
                 'tableData' => $counts,
                 'chartData' => $chartData,
-                'chart' => $chart
+                'chart' => $chart,
+                'currentField' => $fieldName,
+                'indexName' => $indexName,
+                'max' => $max,
+                // we need the facets to get a menu. Alas, this needs to run without the bootstrap bundle
+                'facetFields' =>  $index->getFilterableAttributes(),
             ]);
     }
 

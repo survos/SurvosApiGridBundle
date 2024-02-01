@@ -1,19 +1,51 @@
 {% extends "base.html.twig" %}
 {% block body %}
 
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Facets</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% for facet in facetFields %}
+                        <li class="nav-item">
+                            <a
+                                    class="nav-link {{ currentField == facet ? 'active' }}"
+                                    aria-current="{{ facet }}"
+                                    href="{{ path('survos_facet_show', {indexName: indexName, max:max, fieldName:facet}) }}">
+                                {{ facet }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <ul class="list-group list-group-horizontal">
+
+    </ul>
+
+    <ul class="list-inline">
+
+    </ul>
 
     <div class="row">
         <div class="col-8">
             <div style="height: 300px;">
                 {{ chart ? render_chart(chart) : 'composer require symfony/ux-chartjs ' }}
             </div>
-            {#            <div {{ stimulus_controller('highchart', {#}
-            {#                'data': chartData,#}
-            {#                'title': field.label|default(field.code)#}
-            {#            }) }}>#}
-            {#                <div {{ stimulus_target('highchart', 'piechart') }}>Pie chart here.</div>#}
-            {#                <div {{ stimulus_target('highchart', 'datatable') }}></div>#}
-            {#            </div>#}
+            {#            <div {{ stimulus_controller('highchart', { #}
+            {#                'data': chartData, #}
+            {#                'title': field.label|default(field.code) #}
+            {#            }) }}> #}
+            {#                <div {{ stimulus_target('highchart', 'piechart') }}>Pie chart here.</div> #}
+            {#                <div {{ stimulus_target('highchart', 'datatable') }}></div> #}
+            {#            </div> #}
 
         </div>
         <div class="col-4">
@@ -21,26 +53,26 @@
         </div>
     </div>
 
-    {% endblock %}
+{% endblock %}
 
 {% block table_data %}
-            {% component grid with {
-                data: tableData,
-                dom: 'fT',
-                columns: [
-                    {name: 'label' },
-                    {name: 'count'}
-                ]
-            } %}
+    {% component grid with {
+        data: tableData,
+        dom: 'fT',
+        columns: [
+            {name: 'label' },
+            {name: 'count'}
+        ]
+    } %}
 
-                {% block label %}
-                    {{ row.label|slice(0, 20) }}
-                {% endblock %}
+        {% block label %}
+            {{ row.label|slice(0, 20) }}
+        {% endblock %}
 
 
-            {% endcomponent %}
+    {% endcomponent %}
 
-        </div>
+    </div>
     </div>
 
 

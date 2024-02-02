@@ -14,6 +14,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
 
+#[Route('/meili')]
 class MeiliController extends AbstractController
 {
     protected $helper;
@@ -25,6 +26,21 @@ class MeiliController extends AbstractController
     {
 //        $this->helper = $helper;
     }
+
+    #[Route(path: '/realtime/abc/{indexName}.{_format}', name: 'survos_meili_realtime_stats', methods: ['GET'])]
+    #[Template('@SurvosApiGrid/_realtime.html.twig')]
+    public function realtime_stats(
+        string  $indexName,
+        string $_format='html'
+    ): array
+    {
+        $index = $this->meili->getIndex($indexName);
+        $stats = $index->stats();
+        return $stats;
+
+    }
+
+
 
     #[Route(path: '/facet/{indexName}/{fieldName}/{max}', name: 'survos_facet_show', methods: ['GET'])]
     public function facet(string $indexName, string $fieldName, int $max = 25): Response

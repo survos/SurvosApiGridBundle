@@ -30,4 +30,4 @@ parameters:
 #            path: ./src/DependencyInjection/Providers
         -
             message: '#.*NodeDefinition::children.*#'
-            path: ./src/DependencyInjection
+            path: ./src/*Bundle.php

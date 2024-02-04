@@ -69,8 +69,10 @@ class IndexCommand extends Command
             // https://abendstille.at/blog/?p=163
             $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($metas as $meta) {
+                // actually, ApiResource or GetCollection
                 foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
                     $args = $attribute->getArguments();
+                    // @todo: this could also be inside of the operation!
                     if (array_key_exists('normalizationContext', $args)) {
                         $groups = $args['normalizationContext']['groups'];
                         if (is_string($groups)) {

@@ -70,7 +70,6 @@ class MeiliSearchStateProvider implements ProviderInterface
             }
 
             $data = $index->search($searchQuery, $body);
-//            dd($data, $body, $searchQuery);
             $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);
             $body['limit'] = 0;
@@ -92,7 +91,7 @@ class MeiliSearchStateProvider implements ProviderInterface
         $returnObject['offset'] = $data->getOffset();
         $returnObject['limit'] = $data->getLimit();
         $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();
-        $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
+        $hits = $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
         $returnObject['processingTimeMs'] = $data->getProcessingTimeMs();
         $returnObject['query'] = $data->getQuery();
         $returnObject['facetDistribution'] = $data->getFacetDistribution();

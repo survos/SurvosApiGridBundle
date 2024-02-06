@@ -8,6 +8,7 @@ use ApiPlatform\Api\UrlGeneratorInterface;
 use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
 use ApiPlatform\JsonLd\ContextBuilder;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
+use ApiPlatform\Metadata\Error;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
@@ -29,7 +30,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     public function __construct(
         private ContextBuilderInterface        $contextBuilder,
-        ResourceClassResolverInterface         $resourceClassResolver,
+        protected ResourceClassResolverInterface         $resourceClassResolver,
         private readonly RequestStack          $requestStack, // hack to add locale
         private readonly IriConverterInterface $iriConverter,
         private readonly LoggerInterface       $logger,
@@ -48,6 +49,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
      */
     public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
+//        dd($object, $format, $context);
+        $this->logger->error(sprintf("%s ", $format));
         if (!isset($context['resource_class']) || isset($context['api_sub_level'])) {
             return $this->normalizeRawCollection($object, $format, $context);
         }
@@ -152,7 +155,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     {
         $data = [];
         $data['hydra:member'] = [];
-        dd($context);
+        $this->logger->info(sprintf('%s %s for %s %s', __CLASS__, $context['root_operation_name'], $context['resource_class'], __METHOD__));
 
         $iriOnly = $context[self::IRI_ONLY] ?? $this->defaultContext[self::IRI_ONLY];
 
@@ -176,7 +179,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         foreach ($object as $obj) {
             if ($iriOnly) {
                 $normalizedData = $this->iriConverter->getIriFromResource($obj);
-                dd($normalizedData);
 //                $normalizedData =  $this->iriConverter->getIriFromResource($obj); // ??
                 $normalizedData = $this->iriConverter->getResourceFromIri($obj);
             } else {
@@ -196,6 +198,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     protected function initContext(string $resourceClass, array $context): array
     {
+        dump($context);
         $context = parent::initContext($resourceClass, $context);
         $context['api_collection_sub_level'] = true;
 
@@ -252,6 +255,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         if (isset($context['jsonld_embed_context'])) {
             $data['@context'] = $contextBuilder->getResourceContext($resourceClass);
 
+            return $data;
+        }
+
+        if (($operation = $context['operation'] ?? null) && ($operation->getExtraProperties()['rfc_7807_compliant_errors'] ?? false) && $operation instanceof Error) {
             return $data;
         }
 

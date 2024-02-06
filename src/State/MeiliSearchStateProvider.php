@@ -7,18 +7,11 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Psr\Http\Client\ClientInterface;
 use Survos\ApiGrid\Service\MeiliService;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Meilisearch\Bundle\SearchService;
-use Meilisearch\Client;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\DependencyInjection\Attribute\Tagged;
-use ApiPlatform\Util\Inflector;
 use ApiPlatform\State\Pagination\Pagination;
-use Symfony\Component\DependencyInjection\TaggedContainerInterface;
 use Meilisearch\Search\SearchResult;
-use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 
 class MeiliSearchStateProvider implements ProviderInterface
 {
@@ -61,15 +54,16 @@ class MeiliSearchStateProvider implements ProviderInterface
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
             try {
+                $index = $this->meili->getIndex($indexName);
+                $data = $index->search($searchQuery, $body);
 //                $client = $this->meili->getMeiliClient();
 //                $index = $client->index($indexName);
-                $index = $this->meili->getIndex($indexName);
             //dd($body);
             } catch (\Exception $exception) {
+                dd($indexName, $searchQuery, $exception);
                 throw new \Exception($indexName . ' ' . $exception->getMessage());
             }
 
-            $data = $index->search($searchQuery, $body);
             $data = $this->denormalizeObject($data, $resourceClass);
             unset($body['filter']);
             $body['limit'] = 0;

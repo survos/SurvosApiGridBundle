@@ -156,8 +156,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setPublic(true)
         ;
 
-//        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
-        $builder->register(DataTableCollectionNormalizer::class)
+        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+//        $builder->register(DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))

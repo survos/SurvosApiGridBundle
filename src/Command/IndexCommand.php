@@ -112,10 +112,12 @@ class IndexCommand extends Command
 
             if ($this->io->isVerbose()) {
                 $stats = $index->stats();
+                $this->io->write(json_encode($stats, JSON_PRETTY_PRINT));
+                $this->io->write(json_encode($index->getSettings(), JSON_PRETTY_PRINT));
                 // now what?
 
             }
-            $this->io->success('app:index-entity ' . $class . ' success.');
+            $this->io->success('app:index-entity ' . $class . ' finished indexing');
 
         }
 

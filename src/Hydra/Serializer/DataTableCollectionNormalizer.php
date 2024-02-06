@@ -13,6 +13,7 @@ use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use Meilisearch\Search\SearchResult;
+use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -27,11 +28,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private                                                      $contextBuilder,
-        ResourceClassResolverInterface                               $resourceClassResolver,
-        private readonly RequestStack                                $requestStack, // hack to add locale
-        private readonly IriConverterInterface                       $iriConverter,
-        array                                                        $defaultContext = []
+        private ContextBuilderInterface        $contextBuilder,
+        ResourceClassResolverInterface         $resourceClassResolver,
+        private readonly RequestStack          $requestStack, // hack to add locale
+        private readonly IriConverterInterface $iriConverter,
+        private readonly LoggerInterface       $logger,
+        array                                  $defaultContext = []
     )
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
@@ -44,7 +46,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
      *
      * @param iterable $object
      */
-    public function normalize(mixed  $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         if (!isset($context['resource_class']) || isset($context['api_sub_level'])) {
             return $this->normalizeRawCollection($object, $format, $context);
@@ -52,9 +54,9 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         $paginationData = $this->getPaginationData($object, $context);
         $facets = [];
-        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
-            if(isset($params['facets']) && is_array($params['facets'])) {
+            if (isset($params['facets']) && is_array($params['facets'])) {
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
             }
             $object = $object['data']->getHits();
@@ -69,13 +71,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
                     $repo::class . " must implement QueryBuilderHelperInterface");
 
-                if(isset($params['facets']) && is_array($params['facets'])) {
+                if (isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
 //                    dd($params['facets']);
-                    foreach($params['facets'] as $key => $facet) {
+                    foreach ($params['facets'] as $key => $facet) {
 
                         $keyArray = array_keys($metadata->getReflectionProperties());
-                        if(in_array($facet, $keyArray)) {
+                        if (in_array($facet, $keyArray)) {
                             try {
                                 $counts = $repo->getCounts($facet);
                                 $doctrineFacets[$facet] = $counts;
@@ -86,7 +88,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                         }
                     }
 
-                    $facets = $this->getFacetsData($doctrineFacets,$doctrineFacets, $context);
+                    $facets = $this->getFacetsData($doctrineFacets, $doctrineFacets, $context);
                 }
             }
         }
@@ -136,7 +138,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $data['hydra:totalItems'] = \count($object);
         }
 
-        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             $data['hydra:totalItems'] = $object['data']->getEstimatedTotalHits();
         }
 
@@ -150,6 +152,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     {
         $data = [];
         $data['hydra:member'] = [];
+        dd($context);
 
         $iriOnly = $context[self::IRI_ONLY] ?? $this->defaultContext[self::IRI_ONLY];
 
@@ -172,9 +175,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         foreach ($object as $obj) {
             if ($iriOnly) {
-                $normalizedData =  $this->iriConverter->getResourceFromIri($obj);
+                $normalizedData = $this->iriConverter->getIriFromResource($obj);
+                dd($normalizedData);
+//                $normalizedData =  $this->iriConverter->getIriFromResource($obj); // ??
+                $normalizedData = $this->iriConverter->getResourceFromIri($obj);
             } else {
-                $normalizedData =  $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
+                $normalizedData = $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }
             // hack -- this should be its own normalizer.  Plus, this needs to be recursive
             if (array_key_exists('rp', $normalizedData)) {
@@ -196,17 +202,18 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         return $context;
     }
 
-    private function getFacetsData(array $facets, ?array $params, ?array $context) :array {
+    private function getFacetsData(array $facets, ?array $params, ?array $context): array
+    {
         $facetsData = [];
 
-        foreach($params as $key => $facet) {
+        foreach ($params as $key => $facet) {
             $data = [];
-            foreach($facet as $facetKey => $facetValue) {
-                $fdata["label"] =  $facetKey;
-                $fdata["total"] =  $facetValue;
-                $fdata["value"] =  $facetKey;
-                $fdata["count"] =  0;
-                if(isset($facets[$key][$facetKey])) {
+            foreach ($facet as $facetKey => $facetValue) {
+                $fdata["label"] = $facetKey;
+                $fdata["total"] = $facetValue;
+                $fdata["value"] = $facetKey;
+                $fdata["count"] = 0;
+                if (isset($facets[$key][$facetKey])) {
                     $fdata["count"] = $facets[$key][$facetKey];
                 }
                 $data[] = $fdata;
@@ -219,16 +226,18 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         return $returnData;
     }
 
-    private function createAllSearchPanesRecords(array $params) {
+    private function createAllSearchPanesRecords(array $params)
+    {
         $data = [];
         foreach ($params as $param) {
-            $data[] = $this->createSearchPanesArray($param["label"] , 0);
+            $data[] = $this->createSearchPanesArray($param["label"], 0);
         }
         return $data;
     }
 
-    private function createSearchPanesArray($key,$count) {
-        return ["label" => $key, "total" => $count , "value" => $key,  "count" => $count];
+    private function createSearchPanesArray($key, $count)
+    {
+        return ["label" => $key, "total" => $count, "value" => $key, "count" => $count];
     }
 
     // copied from JsonLdContextTrait, which is internal

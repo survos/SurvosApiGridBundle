@@ -116,7 +116,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
             ->setArgument('$registry', new Reference('doctrine'))
         ;
@@ -150,15 +150,17 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$httpClient',new Reference('httplug.http_client'))
             ->setArgument('$meiliHost',$config['meiliHost'])
             ->setArgument('$meiliKey',$config['meiliKey'])
-            ->setAutowired(true)
             ->setArgument('$denormalizer', new Reference('serializer'))
             ->addTag('api_platform.state_provider')
-            ->setPublic(true);
+            ->setAutowired(true)
+            ->setPublic(true)
+        ;
 
-        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+//        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
+        $builder->register(DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
-//            ->setArgument('$iriConverter', new Reference('api_platform.iri_converter'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
             ->addTag('serializer.normalizer', ['priority' => -985]);
@@ -189,7 +191,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger'))
+            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$inspectionService', new Reference(InspectionService::class))
             ->setArgument('$stimulusController', $config['stimulus_controller']);

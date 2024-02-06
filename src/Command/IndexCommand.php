@@ -74,6 +74,7 @@ class IndexCommand extends Command
                     $args = $attribute->getArguments();
                     // @todo: this could also be inside of the operation!
                     if (array_key_exists('normalizationContext', $args)) {
+                        assert(array_key_exists('groups', $args['normalizationContext']), "Add a groups to " . $meta->getName());
                         $groups = $args['normalizationContext']['groups'];
                         if (is_string($groups)) {
                             $groups = [$groups];
@@ -90,6 +91,7 @@ class IndexCommand extends Command
 
         foreach ($classes as $class=>$groups) {
             $indexName = (new \ReflectionClass($class))->getShortName();
+            $this->io->title($indexName);
             if ($reset=$input->getOption('reset')) {
                 $this->meiliService->reset($indexName);
             }

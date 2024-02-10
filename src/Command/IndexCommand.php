@@ -90,7 +90,8 @@ class IndexCommand extends Command
         $this->io = new SymfonyStyle($input, $output);
 
         foreach ($classes as $class=>$groups) {
-            $indexName = (new \ReflectionClass($class))->getShortName();
+            $indexName = $this->meiliService->getPrefixedIndexName((new \ReflectionClass($class))->getShortName());
+
             $this->io->title($indexName);
             if ($reset=$input->getOption('reset')) {
                 $this->meiliService->reset($indexName);

@@ -17,7 +17,7 @@
 
 {% block body %}
 
-    <h1>{{ apiCall }}</h1>
+    <h1>{{ apiRoute }}</h1>
     {{ useMeili ? 'meili' : 'doctrine' }}
     {% set params = useMeili ? {} : {dbIndexName: indexName} %}
 
@@ -26,6 +26,7 @@
             :class="class"
             :caller="_self"
             :columns="columns"
+            :apiRoute="apiRoute"
             :meili="useMeili"
     >
     </twig:api_grid>

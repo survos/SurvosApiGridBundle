@@ -22,7 +22,7 @@
     {% set apiCall = this.class ? api_route(this.class) : 'meilisearch' %}
 {% endif %}
 
-<h1>apiCall: {{ apiCall }}</h1>
+{% if app.environment == 'dev' %}<h1>apiCall: {{ apiCall }}</h1>{% endif %}
 
 {% if apiCall %}
     {{ include('@SurvosApiGrid/components/_datatable_with_facets.html.twig') }}

@@ -194,6 +194,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
             ->setArgument('$inspectionService', new Reference(InspectionService::class))
+            ->setArgument('$meiliService', new Reference('api_meili_service'))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
@@ -214,11 +215,19 @@ class SurvosApiGridBundle extends AbstractBundle
         // since the configuration is short, we can add it here
         $definition->rootNode()
             ->children()
-            ->scalarNode('stimulus_controller')->defaultValue('@survos/api-grid-bundle/api_grid')->end()
+            ->scalarNode('stimulus_controller')
+                ->info('The stimulus controller to use, should extend @survos/api-grid-bundle/api_grid')
+                ->defaultValue('@survos/api-grid-bundle/api_grid')
+            ->end()
             ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
-            ->scalarNode('meiliHost')->defaultValue('http://127.0.0.1:7700')->end()
-            ->scalarNode('meiliKey')->defaultValue('masterKey')->end()
-            ->integerNode('maxValuesPerFacet')->defaultValue(100)->end()
+            ->scalarNode('meiliHost')->defaultValue('%env(MEILI_SERVER)%')->end()
+            ->scalarNode('meiliKey')->defaultValue('%env(MEILI_API_KEY)%')->end()
+            ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
+            ->booleanNode('passLocale')->defaultValue(false)->end()
+            ->integerNode('maxValuesPerFacet')
+                ->info('https://specs.meilisearch.com/specifications/text/157-faceting-setting-api.html#_3-functional-specification')
+                ->defaultValue(100)
+            ->end()
             ->end();;
     }
 

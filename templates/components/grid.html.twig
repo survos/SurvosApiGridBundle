@@ -29,6 +29,10 @@
             </thead>
             <tbody>
             {% for row in data %}
+                {% set rowLoop = loop %}
+                {% if loop.index == 2 %}
+{#                {{ dump(loop.index, rowLoop) }}#}
+                {% endif %}
                 <tr class="align-top">
                     {% for c in columns %}
                     <td>
@@ -40,7 +44,7 @@
                         {% set templateName = c.twigTemplate|default(c.name) %}
 
                         {% if block(templateName) is defined %}
-                            {% set blockParams = {field_name: c.name, row: row, column: c, c:c } %}
+                            {% set blockParams = {field_name: c.name, row: row, column: c, c:c, loop: rowLoop } %}
                             {% if rowAlias %}
                                 {% set blockParams = setAttribute(blockParams, rowAlias, row ) %}
 {#                                {{ blockParams|json_encode }}#}

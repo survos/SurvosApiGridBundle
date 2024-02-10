@@ -64,7 +64,9 @@ class FacetsFieldSearchFilter extends AbstractFilter implements FilterInterface
             } else {
                 $filterValue[0] = null;
             }
-            $this->addWhereIn($queryBuilder, $filterValue, $key);
+            if (in_array($key, $this->properties)) {
+                $this->addWhereIn($queryBuilder, $filterValue, $key);
+            }
         }
         return;
     }

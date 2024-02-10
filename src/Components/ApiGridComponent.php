@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Components\Common\TwigBlocksInterface;
 use Survos\ApiGrid\Model\Column;
 use Survos\ApiGrid\Service\DatatableService;
+use Survos\ApiGrid\Service\MeiliService;
 use Survos\ApiGrid\State\MeiliSearchStateProvider;
 use Survos\ApiGrid\TwigBlocksTrait;
 use Survos\InspectionBundle\Services\InspectionService;
@@ -32,7 +33,8 @@ class ApiGridComponent implements TwigBlocksInterface
         private InspectionService $inspectionService,
         private UrlGeneratorInterface $urlGenerator,
         private IriConverterInterface $iriConverter,
-        public ?string $stimulusController,
+        private ?MeiliService $meiliService=null,
+        public ?string $stimulusController=null,
         private bool $meili = false,
         private ?string $class = null,
         private array $filter = [],
@@ -137,7 +139,7 @@ class ApiGridComponent implements TwigBlocksInterface
     {
         if ($this->class) {
             if (!$this->index) {
-                $this->index =  MeiliSearchStateProvider::getSearchIndexObject($this->class);
+                $this->index =  $this->meiliService->getPrefixedIndexName(MeiliSearchStateProvider::getSearchIndexObject($this->class));
             }
         }
         // really we're getting the schema from the PHP Attributes here.

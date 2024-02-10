@@ -91,8 +91,6 @@ class MeiliSearchStateProvider implements ProviderInterface
         $returnObject['facetDistribution'] = $data->getFacetDistribution();
         $returnObject['facetStats'] = $data->getFacetStats();
 //        dd($returnObject['facetDistribution']['keywords'], $returnObject['facetStats']);
-
-
         return new SearchResult($returnObject);
     }
 }

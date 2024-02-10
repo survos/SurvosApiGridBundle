@@ -83,3 +83,36 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ApiFilter(OrderFilter::class, properties: ['id','objectCount','countryCode'])]
 ```
+
+```bash
+symfony new phpunit-bug --webapp && cd phpunit-bug
+composer require --dev symfony/phpunit-bridge
+vendor/bin/simple-phpunit
+```
+
+
+API Bug with doctrine
+
+```bash
+symfony new api-bug --webapp && cd api-bug
+composer config extra.symfony.allow-contrib true
+echo "DATABASE_URL=sqlite:///%kernel.project_dir%/var/data.db" > .env.local
+composer require api
+echo "title,string,80,yes," | sed "s/,/\n/g"  | bin/console -a make:entity Book
+bin/console doctrine:schema:update --force --complete
+
+symfony server:start -d
+symfony open:local --path=/api
+```
+
+Now add a Book via post
+
+```bash
+curl -X 'POST' \
+  'https://127.0.0.1:8000/api/books' \
+  -H 'accept: application/ld+json' \
+  -H 'Content-Type: application/ld+json' \
+  -d '{
+  "title": "Symfony Fast Track"
+}'
+```

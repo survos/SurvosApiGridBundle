@@ -198,7 +198,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     protected function initContext(string $resourceClass, array $context): array
     {
-        dump($context);
         $context = parent::initContext($resourceClass, $context);
         $context['api_collection_sub_level'] = true;
 

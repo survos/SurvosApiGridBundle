@@ -9,10 +9,12 @@ use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
 use ApiPlatform\JsonLd\ContextBuilder;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
 use ApiPlatform\Metadata\Error;
+use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
+use ApiPlatform\Util\IriHelper;
 use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
@@ -29,17 +31,19 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private ContextBuilderInterface        $contextBuilder,
-        protected ResourceClassResolverInterface         $resourceClassResolver,
-        private readonly RequestStack          $requestStack, // hack to add locale
-        private readonly IriConverterInterface $iriConverter,
-        private readonly LoggerInterface       $logger,
-        array                                  $defaultContext = []
+        private                                                      $contextBuilder,
+        ResourceClassResolverInterface                               $resourceClassResolver,
+        private readonly LoggerInterface $logger,
+        private readonly RequestStack                                $requestStack, // hack to add locale
+        private readonly IriConverterInterface                       $iriConverter,
+        protected ?ResourceMetadataCollectionFactoryInterface        $resourceMetadataFactory,
+        array                                                        $defaultContext = [],
+        protected string                                             $pageParameterName = 'page'
     )
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
 
-        parent::__construct($resourceClassResolver, '');
+        parent::__construct($resourceClassResolver, $pageParameterName);
     }
 
     /**
@@ -57,28 +61,31 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         $paginationData = $this->getPaginationData($object, $context);
         $facets = [];
-        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        $data = [];
+
+        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
             if (isset($params['facets']) && is_array($params['facets'])) {
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
             }
+            $data = $this->getNextData($object['data'], $context, []);
             $object = $object['data']->getHits();
         }
 
         if ($object instanceof PaginatorInterface) {
+            $data = $this->getNextData($object, $context, []);
             if ($context['request_uri']) {
                 parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
                 $em = $object->getQuery()->getEntityManager();
                 $metadata = $em->getClassMetadata($context['operation']->getClass());
                 $repo = $em->getRepository($context['operation']->getClass());
-                assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
-                    $repo::class . " must implement QueryBuilderHelperInterface");
+//                assert(is_subclass_of($repo, QueryBuilderHelperInterface::class),
+//                    $repo::class . " must implement QueryBuilderHelperInterface");
 
                 if (isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
-//                    dd($params['facets']);
-                    foreach ($params['facets'] as $key => $facet) {
 
+                    foreach($params['facets'] as $key => $facet) {
                         $keyArray = array_keys($metadata->getReflectionProperties());
                         if (in_array($facet, $keyArray)) {
                             try {
@@ -98,7 +105,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         $context = $this->initContext($resourceClass, $context);
-        $data = [];
 
         if (($operation = $context['operation'] ?? null) && method_exists($operation, 'getItemUriTemplate')) {
             $context['item_uri_template'] = $operation->getItemUriTemplate();
@@ -278,4 +284,72 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         return $contextBuilder->getAnonymousResourceContext($object, ($context['output'] ?? []) + ['api_resource' => $context['api_resource'] ?? null]);
     }
 
+    public function getSupportedTypes(?string $format): array
+    {
+        /*
+         * At this point, support anything that is_iterable(), i.e. array|Traversable
+         * for non-objects, symfony uses 'native-'.\gettype($data) :
+         * https://github.com/tucksaun/symfony/blob/400685a68b00b0932f8ef41096578872b643099c/src/Symfony/Component/Serializer/Serializer.php#L254
+         */
+        if (static::FORMAT === $format) {
+            return [
+                'native-array' => true,
+                '\Traversable' => true,
+            ];
+        }
+
+        return [];
+    }
+
+    private function getNextData($object, $context, $data)
+    {
+        $parsed = IriHelper::parseIri($context['request_uri'] ?? '/', $this->pageParameterName);
+        $currentPage = $lastPage = $itemsPerPage = $pageTotalItems = null;
+        if ($paginated = ($object instanceof PartialPaginatorInterface)) {
+            if ($object instanceof PaginatorInterface) {
+                $paginated = 1. !== $lastPage = $object->getLastPage();
+            } else {
+                $itemsPerPage = $object->getItemsPerPage();
+                $pageTotalItems = (float) \count($object);
+            }
+
+            $currentPage = $object->getCurrentPage();
+        }
+
+        if ($object instanceof SearchResult && $paginated = ($object instanceof SearchResult)) {
+                $itemsPerPage = $object->getLimit();
+                $lastPage = ceil($object->getEstimatedTotalHits() / $itemsPerPage);
+                $pageTotalItems = $object->getEstimatedTotalHits();
+                $currentPage = floor($object->getOffset() / $itemsPerPage) + 1;
+        }
+
+        $data['hydra:view'] = ['@id' => null, '@type' => 'hydra:PartialCollectionView'];
+
+        $data['hydra:view']['@id'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $paginated ? $currentPage : null);
+
+        if ($paginated) {
+            return $this->populateDataWithPagination($data, $parsed, $currentPage, $lastPage, $itemsPerPage, $pageTotalItems);
+        }
+
+        return $data;
+    }
+
+
+    private function populateDataWithPagination(array $data, array $parsed, ?float $currentPage, ?float $lastPage, ?float $itemsPerPage, ?float $pageTotalItems): array
+    {
+        if (null !== $lastPage) {
+            $data['hydra:view']['hydra:first'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, 1.);
+            $data['hydra:view']['hydra:last'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $lastPage);
+        }
+
+        if (1. !== $currentPage) {
+            $data['hydra:view']['hydra:previous'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage - 1.);
+        }
+
+        if ((null !== $lastPage && $currentPage < $lastPage) || (null === $lastPage && $pageTotalItems >= $itemsPerPage)) {
+            $data['hydra:view']['hydra:next'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage + 1.);
+        }
+
+        return $data;
+    }
 }

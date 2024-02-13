@@ -156,14 +156,15 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setPublic(true)
         ;
 
-        $builder->register('api_platform.hydra.normalizer.collection', DataTableCollectionNormalizer::class)
-//        $builder->register(DataTableCollectionNormalizer::class)
+
+        $builder->register(DataTableCollectionNormalizer::class)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
             ->setArgument('$requestStack', new Reference('request_stack'))
-            ->addTag('serializer.normalizer', ['priority' => -985]);
+            ->setArgument('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
+            ->addTag('serializer.normalizer', ['priority' => -900]);
 
 //        $container->services()->alias(MeiliCollectionNormalizer::class,'api_platform.hydra.normalizer.collection');
         // $builder->register('api_platform.hydra.normalizer.partial_collection_view', PartialCollectionViewNormalizer::class)

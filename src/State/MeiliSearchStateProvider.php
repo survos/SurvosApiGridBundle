@@ -5,6 +5,7 @@ namespace Survos\ApiGrid\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
+use Doctrine\DBAL\Exception;
 use Psr\Http\Client\ClientInterface;
 use Survos\ApiGrid\Service\MeiliService;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -60,8 +61,7 @@ class MeiliSearchStateProvider implements ProviderInterface
 //                $index = $client->index($indexName);
             //dd($body);
             } catch (\Exception $exception) {
-                dd($indexName, $searchQuery, $exception);
-                throw new \Exception($indexName . ' ' . $exception->getMessage());
+                throw new Exception($indexName . ' -- ' . $exception->getMessage());
             }
 
             $data = $this->denormalizeObject($data, $resourceClass);

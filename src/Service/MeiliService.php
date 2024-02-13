@@ -171,6 +171,7 @@ class MeiliService
 
     public function getIndex(string $indexName, string $key = 'id', bool $autoCreate=true): ?Indexes
     {
+        $indexName = $this->getPrefixedIndexName($indexName);
         $this->loadExistingIndexes();
         static $indexes = [];
         if (!$index = $indexes[$indexName] ?? null) {

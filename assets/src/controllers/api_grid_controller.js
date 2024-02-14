@@ -542,7 +542,7 @@ export default class extends Controller {
 
                 // console.warn(apiPlatformHeaders);
 
-                axios.get(this.apiCallValue, {
+                let request = axios.get(this.apiCallValue, {
                     params: this.apiParams,
                     headers: apiPlatformHeaders
                 })
@@ -642,8 +642,12 @@ export default class extends Controller {
                         }
                         callback(callbackValues);
                     })
-                    .catch(function (error) {
-                        // handle error
+                    .catch((error) => {
+                        let url = error.request.responseURL;
+                        var a = document.createElement('a');
+                        var linkText = document.createTextNode(url);
+                        a.href = url;
+                        this.messageTarget.innerHTML = url;
                         console.error(error);
                     })
                 ;

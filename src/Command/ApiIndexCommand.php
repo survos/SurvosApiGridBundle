@@ -15,7 +15,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Zenstruck\Console\Attribute\Argument;
 use Zenstruck\Console\Attribute\Option;
-use Zenstruck\Console\ConfigureWithAttributes;
 use Zenstruck\Console\IO;
 use Zenstruck\Console\InvokableServiceCommand;
 use Zenstruck\Console\RunsCommands;
@@ -27,7 +26,6 @@ use ApiPlatform\Metadata\ApiResource;
 #[AsCommand('api:index', 'Create a meili index for a doctrine entity', aliases: ['app:index-db'])]
 final class ApiIndexCommand extends InvokableServiceCommand
 {
-    use ConfigureWithAttributes;
     use RunsCommands;
     use RunsProcesses;
 

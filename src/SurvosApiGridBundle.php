@@ -198,6 +198,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$inspectionService', new Reference(InspectionService::class))
             ->setArgument('$meiliService', new Reference('api_meili_service'))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
+
+
         $builder->register(MultiFieldSearchFilter::class)
             ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
             ->addArgument(new Reference('request_stack'))

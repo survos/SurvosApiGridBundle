@@ -15,6 +15,7 @@ use Survos\ApiGrid\Attribute\MeiliId;
 use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGrid\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Serializer\Attribute\Groups;
 use function Symfony\Component\String\u;
 
 class DatatableService
@@ -60,7 +61,8 @@ class DatatableService
 
             } else {
                 if (!array_key_exists('name', $c)) {
-                    dd($columns, $idx, $c);
+                    continue;
+                    dd("mssing name in " . join('|', array_keys($c)), $columns, $idx, $c);
                 }
                 assert(array_key_exists('name', $c), json_encode($c));
                 $columnName = $c['name'];
@@ -185,6 +187,17 @@ class DatatableService
             }
         }
 
+        // now go through each property, including getting the primary key
+        // something's still not right here!
+        foreach ($reflectionClass->getMethods() as $method) {
+            $fieldname = $method->getName();
+            foreach ($method->getAttributes() as $attribute) {
+                if ($attribute->getName() == Groups::class) {
+//                    dump($settings, $fieldname, $attribute);
+                    $settings[$fieldname]['browsable'] = true;
+                }
+            }
+        }
 //        dd($settings);
         // @todo: methods
         return $settings;

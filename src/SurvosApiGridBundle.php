@@ -8,6 +8,7 @@ use Survos\ApiGrid\Command\ApiIndexCommand;
 use Survos\ApiGrid\Command\IndexCommand;
 use Survos\ApiGrid\Components\GridComponent;
 use Survos\ApiGrid\Components\ItemGridComponent;
+use Survos\ApiGrid\Components\JsTwigComponent;
 use Survos\ApiGrid\Controller\GridController;
 use Survos\ApiGrid\Controller\MeiliController;
 use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
@@ -123,6 +124,11 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
 
         $builder->register(ItemGridComponent::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
+        ;
+
+        $builder->register(JsTwigComponent::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
         ;

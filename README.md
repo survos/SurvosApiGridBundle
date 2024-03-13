@@ -116,3 +116,20 @@ curl -X 'POST' \
   "title": "Symfony Fast Track"
 }'
 ```
+
+## Brainstorm: jstwig component
+```twig
+<twig:jstwig :data="data>
+<section class="containers">
+        <h3>
+            {{ row.s|length }} Results
+        </h3>
+
+    {% for row in row %}
+            <div>
+                {{- 'Overlay ' ~ i -}}
+            </div>
+    {% endfor %}
+</section>
+</twig:jstwig>
+```

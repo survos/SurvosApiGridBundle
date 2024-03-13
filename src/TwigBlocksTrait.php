@@ -7,10 +7,11 @@ use Symfony\Component\DomCrawler\Crawler;
 trait TwigBlocksTrait
 {
 
-    public function getTwigBlocks(): array
+    public function getTwigBlocks(?string $id=null): array
     {
         $customColumnTemplates = [];
         $allTwigBlocks = [];
+//        dd($this->twig->getLoader()->cache, $id, $this->caller);
         if ($this->caller) {
             //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
@@ -69,8 +70,14 @@ trait TwigBlocksTrait
 
             $crawler = new Crawler();
             $crawler->addHtmlContent($componentHtml);
-//            dd($componentHtml, $twigBlocks);
             $allTwigBlocks = [];
+            if ($this->getId()) {
+                $selector = '#' . $this->getId();
+                $text = $crawler->filter($selector)->html();
+                $text =  urldecode($text);
+                $customColumnTemplates[$this->getId()] = $text;
+                return $customColumnTemplates;
+            }
 
             if ($crawler->filterXPath('//api_grid')->count() > 0) {
                 $twigBlocks = $crawler->filterXPath('//api_grid')->each(function (Crawler $node, $i) {
@@ -79,6 +86,15 @@ trait TwigBlocksTrait
                 if (is_array($twigBlocks)) {
                     $twigBlocks = $twigBlocks[0];
                 }
+            } elseif ($crawler->filterXPath('//js_twig')->count() > 0) {
+                dd($crawler);
+                    $twigBlocks = $crawler->filterXPath('//js_twig')->each(function (Crawler $node, $i) {
+                        dd($node);
+                        return urldecode($node->html());
+                    });
+                    if (is_array($twigBlocks)) {
+                        $twigBlocks = $twigBlocks[0];
+                    }
             } else {
                 $twigBlocks = $source;
             }

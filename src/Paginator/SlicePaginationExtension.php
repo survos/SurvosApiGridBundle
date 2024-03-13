@@ -59,8 +59,8 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
         }
 
         $queryBuilder
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setFirstResult((int)$offset)
+            ->setMaxResults((int)$limit);
     }
 
     /**

@@ -56,6 +56,7 @@ export default class extends Controller {
         let globals = JSON.parse(this.globalsValue);
 
         this.fetchItem().then((item) => {
+            console.log(item);
             let params = {data: item, globals: globals};
             params._keys = null;
             // console.error(params);

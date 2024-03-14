@@ -36,11 +36,5 @@ class JsTwigComponent implements TwigBlocksInterface
         //        ='@survos/grid-bundle/api_grid';
     }
 
-    public function getId()
-    {
-        return $this->id;
-
-    }
-
 
 }

@@ -128,4 +128,11 @@ trait TwigBlocksTrait
         return $customColumnTemplates;
     }
 
+    public function getId()
+    {
+        return $this->id??null;
+    }
+
+
+
 }

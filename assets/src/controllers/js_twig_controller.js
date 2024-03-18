@@ -26,8 +26,7 @@ export default class extends Controller {
     }
 
     connect() {
-        console.log("Hello from " + this.identifier);
-        console.error(this.blocksValue);
+        // console.log("Hello from " + this.identifier);
         this.render()
     }
 
@@ -41,8 +40,6 @@ export default class extends Controller {
         }
 
         const item = await response.json();
-
-        console.error(item);
         return item;
     }
 
@@ -56,13 +53,11 @@ export default class extends Controller {
         let globals = JSON.parse(this.globalsValue);
 
         this.fetchItem().then((item) => {
-            console.log(item);
             let params = {data: item, globals: globals};
             params._keys = null;
             // console.error(params);
             let html = template.render(params);
             this.element.innerHTML = html;
-            console.warn('call twig');
         })
 
 

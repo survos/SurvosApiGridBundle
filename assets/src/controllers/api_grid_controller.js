@@ -450,8 +450,20 @@ export default class extends Controller {
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
-            responsive: true,
-            // scroller: {
+            // responsive: true,
+            responsive: {
+                details: {
+                    display: DataTables.Responsive.display.modal({
+                    // display: $.fn.dataTable.Responsive.display.modal({
+                        header: function (row) {
+                            var data = row.data();
+                            return 'Details for ' + data.clientName;
+                        }
+                    })
+                }
+            },
+
+        // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
             //     // displayBuffer: 10,
             //     loadingIndicator: true,

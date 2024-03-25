@@ -5,11 +5,17 @@ import $ from 'jquery';
 
 import {default as axios} from "axios";
 
+console.log('bootstrap before responsive!');
+
 import DataTables from "datatables.net-bs5";
 import '../datatables-plugins.js';
+// https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
+import bootstrap from 'bootstrap'; // bootstrap javascript
+// import Modal from 'bootstrap/js/dist/modal';
+window.bootstrap = bootstrap;
+DataTables.Responsive.bootstrap( bootstrap );
+
 import PerfectScrollbar from 'perfect-scrollbar';
-// if component
-let routes = false;
 
 import Routing from 'fos-routing';
 import RoutingData from '/js/fos_js_routes.js';
@@ -32,9 +38,6 @@ Twig.extend(function (Twig) {
 });
 
 
-// import {Modal} from "bootstrap"; !!
-// https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
-// import Modal from 'bootstrap/js/dist/modal';
 // import cb from "../js/app-buttons";
 
 
@@ -446,22 +449,22 @@ export default class extends Controller {
             orderCellsTop: true,
             fixedHeader: true,
             //cascadePanes  : true,
-            deferRender: true,
+            // deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
-            // responsive: true,
-            responsive: {
-                details: {
-                    display: DataTables.Responsive.display.modal({
-                    // display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details for ' + data.clientName;
-                        }
-                    })
-                }
-            },
+            responsive: true,
+            // responsive: {
+            //     details: {
+            //         display: DataTables.Responsive.display.modal({
+            //         // display: $.fn.dataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details for ' + data.clientName;
+            //             }
+            //         })
+            //     }
+            // },
 
         // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
@@ -534,6 +537,7 @@ export default class extends Controller {
             //     }),
             // ],
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
+            // https://datatables.net/reference/option/ajax
             ajax: (params, callback, settings) => {
                     this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
@@ -545,6 +549,7 @@ export default class extends Controller {
                 if (this.locale !== '') {
                     this.apiParams['_locale'] = this.locale;
                 }
+                // check for meili index
                 if (this.hasIndexValue) {
                     this.apiParams['_index'] = this.indexValue;
                 }

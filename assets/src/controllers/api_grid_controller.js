@@ -7,13 +7,15 @@ import {default as axios} from "axios";
 
 console.log('bootstrap before responsive!');
 
-import DataTables from "datatables.net-bs5";
+import DataTable from "datatables.net-bs5";
 import '../datatables-plugins.js';
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
-import bootstrap from 'bootstrap'; // bootstrap javascript
+// import bootstrap from 'bootstrap'; // bootstrap javascript
+import * as bootstrap from 'bootstrap';
+
 // import Modal from 'bootstrap/js/dist/modal';
 window.bootstrap = bootstrap;
-DataTables.Responsive.bootstrap( bootstrap );
+DataTable.Responsive.bootstrap( bootstrap );
 
 import PerfectScrollbar from 'perfect-scrollbar';
 
@@ -456,7 +458,7 @@ export default class extends Controller {
             // responsive: true,
             responsive: {
                 details: {
-                    display: DataTables.Responsive.display.modal({
+                    display: DataTable.Responsive.display.modal({
                     // display: $.fn.dataTable.Responsive.display.modal({
                         header: function (row) {
                             var data = row.data();
@@ -671,7 +673,7 @@ export default class extends Controller {
 
             },
         };
-        let dt = new DataTables(el, setup);
+        let dt = new DataTable(el, setup);
 
 
         if (this.filter.hasOwnProperty('P')) {

@@ -148,6 +148,12 @@ class ApiGridComponent implements TwigBlocksInterface
         return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
     }
 
+    public function getModalTemplate(): ?string
+    {
+        return $this->getTwigBlocks()['_modal']??null;
+
+    }
+
     public function searchPanesColumns(): int
     {
         $count = 0;

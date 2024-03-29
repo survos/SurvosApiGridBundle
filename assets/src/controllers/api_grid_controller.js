@@ -65,6 +65,7 @@ export default class extends Controller {
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
         globals: {type: String, default: '[]'},
+        modalTemplate: {type: String, default: ''},
         locale: {type: String, default: 'no-locale!'},
         style: {type: String, default: 'spreadsheet'},
         cascadePanes: {type: Boolean, default: false},
@@ -86,7 +87,7 @@ export default class extends Controller {
         let columns = this.columns.sort(function(a, b) {
             return   a.order - b.order; // Sort in ascending order
         });
-        // console.error(columns);
+        console.error(columns);
 
         let x = columns.map(c => {
             let render = null;
@@ -95,11 +96,10 @@ export default class extends Controller {
                     data: c.twigTemplate
                 });
                 render = (data, type, row, meta) => {
-                    let globals = JSON.parse(this.globalsValue);
                     // Object.assign(row, );
                     // row.locale = this.localeValue;
 
-                    let params = {data: data, row: row, globals: globals, column: c, field_name: c.name};
+                    let params = {data: data, row: row, globals: this.globals, column: c, field_name: c.name};
                     params._keys = null;
                     // console.error(params);
                     return template.render(params);
@@ -139,6 +139,7 @@ export default class extends Controller {
         this.apiParams = {}; // initialize
         const event = new CustomEvent("changeFormUrlEvent", {formUrl: 'testing formURL!'});
         window.dispatchEvent(event);
+        this.globals = JSON.parse(this.globalsValue);
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
@@ -439,6 +440,25 @@ export default class extends Controller {
         //     language = hilanguage;
         // }
 
+        var modalTemplate;
+        var modalRenderer = DataTable.Responsive.renderer.tableAll({
+            tableClass: 'ui table'
+        })
+        if (this.modalTemplateValue) {
+            modalTemplate = Twig.twig({
+                data: this.modalTemplateValue
+            });
+            modalRenderer = ( api, rowIdx, columns ) => {
+                let data = api.row(rowIdx).data();
+                let params = {data: data, columns: columns, globals: this.globals};
+                // params._keys = null;
+                // console.error(params);
+                // return this.modalTemplateValue;
+                return modalTemplate.render(params);
+                console.log(rowIdx);
+            }
+        }
+
         let setup = {
             // let dt = new DataTable(el, {
             language: language,
@@ -451,15 +471,15 @@ export default class extends Controller {
             orderCellsTop: true,
             fixedHeader: true,
             //cascadePanes  : true,
-            // deferRender: true,
+            deferRender: true,
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
             // responsive: true,
             responsive: {
                 details: {
+                    renderer: modalRenderer,
                     display: DataTable.Responsive.display.modal({
-                    // display: $.fn.dataTable.Responsive.display.modal({
                         header: function (row) {
                             var data = row.data();
                             return 'Details for ' + data.clientName;
@@ -662,6 +682,7 @@ export default class extends Controller {
                         callback(callbackValues);
                     })
                     .catch((error) => {
+                        console.error(error, error.request);
                         let url = error.request.responseURL;
                         var a = document.createElement('a');
                         var linkText = document.createTextNode(url);
@@ -1025,10 +1046,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         };
 
         this.debug && console.log('adding footer');
-        // var tr = $('<tr>');
-        // var that = this;
-        // console.log(this.columns());
-        // Create an empty <tfoot> element and add it to the table:
         var footer = el.createTFoot();
         footer.classList.add('show-footer-above');
 

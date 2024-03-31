@@ -475,18 +475,18 @@ export default class extends Controller {
             // scrollX:        true,
             // scrollCollapse: true,
             scroller: true,
-            // responsive: true,
-            responsive: {
-                details: {
-                    renderer: modalRenderer,
-                    display: DataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details for ' + data.clientName;
-                        }
-                    })
-                }
-            },
+            responsive: true,
+            // responsive: {
+            //     details: {
+            //         renderer: modalRenderer,
+            //         display: DataTable.Responsive.display.modal({
+            //             header: function (row) {
+            //                 var data = row.data();
+            //                 return 'Details for ' + data.clientName;
+            //             }
+            //         })
+            //     }
+            // },
 
         // scroller: {
             //     // rowHeight: 90, // @WARNING: Problematic!!
@@ -563,8 +563,9 @@ export default class extends Controller {
             ajax: (params, callback, settings) => {
                     this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
-                // console.error(searchPanesRaw, this.apiParams);
-                // console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, apiParams);
+                // console.error(this.apiParams);
+                // console.warn(params);
+                console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
                 // yet another locale hack

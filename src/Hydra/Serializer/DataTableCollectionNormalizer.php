@@ -54,7 +54,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
 //        dd($object, $format, $context);
-        $this->logger->error(sprintf("%s ", $format));
+//        $this->logger->error(sprintf("%s ", $format));
         if (!isset($context['resource_class']) || isset($context['api_sub_level'])) {
             return $this->normalizeRawCollection($object, $format, $context);
         }

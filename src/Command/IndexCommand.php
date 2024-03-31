@@ -102,11 +102,10 @@ class IndexCommand extends Command
             $batchSize = $input->getOption('batch-size');
 
 
-
-            $stats = $this->indexClass($class, $index, $batchSize, $indexName, $groups,
-                $input->getOption('limit'),
-                $input->getOption('filter') ? $filterArray: null,
-                $input->getOption('dump'),
+            $stats = $this->indexClass($class, $index, batchSize: $batchSize, indexName: $indexName, groups: $groups,
+                limit: $input->getOption('limit'),
+                filter: $input->getOption('filter') ? $filterArray: null,
+                dump: $input->getOption('dump'),
             );
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
             $this->meiliService->waitUntilFinished($index);
@@ -186,8 +185,10 @@ class IndexCommand extends Command
         $primaryKey = $index->getPrimaryKey();
         $repo =  $this->entityManager->getRepository($class);
         $qb = $repo->createQueryBuilder('r');
-        $count = null;
+        $count = 0;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
+
+
         if ($filter) {
             foreach ($filter as $var => $val) {
                 $qb->andWhere('e.' . $var . "= :$var")
@@ -195,21 +196,34 @@ class IndexCommand extends Command
             }
 //            $qb->andWhere($filter);
         }
-        $results = $qb->getQuery()->toIterable();
-        if (is_null($count)) {
-            // slow if not filtered!
-            $count = count(iterator_to_array($results, false));
-        }
-        $results = $qb->getQuery()->toIterable();
-        $this->io->title("$count $class");
-        if (!$count) {
+        $total = (clone $qb)->select("count(e.$primaryKey)")->getQuery()->getSingleScalarResult();
+        $this->io->title("$total $class");
+        if (!$total) {
             return ['numberOfDocuments'=>0];
         }
+
+        $query = $qb->getQuery();
+        $progressBar = $this->getProcessBar($total);
+        $progressBar->setMessage("Indexing $class");
+
+        do {
+        if ($batchSize) {
+            $query
+                ->setFirstResult($startingAt)
+                ->setMaxResults($batchSize);
+        }
+        $results = $query->toIterable();
+        $count += count(iterator_to_array($results, false)); //??
+//        if (is_null($count)) {
+//            // slow if not filtered!
+//            $count = count(iterator_to_array($results, false));
+//        }
+            $results = $qb->getQuery()->toIterable();
+            $startingAt += $batchSize;
+
         if ($subdomain) {
             assert($count == 1, "$count should be one for " . $subdomain);
         }
-        $progressBar = $this->getProcessBar($count);
-        $progressBar->setMessage("Indexing $class");
 
         foreach ($results as $idx => $r) {
 
@@ -251,12 +265,13 @@ class IndexCommand extends Command
             $records[] = $data;
 //            if (count($data['tags']??[]) == 0) { continue; dd($data['tags'], $r->getTags()); }
 
-            if (( ($progress = $progressBar->getProgress()) % $batchSize) === 0) {
+            if ($batchSize && (($progress = $progressBar->getProgress()) % $batchSize) === 0) {
                 $task = $index->addDocuments($records, $primaryKey);
                 // wait for the first record, so we fail early and catch the error, e.g. meili down, no index, etc.
                 if (!$progress) {
                     $this->meiliService->waitForTask($task);
                 }
+                $this->io->writeln("Flushing " . count($records));
                 $records = [];
             }
             $progressBar->advance();
@@ -265,12 +280,19 @@ class IndexCommand extends Command
                 break;
             }
         }
+        // if there are some that aren't batched...
         if (count($records)) {
+//            dump($total, $limit, $batchSize);
+            $this->io->writeln("Final Flush " . count($records));
             $task = $index->addDocuments($records, $primaryKey);
             // if debugging
 //            $this->waitForTask($task);
         }
 
+//            dump($count, $startingAt, $batchSize);
+            $this->io->write("$count of $total loaded, this batch:" . count($records));
+        } while ($count < $total);
+//        dd($count, $total, $batchSize);
 
         $progressBar->finish();
 

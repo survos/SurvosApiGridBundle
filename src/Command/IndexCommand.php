@@ -70,7 +70,8 @@ class IndexCommand extends Command
             $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($metas as $meta) {
                 // actually, ApiResource or GetCollection
-                foreach ($meta->getReflectionClass()->getAttributes(ApiResource::class) as $attribute) {
+                $apiRouteAttributes = $meta->getReflectionClass()->getAttributes(ApiResource::class);
+                foreach ($apiRouteAttributes as $attribute) {
                     $args = $attribute->getArguments();
                     // @todo: this could also be inside of the operation!
                     if (array_key_exists('normalizationContext', $args)) {
@@ -86,6 +87,10 @@ class IndexCommand extends Command
                     }
                 }
             }
+        if ($output->isVerbose() && !count($apiRouteAttributes)) {
+            $output->writeln("Skipping $class, not an API Resource");
+        }
+
 
         $this->io = new SymfonyStyle($input, $output);
 
@@ -100,7 +105,6 @@ class IndexCommand extends Command
 
             $index = $this->configureIndex($class, $indexName);
             $batchSize = $input->getOption('batch-size');
-
 
             $stats = $this->indexClass($class, $index, batchSize: $batchSize, indexName: $indexName, groups: $groups,
                 limit: $input->getOption('limit'),
@@ -179,12 +183,9 @@ class IndexCommand extends Command
                                 ?string $subdomain=null,
     ): array
     {
-
         $startingAt = 0;
         $records = [];
         $primaryKey = $index->getPrimaryKey();
-        $repo =  $this->entityManager->getRepository($class);
-        $qb = $repo->createQueryBuilder('r');
         $count = 0;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
 
@@ -197,35 +198,37 @@ class IndexCommand extends Command
 //            $qb->andWhere($filter);
         }
         $total = (clone $qb)->select("count(e.$primaryKey)")->getQuery()->getSingleScalarResult();
-        $this->io->title("$total $class");
+        $this->io->title("Indexing $class ($total records, batches of $batchSize) ");
         if (!$total) {
             return ['numberOfDocuments'=>0];
         }
 
         $query = $qb->getQuery();
         $progressBar = $this->getProcessBar($total);
-        $progressBar->setMessage("Indexing $class");
+        $progressBar->setMessage("Indexing $class ($total records, batches of $batchSize) ");
 
         do {
         if ($batchSize) {
             $query
                 ->setFirstResult($startingAt)
                 ->setMaxResults($batchSize);
+            $this->io->writeln("Fetching $startingAt ($batchSize)");
         }
         $results = $query->toIterable();
-        $count += count(iterator_to_array($results, false)); //??
 //        if (is_null($count)) {
 //            // slow if not filtered!
 //            $count = count(iterator_to_array($results, false));
 //        }
-            $results = $qb->getQuery()->toIterable();
+//            $results = $qb->getQuery()->toIterable();
             $startingAt += $batchSize;
+//            $count += count(iterator_to_array($results, false)); //??
 
         if ($subdomain) {
             assert($count == 1, "$count should be one for " . $subdomain);
         }
 
         foreach ($results as $idx => $r) {
+            $count++;
 
             // @todo: pass in groups?  Or configure within the class itself?
             // maybe these should come from the ApiPlatform normalizer.
@@ -275,8 +278,10 @@ class IndexCommand extends Command
                 $records = [];
             }
             $progressBar->advance();
+            assert($count == $progressBar->getProgress(), "$count  <> " . $progressBar->getProgress());
 
             if ($limit && ($progressBar->getProgress() >= $limit)) {
+                $count = $total; // hack for breaking out of loop
                 break;
             }
         }
@@ -290,7 +295,8 @@ class IndexCommand extends Command
         }
 
 //            dump($count, $startingAt, $batchSize);
-            $this->io->write("$count of $total loaded, this batch:" . count($records));
+            $this->io->writeln("$count of $total loaded, this batch:" . count($records));
+        dump("$count of $total");
         } while ($count < $total);
 //        dd($count, $total, $batchSize);
 

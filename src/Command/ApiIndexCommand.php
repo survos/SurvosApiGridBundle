@@ -23,7 +23,7 @@ use ApiPlatform\Metadata\ApiFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use ApiPlatform\Metadata\ApiResource;
 
-#[AsCommand('api:index', 'Create a meili index for a doctrine entity', aliases: ['app:index-db'])]
+#[AsCommand('api:index', 'deprecated? USE GRID:INDEX!   this is specific to project and owner', aliases: ['app:index-db'])]
 final class ApiIndexCommand extends InvokableServiceCommand
 {
     use RunsCommands;

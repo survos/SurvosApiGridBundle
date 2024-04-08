@@ -189,7 +189,6 @@ class IndexCommand extends Command
         $count = 0;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
 
-
         if ($filter) {
             foreach ($filter as $var => $val) {
                 $qb->andWhere('e.' . $var . "= :$var")
@@ -209,10 +208,11 @@ class IndexCommand extends Command
 
         do {
         if ($batchSize) {
+            assert($count < $total, "count $count >= total $total");
             $query
                 ->setFirstResult($startingAt)
                 ->setMaxResults($batchSize);
-            $this->io->writeln("Fetching $startingAt ($batchSize)");
+//            $this->io->writeln("Fetching $startingAt ($batchSize)");
         }
         $results = $query->toIterable();
 //        if (is_null($count)) {
@@ -226,10 +226,8 @@ class IndexCommand extends Command
         if ($subdomain) {
             assert($count == 1, "$count should be one for " . $subdomain);
         }
-
         foreach ($results as $idx => $r) {
             $count++;
-
             // @todo: pass in groups?  Or configure within the class itself?
             // maybe these should come from the ApiPlatform normalizer.
 
@@ -241,6 +239,7 @@ class IndexCommand extends Command
             if (!array_key_exists($primaryKey, $data)) {
 //                dd($data, $primaryKey);
                 $this->logger->error("No primary key $primaryKey for " . $class);
+                return ['numberOfDocuments'=>0];
                 break;
             }
             $data['id'] = $data[$primaryKey]; // ??
@@ -274,7 +273,7 @@ class IndexCommand extends Command
                 if (!$progress) {
                     $this->meiliService->waitForTask($task);
                 }
-                $this->io->writeln("Flushing " . count($records));
+//                $this->io->writeln("Flushing " . count($records));
                 $records = [];
             }
             $progressBar->advance();
@@ -285,22 +284,23 @@ class IndexCommand extends Command
                 break;
             }
         }
+//            $this->io->writeln("$count of $total loaded, this batch:" . count($records));
+        if ($startingAt > $total) {
+//            dump($count, $total, $startingAt);
+        }
+        } while ( ($count < $total)) ;
+//        dd($count, $total, $batchSize);
+
+        $progressBar->finish();
         // if there are some that aren't batched...
         if (count($records)) {
-//            dump($total, $limit, $batchSize);
             $this->io->writeln("Final Flush " . count($records));
             $task = $index->addDocuments($records, $primaryKey);
             // if debugging
 //            $this->waitForTask($task);
         }
 
-//            dump($count, $startingAt, $batchSize);
-            $this->io->writeln("$count of $total loaded, this batch:" . count($records));
-        dump("$count of $total");
-        } while ($count < $total);
-//        dd($count, $total, $batchSize);
 
-        $progressBar->finish();
 
         $this->showIndexSettings($index);
 

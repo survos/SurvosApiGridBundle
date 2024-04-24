@@ -1035,7 +1035,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
     initFooter(el) {
         return;
 
-        var footer = el.querySelector('tfoot');
+        let footer = el.querySelector('tfoot');
         if (footer) {
             return; // do not initiate twice
         }
@@ -1047,7 +1047,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         };
 
         this.debug && console.log('adding footer');
-        var footer = el.createTFoot();
+        footer = el.createTFoot();
         footer.classList.add('show-footer-above');
 
         var thead = el.querySelector('thead');

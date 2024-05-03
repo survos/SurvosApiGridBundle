@@ -52,7 +52,8 @@ export default class extends Controller {
             console.log(this.tableElement);
         } else if (this.element.tagName === 'TABLE') {
             this.tableElement = this.element;
-            if (this.useDatatablesValue) {
+            if (!this.useDatatablesValue) {
+                return;
             }
 
         } else {
@@ -287,13 +288,13 @@ export default class extends Controller {
             // responsive: true,
             responsive: {
                 details: {
-                    display: DataTables.Responsive.display.modal({
-                        // display: $.fn.dataTable.Responsive.display.modal({
-                        header: function (row) {
-                            var data = row.data();
-                            return 'Details for ' + data.clientName;
-                        }
-                    })
+                    // display: DataTables.Responsive.display.modal({
+                    //     // display: $.fn.dataTable.Responsive.display.modal({
+                    //     header: function (row) {
+                    //         var data = row.data();
+                    //         return 'Details for ' + data.clientName;
+                    //     }
+                    // })
                 }
             },
 

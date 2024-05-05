@@ -5,7 +5,10 @@
 <div {{ stimulus_controller(_sc, {
     blocks: this.twigBlocks,
     apiUrl: this.apiUrl,
-    data: data|default(false)
+    data: data|default(false),
+    globals: {
+        isAdmin: is_granted('ROLE_ADMIN')
+    }
 }) }}>
 
     <div {{ stimulus_target(_sc, 'message') }}>

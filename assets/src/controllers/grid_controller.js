@@ -46,6 +46,8 @@ export default class extends Controller {
         this.that = this; // for the modal
         let dom = this.domValue;
 
+        return;
+
         this.tableElement = false;
         if (this.hasTableTarget) {
             this.tableElement = this.tableTarget;

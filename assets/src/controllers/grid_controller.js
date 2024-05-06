@@ -46,6 +46,9 @@ export default class extends Controller {
         this.that = this; // for the modal
         let dom = this.domValue;
 
+        if (!this.useDatatablesValue) {
+            return;
+        }
         return;
 
         this.tableElement = false;

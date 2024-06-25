@@ -50,6 +50,7 @@ class SurvosApiGridBundle extends AbstractBundle
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
 
+//        dd($config);
         $builder->register($id = 'api_meili_service', MeiliService::class)
             ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
             ->setArgument('$config',$config)

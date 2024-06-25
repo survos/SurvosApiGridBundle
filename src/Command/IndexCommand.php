@@ -99,6 +99,7 @@ class IndexCommand extends Command
 
             $this->io->title($indexName);
             if ($reset=$input->getOption('reset')) {
+//                dd($this->meiliService);
                 $this->meiliService->reset($indexName);
             }
 //            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));

@@ -146,6 +146,14 @@ class MeiliController extends AbstractController
     {
         $index = $this->meili->getIndex($indexName);
         $settings = $index->getSettings();
+        $stats = $index->stats();
+        // idea: meiliStats as a component?
+        $data =  [
+            'indexName' => $indexName,
+            'settings' => $index->getSettings(),
+            'stats' => $stats
+        ];
+
         dd($indexName, $settings);
         // inspect the entity and colum?
         // this gets the facet data from meili, though it could get it from a dedicated Field entity in this bundle

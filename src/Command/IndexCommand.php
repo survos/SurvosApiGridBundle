@@ -122,10 +122,11 @@ class IndexCommand extends Command
                 // now what?
 
             }
-            $this->io->success('app:index-entity ' . $class . ' finished indexing');
+            $this->io->success($this->getName() . ' ' . $class . ' finished indexing');
 
         }
 
+        $this->io->success($this->getName() . ' complete.');
         return self::SUCCESS;
 
     }

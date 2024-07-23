@@ -70,7 +70,6 @@ class MeiliService
             $indexName = $indexName->getMeiliIndexName();
         }
         $client = $this->getMeiliClient();
-        dd($client);
         try {
             $index = $client->getIndex($indexName);
             $response = $client->deleteIndex($indexName);

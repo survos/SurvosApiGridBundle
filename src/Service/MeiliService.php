@@ -44,7 +44,7 @@ class MeiliService
     public function __construct(
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
-        protected ClientInterface $httpClient,
+        protected ?ClientInterface $httpClient=null,
         private string $meiliHost,
         private string $meiliKey,
         private array $config=[],

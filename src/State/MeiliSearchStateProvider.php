@@ -21,11 +21,11 @@ class MeiliSearchStateProvider implements ProviderInterface
         private EntityManagerInterface         $em,
         private Pagination                     $pagination,
         private iterable                 $meiliSearchFilters,
-        protected ClientInterface              $httpClient,
         protected MeiliService                 $meili,
         private string                         $meiliHost,
         private string                         $meiliKey,
-        private readonly DenormalizerInterface $denormalizer
+        private readonly DenormalizerInterface $denormalizer,
+        protected ?ClientInterface              $httpClient=null,
     )
     {
     }

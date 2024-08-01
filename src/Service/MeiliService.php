@@ -36,21 +36,20 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+
 use function Symfony\Component\String\u;
 
 class MeiliService
-
 {
     public function __construct(
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
-        protected ?ClientInterface $httpClient=null,
         private string $meiliHost,
         private string $meiliKey,
-        private array $config=[],
+        private array $config = [],
         private ?LoggerInterface $logger = null,
-    )
-    {
+        protected ?ClientInterface $httpClient = null,
+    ) {
     }
 
     public function getConfig(): array
@@ -76,7 +75,6 @@ class MeiliService
             $task = $this->waitForTask($response['taskUid'], $index);
 //            $this->io()->info("Deletion Task is at " . $task['status']);
             $this->logger->info("Index " . $indexName . " has been deleted.");
-
         } catch (ApiException $exception) {
             if ($exception->errorCode == 'index_not_found') {
                 try {
@@ -89,10 +87,9 @@ class MeiliService
                 dd($exception);
             }
         }
-
     }
 
-    public function waitForTask(array|string|int $taskId, ?Indexes $index = null, bool $stopOnError = true, mixed $dataToDump=null): array
+    public function waitForTask(array|string|int $taskId, ?Indexes $index = null, bool $stopOnError = true, mixed $dataToDump = null): array
     {
 
         if (is_array($taskId)) {
@@ -104,8 +101,8 @@ class MeiliService
             // e.g index creation, when we don't have an index.  there's probably a better way.
             while (
                 ($task = $this->getMeiliClient()->getTask($taskId))
-                && (($status = $task['status']) && !in_array($status, ['failed', 'succeeded']))) {
-
+                && (($status = $task['status']) && !in_array($status, ['failed', 'succeeded']))
+            ) {
                 if (isset($this->logger)) {
 //                    $this->logger->info(sprintf("Task %s is at %s", $taskId, $status));
                 }
@@ -118,7 +115,6 @@ class MeiliService
         }
 
         return $task;
-
     }
 
     public function getPrefixedIndexName(string $indexName)
@@ -146,8 +142,12 @@ class MeiliService
             $isIndexing = $stats['isIndexing'];
             $indexName = $index->getUid();
             if ($this->logger) {
-                $this->logger->info(sprintf("\n%s is %s with %d documents",
-                    $indexName, $isIndexing ? 'indexing' : 'ready', $stats['numberOfDocuments']));
+                $this->logger->info(sprintf(
+                    "\n%s is %s with %d documents",
+                    $indexName,
+                    $isIndexing ? 'indexing' : 'ready',
+                    $stats['numberOfDocuments']
+                ));
             }
             if ($isIndexing) {
                 sleep(1);
@@ -169,7 +169,7 @@ class MeiliService
         return $client;
     }
 
-    public function getIndex(string $indexName, string $key = 'id', bool $autoCreate=true): ?Indexes
+    public function getIndex(string $indexName, string $key = 'id', bool $autoCreate = true): ?Indexes
     {
         $indexName = $this->getPrefixedIndexName($indexName);
         $this->loadExistingIndexes();
@@ -193,7 +193,7 @@ class MeiliService
         } while ($nextPage);
     }
 
-    public function getOrCreateIndex(string $indexName, string $key = 'id', bool $autoCreate=true): ?Indexes
+    public function getOrCreateIndex(string $indexName, string $key = 'id', bool $autoCreate = true): ?Indexes
     {
         $client = $this->getMeiliClient();
         try {
@@ -212,7 +212,6 @@ class MeiliService
             }
         }
         return $index;
-
     }
 
 
@@ -235,8 +234,5 @@ class MeiliService
             $currentPosition++;
         }
         $progressBar->finish();
-
     }
-
-
 }

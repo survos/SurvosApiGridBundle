@@ -40,7 +40,7 @@ class MeiliSearchStateProvider implements ProviderInterface
                 $body = $meiliSearchFilter->apply($body, $resourceClass, $operation, $context);
             }
 
-            $searchQuery = isset($context['filters']['search'])?$context['filters']['search']:"";
+            $searchQuery = $context['filters']['search']??'';
 
             $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
@@ -54,9 +54,9 @@ class MeiliSearchStateProvider implements ProviderInterface
             if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
-            try {
                 $index = $this->meili->getIndex($indexName);
                 $data = $index->search($searchQuery, $body);
+            try {
 //                $client = $this->meili->getMeiliClient();
 //                $index = $client->index($indexName);
             //dd($body);

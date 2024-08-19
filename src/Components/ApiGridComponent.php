@@ -203,6 +203,7 @@ class ApiGridComponent implements TwigBlocksInterface
 //            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),
 //                context: $context ?? []);
 
+
         $routes = $this->inspectionService->getAllUrlsForResource($class);
         // the problem with this is that it always gets the _first_ one.
         if ($apiRoute) {
@@ -212,7 +213,7 @@ class ApiGridComponent implements TwigBlocksInterface
             $urls = $this->inspectionService->getAllUrlsForResource($class);
             $routeKey = $apiRoute ?: array_key_first($urls);
             // the real route is the opname
-            assert(array_key_exists($routeKey, $routes), "Missing $routeKey in " . join(',', array_keys($routes)));
+            assert(array_key_exists($routeKey, $routes), "Missing route $routeKey in " . join(',', array_keys($routes)));
             $route = $routes[$routeKey]['opName'];
             $apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
 //            dd($this->apiGetCollectionUrl);

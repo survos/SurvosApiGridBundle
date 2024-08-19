@@ -51,11 +51,12 @@ class MeiliSearchStateProvider implements ProviderInterface
             $locale = $context['filters']['_locale'] ?? null;
 
             //
-            if (!$indexName = isset($context['uri_variables']['indexName'])?$context['uri_variables']['indexName']:false) {
+            if (!$indexName = $context['uri_variables']['indexName'] ?? false) {
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
                 $index = $this->meili->getIndex($indexName);
                 $data = $index->search($searchQuery, $body);
+//            dd($context, $indexName);
             try {
 //                $client = $this->meili->getMeiliClient();
 //                $index = $client->index($indexName);

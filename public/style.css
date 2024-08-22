@@ -21,3 +21,51 @@
     white-space: normal;
 }
 
+
+.custom-heading {
+    max-width: 150px;
+    text-wrap: wrap;
+
+    /*// hack!*/
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+
+}
+
+td.dtr-control:has(> .custom-heading) {
+    white-space: normal;
+}
+.custom-dtr-data {
+    text-wrap: wrap;
+    vertical-align: text-top;
+    white-space: normal !important;
+}
+.custom-heading a {
+    text-wrap: wrap;
+}
+
+li:has(.dtr-data > .custom-dtr-data) {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+table.dataTable>tbody>tr.child span.dtr-title {
+    min-width: 190px !important;
+    text-transform: capitalize;
+}
+
+table.dataTable>tbody>tr.child ul.dtr-details {
+    display: block !important;
+}
+
+.customTable .dtsb-searchBuilder {
+    float: left;
+}
+
+.customTable .dt-search {
+    float: right;
+}

@@ -58,7 +58,10 @@ class DatatableService
                 assert($c::class == Column::class);
                 $column = $c;
                 $columnName = $column->name;
-
+                // ugh, duplicated.  need to separate and have application-specific templates
+                if (array_key_exists($columnName, $customColumnTemplates)) {
+                    $c->twigTemplate = $customColumnTemplates[$columnName];
+                }
             } else {
                 if (!array_key_exists('name', $c)) {
                     continue;

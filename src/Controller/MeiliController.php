@@ -94,7 +94,8 @@ class MeiliController extends AbstractController
             ]);
     }
 
-    #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats', methods: ['GET'])]
+    // shouldn't this be in MeiliAdminController
+    #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats_something_wrong', methods: ['GET'])]
     public function stats(
         string  $indexName,
         Request $request,

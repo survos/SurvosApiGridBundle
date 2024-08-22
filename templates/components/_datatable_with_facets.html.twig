@@ -15,34 +15,45 @@
     filter: this.filter
 }) }}>
 
-    <div class="dtsp-verticalContainer row">
-        <div class="dtsp-verticalPanes col-3">
-        </div>
-        <div class="col-9">
-            <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
-                message
+    <div class="dtsp-verticalContainer row g-4">
+        <div class="col-sm-12 col-md-5 col-lg-4 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="dtsp-verticalPanes"></div>
+                </div>
             </div>
-{#            {{ component('menu', {#}
-{#                type: PAGE_MENU,#}
-{#                options: {#}
-{#                    columns: columns|json_encode#}
-{#                }#}
-{#            }) }}#}
+        </div>
+        <div class="col-sm-12 col-md-7 col-lg-8 col-xl-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
+                        message
+                    </div>
+        {#            {{ component('menu', {#}
+        {#                type: PAGE_MENU,#}
+        {#                options: {#}
+        {#                    columns: columns|json_encode#}
+        {#                }#}
+        {#            }) }}#}
 
-{#            {% for c in columns %}#}
-{#                {% if c.browsable %}#}
-{#                <li>#}
-{#                    <a href="{{ path('survos_facet_show', {indexName: this.index, fieldName: c.name}) }}">#}
-{#                        {{ c.name }}#}
-{#                        {{ c.browsable ? 'B' }}#}
-{#                    </a>#}
+        {#            {% for c in columns %}#}
+        {#                {% if c.browsable %}#}
+        {#                <li>#}
+        {#                    <a href="{{ path('survos_facet_show', {indexName: this.index, fieldName: c.name}) }}">#}
+        {#                        {{ c.name }}#}
+        {#                        {{ c.browsable ? 'B' }}#}
+        {#                    </a>#}
 
-{#                </li>#}
-{#                {% endif %}#}
-{#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
-{#            {% endfor %}#}
-            <table class="table table-striped nowrap" {{ stimulus_target(this.stimulusController, 'table') }}>
-            </table>
+        {#                </li>#}
+        {#                {% endif %}#}
+        {#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
+        {#            {% endfor %}#}
+                    <div class="table-responsive customTable">
+                        <table class="table table-bordered table-striped nowrap" {{ stimulus_target(this.stimulusController, 'table') }}>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

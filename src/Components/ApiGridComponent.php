@@ -58,7 +58,7 @@ class ApiGridComponent implements TwigBlocksInterface
     {
         // @todo: be smarter with what's allowed.  This don't really feel right
         if ($stack = $this->requestStack->getCurrentRequest()) {
-            $this->filter = $stack->query->all();
+            $this->filter = array_merge($this->filter, $stack->query->all());
         }
         return $this->filter;
     }
@@ -195,9 +195,11 @@ class ApiGridComponent implements TwigBlocksInterface
     public function mount(string $class,
                           string $apiRoute=null,
                           string $apiGetCollectionUrl=null,
+                          array $filter = [],
                           bool $meili=false)
         // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
     {
+        $this->filter = $filter;
 //        assert($class == $this->class, "$class <> $this->class");
         $this->class = $class; // ??
 //            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),

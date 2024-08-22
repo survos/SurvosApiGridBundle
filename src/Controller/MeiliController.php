@@ -42,57 +42,7 @@ class MeiliController extends AbstractController
 
 
 
-    #[Route(path: '/facet/{indexName}/{fieldName}/{max}', name: 'survos_facet_show', methods: ['GET'])]
-    public function facet(string $indexName, string $fieldName, int $max = 25): Response
-    {
-        $index = $this->meili->getIndex($indexName);
-        $data = $index->rawSearch("",['limit' => 0, 'facets' => [$fieldName]]);
 
-        $facetDistributionCounts = $data['facetDistribution'][$fieldName]??[];
-//        $translations = $projectService->getNonObjectTranslations($project->getCode(), $field->getCoreCode(), $locale); // , '=');
-        $counts = [];
-            foreach ($facetDistributionCounts as $label => $count) {
-                $counts[] = [
-                    'label' => $label,
-                    'count' => $count
-                ];
-            }
-        $chartData = [];
-        foreach (array_slice($counts, 0, $max) as $count) {
-            $chartData[$count['label'] ?? $count['code']] = $count['count'];
-        }
-        $chart = null;
-        if ($this->chartBuilder) {
-            $chart = $this->chartBuilder->createChart(Chart::TYPE_PIE);
-            $chart->setData([
-                'labels' => array_keys($chartData),
-                'datasets' => [
-                    [
-                        'label' => 'Data Distribution',
-                        'backgroundColor' => array_map(fn ($x) => sprintf('rgb(%d, %d, %d', random_int(0, 255), random_int(0, 255), random_int(0, 255)), array_values($chartData)),
-                        'borderColor' => 'rgb(255, 99, 132)',
-                        'data' => array_values($chartData),
-                    ],
-                ],
-            ]);
-
-            $chart->setOptions([
-                'maintainAspectRatio' => false,
-            ]);
-
-        }
-
-        return $this->render('@SurvosApiGrid/facet.html.twig', get_defined_vars() + [
-                'tableData' => $counts,
-                'chartData' => $chartData,
-                'chart' => $chart,
-                'currentField' => $fieldName,
-                'indexName' => $indexName,
-                'max' => $max,
-                // we need the facets to get a menu. Alas, this needs to run without the bootstrap bundle
-                'facetFields' =>  $index->getFilterableAttributes(),
-            ]);
-    }
 
     // shouldn't this be in MeiliAdminController
     #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats_something_wrong', methods: ['GET'])]

@@ -147,7 +147,6 @@ export default class extends Controller {
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
-        console.error(this.dom);
         // dom: 'Plfrtip',
         console.assert(this.dom, "Missing dom");
 
@@ -155,7 +154,6 @@ export default class extends Controller {
         // this.sortableFields = JSON.parse(this.sortableFieldsValue);
         // this.searchableFields = JSON.parse(this.searchableFieldsValue);
         this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
-        console.error(this.searchBuilderFields);
 
         this.locale = this.localeValue;
         this.viewTotal = true; // this.viewTotalValue;
@@ -568,6 +566,7 @@ export default class extends Controller {
                 console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
+                console.error(this.apiParams, this.filter);
                 // yet another locale hack
                 if (this.locale !== '') {
                     this.apiParams['_locale'] = this.locale;
@@ -704,6 +703,7 @@ export default class extends Controller {
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
+        console.error(this.filter, this.filterValue);
         this.filter = [];
 
         this.columns.forEach((column, index) => {

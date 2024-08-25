@@ -110,6 +110,7 @@ export default class extends Controller {
                 return this.actions({prefix: c.prefix, actions: c.actions})
             }
 
+            // https://datatables.net/reference/option/columns
             let column =
                 this.c({
                 propertyName: c.name,

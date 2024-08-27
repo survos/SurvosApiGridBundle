@@ -122,7 +122,7 @@ class IndexCommand extends Command
                 // now what?
 
             }
-            $this->io->success($this->getName() . ' ' . $class . ' finished indexing');
+            $this->io->success($this->getName() . ' ' . $class . ' finished indexing to ' . $indexName);
 
         }
 

@@ -87,10 +87,10 @@ export default class extends Controller {
         let columns = this.columns.sort(function(a, b) {
             return   a.order - b.order; // Sort in ascending order
         });
-        console.error(columns);
 
         let x = columns.map(c => {
             let render = null;
+            c.className = c.title;
             if (c.twigTemplate) {
                 let template = Twig.twig({
                     data: c.twigTemplate
@@ -567,7 +567,6 @@ export default class extends Controller {
                 console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
-                console.error(this.apiParams, this.filter);
                 // yet another locale hack
                 if (this.locale !== '') {
                     this.apiParams['_locale'] = this.locale;
@@ -696,17 +695,14 @@ export default class extends Controller {
             },
         };
         let dt = new DataTable(el, setup);
-
-
         if (this.filter.hasOwnProperty('P')) {
         }
         dt.searchPanes();
         if (this.filter.hasOwnProperty('q')) {
             dt.search(this.filter.q).draw();
         }
-        console.error(this.filter, this.filterValue);
-        this.filter = [];
 
+        this.filter = [];
         this.columns.forEach((column, index) => {
             if(column.order == 0) {
                 dt.column(index).visible(false);

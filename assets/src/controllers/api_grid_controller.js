@@ -687,7 +687,7 @@ export default class extends Controller {
                         var a = document.createElement('a');
                         var linkText = document.createTextNode(url);
                         a.href = url;
-                        this.messageTarget.innerHTML = url;
+                        this.messageTarget.innerHTML = error.message + ' ' + url;
                         console.error(error);
                     })
                 ;

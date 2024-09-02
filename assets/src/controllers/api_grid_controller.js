@@ -687,7 +687,8 @@ export default class extends Controller {
                         var a = document.createElement('a');
                         var linkText = document.createTextNode(url);
                         a.href = url;
-                        this.messageTarget.innerHTML = error.message + ' ' + url;
+                        this.messageTarget.innerHTML = '<div class="bg-danger">' + error.message + '</div> ' +
+                            `<a target="_blank" href="${url}">${url}</a>`;
                         console.error(error);
                     })
                 ;

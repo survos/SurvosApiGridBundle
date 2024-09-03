@@ -25,9 +25,9 @@ Routing.setData(RoutingData);
 
 import Twig from 'twig';
 import enLanguage from 'datatables.net-plugins/i18n/en-GB.mjs'
-// import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+import esLanguage from 'datatables.net-plugins/i18n/es-ES.mjs';
+import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
 // import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
-// import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
 // import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
 // import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 Twig.extend(function (Twig) {
@@ -425,19 +425,20 @@ export default class extends Controller {
         }
 
         let language = enLanguage;
-        // if(this.locale == 'en') {
-        //     language = enLanguage;
-        // } else if(this.locale == 'es') {
-        //     language = esLanguage;
+        if(this.locale === 'en') {
+            language = enLanguage;
+        } else if(this.locale === 'es') {
+            language = esLanguage;
+        }else if(this.locale === 'de') {
+            language = deLanguage;
+
         // }else if(this.locale == 'uk') {
         //     language = ukLanguage;
-        // }else if(this.locale == 'de') {
-        //     language = deLanguage;
         // }else if(this.locale == 'hu') {
         //     language = huLanguage;
         // }else if(this.locale == 'hi') {
         //     language = hilanguage;
-        // }
+        }
 
         var modalTemplate;
         var modalRenderer = DataTable.Responsive.renderer.tableAll({

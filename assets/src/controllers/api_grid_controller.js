@@ -11,11 +11,11 @@ import DataTable from "datatables.net-bs5";
 import '../datatables-plugins.js';
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
 // import bootstrap from 'bootstrap'; // bootstrap javascript
-import * as bootstrap from 'bootstrap';
+// import * as bootstrap from 'bootstrap';
 
 // import Modal from 'bootstrap/js/dist/modal';
-window.bootstrap = bootstrap;
-DataTable.Responsive.bootstrap( bootstrap );
+// window.bootstrap = bootstrap;
+// DataTable.Responsive.bootstrap( bootstrap );
 
 import PerfectScrollbar from 'perfect-scrollbar';
 

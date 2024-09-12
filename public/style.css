@@ -1,3 +1,7 @@
+.badge {
+    --tblr-badge-color: #FFF !important;
+    color: var(--tblr-badge-color) !important;
+}
 .width-100 {
     max-width: 100px;
     background: #0a58ca;
@@ -68,4 +72,7 @@ table.dataTable>tbody>tr.child ul.dtr-details {
 
 .customTable .dt-search {
     float: right;
+}
+.current.active {
+    color: var(--tblr-primary);
 }

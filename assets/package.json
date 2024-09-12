@@ -47,7 +47,7 @@
     },
     "importmap": {
       "twig": "^1.17.1",
-      "axios": "^1.2.2",
+      "axios": "^1.7.7",
       "fos-routing": "^0.0.6",
       "perfect-scrollbar": "^1.5.5",
       "datatables.net-plugins/i18n/en-GB.mjs": "^2.0",
@@ -70,6 +70,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "datatables.net": "^2.0.3",
     "datatables.net-bs5": "^2.0.3",

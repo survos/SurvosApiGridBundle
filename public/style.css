@@ -1,3 +1,61 @@
+/*This is api-grid/public/style.css file*/
+
+
+.customTable {
+    line-height: 21px;
+    font-size: 14px;
+}
+.customTable span ,
+.customTable a {
+    font-size: 14px;
+}
+
+.customTable .modern-way {
+    min-width: 65px;
+}
+
+.customTable .dt-search {
+    margin-bottom: 16px;
+    margin-right: 3px;
+}
+
+.customTable div.dtsb-searchBuilder div.dtsb-titleRow {
+    height: 28px;
+}
+.customTable div.dtsb-searchBuilder div.dtsb-titleRow div.dtsb-title {
+    padding-top: 0;
+    color: #495057;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.001em;
+}
+
+.customTable .dt-length, .customTable .dtsb-searchBuilder {
+    float: left;
+}
+
+.customTable .dtsb-searchBuilder {
+    width: auto;
+}
+.customTable .dt-search {
+    float: right;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .badge {
     --tblr-badge-color: #FFF !important;
     color: var(--tblr-badge-color) !important;

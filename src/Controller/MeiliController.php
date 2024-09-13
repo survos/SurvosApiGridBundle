@@ -40,10 +40,6 @@ class MeiliController extends AbstractController
 
     }
 
-
-
-
-
     // shouldn't this be in MeiliAdminController
     #[Route(path: '/stats/{indexName}.{_format}', name: 'survos_index_stats_something_wrong', methods: ['GET'])]
     public function stats(

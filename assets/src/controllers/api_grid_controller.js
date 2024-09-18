@@ -1,4 +1,4 @@
-// during dev, from project_dir run
+    // during dev, from project_dir run
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import {Controller} from "@hotwired/stimulus";
 import $ from 'jquery';
@@ -99,7 +99,14 @@ export default class extends Controller {
                     // Object.assign(row, );
                     // row.locale = this.localeValue;
 
-                    let params = {data: data, row: row, globals: this.globals, column: c, field_name: c.name};
+                    // console.warn(meta); // row, columns, settings
+                    let rowName = 'xx';
+                    let params = {
+                        [c.name]: row[c.name],
+                        data: data, dtType: type, row: row, globals: this.globals, column: c, field_name: c.name};
+                    // params[rowName] = row;
+                    // [key]: 'ES6!'
+                    // params[c.name] = row[c.name];
                     params._keys = null;
                     // console.error(params);
                     return template.render(params);
@@ -123,11 +130,31 @@ export default class extends Controller {
                 className: c.className
             });
 
+            column.searchPanes = {
+                show: c.browsable,
+                dtOpts: {
+                    info: true,
+                    columnDefs: [
+                        {
+                            targets: 0,
+                            className: 'f32'
+                        }
+                    ]
+                }
+            };
+
             if (c.browsable) {
-                column.searchPanes = {
-                    show: true
-                };
+                console.warn(c.name, column);
             }
+            // column.searchPanes.dtOpts = {
+            //     info: true,
+            //     columnDefs: [
+            //             {
+            //                 targets: 0,
+            //                 className: 'f32'
+            //             }
+            //         ]
+            // }
             return column;
         });
         return x;

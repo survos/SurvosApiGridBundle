@@ -18,6 +18,7 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
 
 #[AsTwigComponent('api_grid', template: '@SurvosApiGrid/components/api_grid.html.twig')]
@@ -199,6 +200,10 @@ class ApiGridComponent implements TwigBlocksInterface
                           bool $meili=false)
         // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
     {
+        // this allows the jstwig templates to compile, but needs to happen earlier.
+//        $this->twig->addGlobal('owner', []);
+//        dd($this->twig->getGlobals());
+
         $this->filter = $filter;
 //        assert($class == $this->class, "$class <> $this->class");
         $this->class = $class; // ??

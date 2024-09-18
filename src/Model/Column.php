@@ -11,6 +11,7 @@ class Column
         public ?string $twigTemplate = null,
         public ?string $route = null,
         public ?string $type = null, // this is used for searchBuilder
+        public ?string $rowName = 'row', // what's passed to the column renderer
         public ?string $prefix = null,
         public ?string $internalCode = null, // e.g. label, description, type
         public ?string $className = null, // e.g. pull-right for numbers

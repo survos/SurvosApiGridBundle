@@ -63,11 +63,8 @@ class MeiliService
     }
 
 
-    public function reset(Project|string $indexName)
+    public function reset(string $indexName)
     {
-        if (!is_string($indexName)) {
-            $indexName = $indexName->getMeiliIndexName();
-        }
         $client = $this->getMeiliClient();
         try {
             $index = $client->getIndex($indexName);

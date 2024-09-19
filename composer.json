@@ -18,7 +18,7 @@
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/orm": "^2.12 || ^3.0",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "survos/inspection-bundle": "^1.5.328",
+        "survos/inspection-bundle": "^1.5.329",
         "symfony/config": "^6.4 || ^7.0",
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
@@ -53,7 +53,8 @@
         "symfony/ux-chartjs": "^2.13",
         "meilisearch/meilisearch-php": "^1.6",
         "symfony/http-client": "^7.0",
-        "nyholm/psr7": "^1.0"
+        "nyholm/psr7": "^1.0",
+        "symfony/intl": "^7.1"
     },
     "config": {
         "allow-plugins": {

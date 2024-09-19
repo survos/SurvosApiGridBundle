@@ -19,6 +19,8 @@ use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Intl\Countries;
+use Symfony\Component\Intl\Languages;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
@@ -65,8 +67,11 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+            $locale = $params['_locale'] ?? null;
+            $context['locale'] = $locale;
             if (isset($params['facets']) && is_array($params['facets'])) {
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
+//                dd($facets);
             }
             $data = $this->getNextData($object['data'], $context, []);
             $object = $object['data']->getHits();
@@ -123,6 +128,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         unset($context['operation_type'], $context['operation_name']);
 
         $itemsData = $this->getItemsData($object, $format, $context);
+
 
         return array_merge_recursive($data, $paginationData, $itemsData, ['hydra:facets' => $facets]);
     }
@@ -213,11 +219,27 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     private function getFacetsData(array $facets, ?array $params, ?array $context): array
     {
         $facetsData = [];
-
+        $locale = $context['locale']??null;
         foreach ($params as $key => $facet) {
             $data = [];
+
+            // hack!
+
             foreach ($facet as $facetKey => $facetValue) {
-                $fdata["label"] = $facetKey;
+                try {
+                    $label = match($key) {
+                        'countryCode' => Countries::getName(strtoupper($facetKey), $locale),
+                        'locale' => Languages::getName($facetKey, $locale),
+                        default => $facetKey
+                    };
+                } catch (\Exception $exception) {
+                    assert(false, "bad data! " . $exception->getMessage());
+                    continue;
+                    dd($key, $facetKey, $facetValue, $exception->getMessage());
+                }
+
+                // translation? js for language and country?
+                $fdata["label"] = $label;
                 $fdata["total"] = $facetValue;
                 $fdata["value"] = $facetKey;
                 $fdata["count"] = 0;

@@ -35,15 +35,15 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private                                                      $contextBuilder,
-        ResourceClassResolverInterface                               $resourceClassResolver,
-        private readonly LoggerInterface $logger,
-        private EventDispatcherInterface $eventDispatcher,
-        private readonly RequestStack                                $requestStack, // hack to add locafle
-        private readonly IriConverterInterface                       $iriConverter,
-        protected ?ResourceMetadataCollectionFactoryInterface        $resourceMetadataFactory,
-        array                                                        $defaultContext = [],
-        protected string                                             $pageParameterName = 'page'
+        private                                               $contextBuilder,
+        ResourceClassResolverInterface                        $resourceClassResolver,
+        private readonly LoggerInterface                      $logger,
+        private EventDispatcherInterface                      $eventDispatcher,
+        private readonly RequestStack                         $requestStack, // hack to add locafle
+        private readonly IriConverterInterface                $iriConverter,
+        protected ?ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
+        array                                                 $defaultContext = [],
+        protected string                                      $pageParameterName = 'page'
     )
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
@@ -68,11 +68,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $facets = [];
         $data = [];
 
-        if(is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
             $locale = $params['_locale'] ?? null;
             $context['locale'] = $locale;
             if (isset($params['facets']) && is_array($params['facets'])) {
+                $context['pixieCode'] = $params['pixieCode'] ?? false;
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
             }
             $data = $this->getNextData($object['data'], $context, []);
@@ -92,7 +93,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 if (isset($params['facets']) && is_array($params['facets'])) {
                     $doctrineFacets = [];
 
-                    foreach($params['facets'] as $key => $facet) {
+                    foreach ($params['facets'] as $key => $facet) {
                         $keyArray = array_keys($metadata->getReflectionProperties());
                         if (in_array($facet, $keyArray)) {
                             try {
@@ -221,25 +222,49 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     private function getFacetsData(array $facets, ?array $params, ?array $context): array
     {
         $facetsData = [];
-        $locale = $context['locale']??null;
-        $event =  $this->eventDispatcher->dispatch(new FacetEvent($params, $locale, $context));
-        $translatedFacets = $event->getFacets();
-        foreach ($translatedFacets as $key => $facet) {
-            $data = [];
-            foreach ($facet as $facetKey => $fdata) {
+        $locale = $context['locale'] ?? null;
+        // a mess, needs refactoring
+        if ($pixieCode = $context['uri_variables']['pixieCode'] ?? false) {
+            $event = $this->eventDispatcher->dispatch(new FacetEvent($params, $locale, $context));
+            $translatedFacets = $event->getFacets();
+            foreach ($translatedFacets as $key => $facet) {
+                $data = [];
+
+                foreach ($facet as $facetKey => $fdata) {
 //                dd($facet, $facetKey, $facetCount, $key);
-                // translation? js for language and country?
+                    // translation? js for language and country?
 //                $fdata["label"] = $label;
 //                $fdata["total"] = $facetValue;
-                $fdata["value"] = $facetKey;
+                    $fdata["value"] = $facetKey;
 //                $fdata["count"] = 0;
 //                if (isset($facets[$key][$facetKey])) {
 //                    $fdata["count"] = $facets[$key][$facetKey];
 //                }
 //                dd($fdata);
-                $data[] = $fdata;
+                    $data[] = $fdata;
+                }
+                $facetsData[$key] = $data;
             }
-            $facetsData[$key] = $data;
+        } else {
+
+            $facetsData = [];
+            foreach ($params as $key => $facet) {
+                $data = [];
+                foreach ($facet as $facetKey => $facetValue) {
+                    $fdata["label"] = $facetKey;
+                    $fdata["total"] = $facetValue;
+                    $fdata["value"] = $facetKey;
+                    $fdata["count"] = 0;
+                    if (isset($facets[$key][$facetKey])) {
+                        $fdata["count"] = $facets[$key][$facetKey];
+                    }
+                    $data[] = $fdata;
+                }
+                $facetsData[$key] = $data;
+            }
+
+            $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
+            return $returnData;
         }
 
         $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
@@ -323,17 +348,17 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $paginated = 1. !== $lastPage = $object->getLastPage();
             } else {
                 $itemsPerPage = $object->getItemsPerPage();
-                $pageTotalItems = (float) \count($object);
+                $pageTotalItems = (float)\count($object);
             }
 
             $currentPage = $object->getCurrentPage();
         }
 
         if ($object instanceof SearchResult && $paginated = ($object instanceof SearchResult)) {
-                $itemsPerPage = $object->getLimit();
-                $lastPage = ceil($object->getEstimatedTotalHits() / $itemsPerPage);
-                $pageTotalItems = $object->getEstimatedTotalHits();
-                $currentPage = floor($object->getOffset() / $itemsPerPage) + 1;
+            $itemsPerPage = $object->getLimit();
+            $lastPage = ceil($object->getEstimatedTotalHits() / $itemsPerPage);
+            $pageTotalItems = $object->getEstimatedTotalHits();
+            $currentPage = floor($object->getOffset() / $itemsPerPage) + 1;
         }
 
         $data['hydra:view'] = ['@id' => null, '@type' => 'hydra:PartialCollectionView'];

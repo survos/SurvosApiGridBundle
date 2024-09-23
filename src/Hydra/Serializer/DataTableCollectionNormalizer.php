@@ -17,10 +17,12 @@ use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use ApiPlatform\Util\IriHelper;
 use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
+use Survos\ApiGrid\Event\FacetEvent;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Languages;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 {
@@ -36,7 +38,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         private                                                      $contextBuilder,
         ResourceClassResolverInterface                               $resourceClassResolver,
         private readonly LoggerInterface $logger,
-        private readonly RequestStack                                $requestStack, // hack to add locale
+        private EventDispatcherInterface $eventDispatcher,
+        private readonly RequestStack                                $requestStack, // hack to add locafle
         private readonly IriConverterInterface                       $iriConverter,
         protected ?ResourceMetadataCollectionFactoryInterface        $resourceMetadataFactory,
         array                                                        $defaultContext = [],
@@ -71,7 +74,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $context['locale'] = $locale;
             if (isset($params['facets']) && is_array($params['facets'])) {
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
-//                dd($facets);
             }
             $data = $this->getNextData($object['data'], $context, []);
             $object = $object['data']->getHits();
@@ -220,32 +222,21 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     {
         $facetsData = [];
         $locale = $context['locale']??null;
-        foreach ($params as $key => $facet) {
+        $event =  $this->eventDispatcher->dispatch(new FacetEvent($params, $locale, $context));
+        $translatedFacets = $event->getFacets();
+        foreach ($translatedFacets as $key => $facet) {
             $data = [];
-
-            // hack!
-
-            foreach ($facet as $facetKey => $facetValue) {
-                try {
-                    $label = match($key) {
-                        'countryCode' => Countries::getName(strtoupper($facetKey), $locale),
-                        'locale' => Languages::getName($facetKey, $locale),
-                        default => $facetKey
-                    };
-                } catch (\Exception $exception) {
-                    assert(false, "bad data! " . $exception->getMessage());
-                    continue;
-                    dd($key, $facetKey, $facetValue, $exception->getMessage());
-                }
-
+            foreach ($facet as $facetKey => $fdata) {
+//                dd($facet, $facetKey, $facetCount, $key);
                 // translation? js for language and country?
-                $fdata["label"] = $label;
-                $fdata["total"] = $facetValue;
+//                $fdata["label"] = $label;
+//                $fdata["total"] = $facetValue;
                 $fdata["value"] = $facetKey;
-                $fdata["count"] = 0;
-                if (isset($facets[$key][$facetKey])) {
-                    $fdata["count"] = $facets[$key][$facetKey];
-                }
+//                $fdata["count"] = 0;
+//                if (isset($facets[$key][$facetKey])) {
+//                    $fdata["count"] = $facets[$key][$facetKey];
+//                }
+//                dd($fdata);
                 $data[] = $fdata;
             }
             $facetsData[$key] = $data;

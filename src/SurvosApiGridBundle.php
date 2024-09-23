@@ -166,11 +166,14 @@ class SurvosApiGridBundle extends AbstractBundle
 
 
         $builder->register(DataTableCollectionNormalizer::class)
+            ->setAutowired(true)
+            ->setAutoconfigured(true)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
             ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))
-            ->setArgument('$requestStack', new Reference('request_stack'))
+            ->setArgument('$requestStack', new Reference('request_stack', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setArgument('$eventDispatcher', new Reference('event_dispatcher'))
             ->setArgument('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
             ->addTag('serializer.normalizer', ['priority' => -900]);
 

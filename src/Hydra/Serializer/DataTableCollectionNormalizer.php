@@ -74,7 +74,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $context['locale'] = $locale;
             if (isset($params['facets']) && is_array($params['facets'])) {
                 $context['pixieCode'] = $params['pixieCode'] ?? false;
-                $facets = $this->getFacetsData($object['data']->getFacetDistribution(), $object['facets']->getFacetDistribution(), $context);
+                $facets = $this->getFacetsData($object['data']->getFacetDistribution(),
+                    $object['facets']->getFacetDistribution(), $context);
             }
             $data = $this->getNextData($object['data'], $context, []);
             $object = $object['data']->getHits();
@@ -225,7 +226,9 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $locale = $context['locale'] ?? null;
         // a mess, needs refactoring
         if ($pixieCode = $context['uri_variables']['pixieCode'] ?? false) {
-            $event = $this->eventDispatcher->dispatch(new FacetEvent($params, $locale, $context));
+            $event = $this->eventDispatcher->dispatch(new FacetEvent($params,
+                targetLocale: $locale,
+                context: $context));
             $translatedFacets = $event->getFacets();
             foreach ($translatedFacets as $key => $facet) {
                 $data = [];

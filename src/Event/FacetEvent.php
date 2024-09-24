@@ -13,7 +13,8 @@ class FacetEvent extends Event
 {
     public function __construct(
         private array $facets,
-        private string $targetLocale,
+        private ?string $sourceLocale=null,
+        private ?string $targetLocale=null,
         public array $context = []
     ) {
     }

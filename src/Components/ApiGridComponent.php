@@ -96,7 +96,7 @@ class ApiGridComponent implements TwigBlocksInterface
 
 //    public ?string $class = null;
     public ?string $index = null; // name of the meili index
-    public string $dom='QlfrtipP';
+    public string $dom='QlfrtpP';
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public ?string $apiGetCollectionUrl=null;

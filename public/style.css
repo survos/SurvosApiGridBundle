@@ -134,3 +134,14 @@ table.dataTable>tbody>tr.child ul.dtr-details {
 .current.active {
     color: var(--tblr-primary);
 }
+
+.dtsp-verticalPanes-toggler {
+    margin-top: -17px;
+}
+
+@media (min-width: 768px){
+    #dtsp-verticalPanes {
+        display: block;
+        padding-top: 16px !important;
+    }
+}

@@ -1,4 +1,3 @@
-
 <div {{ apiCall ? stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,
@@ -18,7 +17,10 @@
     <div class="dtsp-verticalContainer row g-4">
         <div class="col-sm-12 col-md-5 col-lg-4 col-xl-3">
             <div class="card">
-                <div class="card-body">
+                <button class="btn btn-primary dtsp-verticalPanes-toggler rounded d-md-none m-3" type="button" data-bs-toggle="collapse" data-bs-target="#dtsp-verticalPanes" aria-expanded="true" aria-controls="dtsp-verticalPanes">
+                    Filters
+                </button>
+                <div class="card-body pt-0 pt-lg-3 collapse" id="dtsp-verticalPanes">
                     <div class="dtsp-verticalPanes"></div>
                 </div>
             </div>

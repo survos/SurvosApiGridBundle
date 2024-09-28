@@ -5,7 +5,7 @@
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: locale,
     globals: globals,
-    buttons: buttons,
+    buttons: buttons|default([]),
     columnConfiguration: columns|json_encode,
     modalTemplate: this.modalTemplate,
     dom: this.dom|default(false),

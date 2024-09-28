@@ -198,6 +198,7 @@ class ApiGridComponent implements TwigBlocksInterface
                           string $apiRoute=null,
                           string $apiGetCollectionUrl=null,
                           array $filter = [],
+                          array $buttons = [],
                           bool $meili=false)
         // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
     {
@@ -206,6 +207,7 @@ class ApiGridComponent implements TwigBlocksInterface
 //        dd($this->twig->getGlobals());
 
         $this->filter = $filter;
+        $this->buttons = $buttons;
 //        assert($class == $this->class, "$class <> $this->class");
         $this->class = $class; // ??
 //            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),

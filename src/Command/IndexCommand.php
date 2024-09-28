@@ -295,11 +295,11 @@ class IndexCommand extends Command
 
         $progressBar->finish();
         // if there are some that aren't batched...
-        if (count($records)) {
             $this->io->writeln("Final Flush " . count($records));
             $task = $index->addDocuments($records, $primaryKey);
             // if debugging
-//            $this->waitForTask($task);
+            $this->meiliService->waitForTask($task);
+        if (count($records)) {
         }
 
 

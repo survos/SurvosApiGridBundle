@@ -96,7 +96,7 @@ class ApiGridComponent implements TwigBlocksInterface
 
 //    public ?string $class = null;
     public ?string $index = null; // name of the meili index
-    public string $dom='QlfrtpP';
+    public string $dom='BQlfrtpP';
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public ?string $apiGetCollectionUrl=null;
@@ -105,6 +105,7 @@ class ApiGridComponent implements TwigBlocksInterface
     public array  $apiGetCollectionParams = [];
     public bool $trans = true;
     public string|bool|null $domain = null;
+    public array $buttons=[]; // for now, simply a keyed list of urls to open
 
     public bool $search = true;
     public string $scrollY = '70vh';

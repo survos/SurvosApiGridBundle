@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use ApiPlatform\State\Pagination\Pagination;
 use Meilisearch\Search\SearchResult;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class MeiliSearchStateProvider implements ProviderInterface
 {
@@ -26,6 +27,7 @@ class MeiliSearchStateProvider implements ProviderInterface
         private string                         $meiliKey,
         private readonly DenormalizerInterface $denormalizer,
         protected ?ClientInterface              $httpClient=null,
+        private ?Stopwatch $stopwatch = null
     )
     {
     }
@@ -55,7 +57,10 @@ class MeiliSearchStateProvider implements ProviderInterface
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
                 $index = $this->meili->getIndex($indexName);
+            $event = $this->stopwatch->start('meili-search', 'meili');
                 $data = $index->search($searchQuery, $body);
+                $event->stop();
+
 //            dd($context, $indexName);
             try {
 //                $client = $this->meili->getMeiliClient();
@@ -65,11 +70,16 @@ class MeiliSearchStateProvider implements ProviderInterface
                 throw new \Exception($indexName . ' -- ' . $exception->getMessage());
             }
 
+            $event = $this->stopwatch->start('meili-denormalizeObject', 'meili');
             $data = $this->denormalizeObject($data, $resourceClass);
+            $event->stop();
             unset($body['filter']);
             $body['limit'] = 0;
             $body['offset'] = 0;
+
+            $event = $this->stopwatch->start('facets', 'meili');
             $facets = $index->search('', $body);
+            $event->stop();
 
             return ['data' => $data, 'facets' => $facets];
         }
@@ -86,7 +96,9 @@ class MeiliSearchStateProvider implements ProviderInterface
         $returnObject['offset'] = $data->getOffset();
         $returnObject['limit'] = $data->getLimit();
         $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();
-        $hits = $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
+
+
+        $returnObject['hits'] = $this->denormalizer->normalize($data->getHits(), 'meili');
         $returnObject['processingTimeMs'] = $data->getProcessingTimeMs();
         $returnObject['query'] = $data->getQuery();
         $returnObject['facetDistribution'] = $data->getFacetDistribution();

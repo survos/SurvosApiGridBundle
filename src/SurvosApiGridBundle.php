@@ -88,11 +88,13 @@ class SurvosApiGridBundle extends AbstractBundle
 
         // check https://github.com/zenstruck/console-extra/issues/59
         $definition = $builder->autowire(IndexCommand::class)
-            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
-            ->setArgument('$bag', new Reference('parameter_bag'))
-            ->setArgument('$serializer', new Reference('serializer'))
-            ->setArgument('$meiliService', new Reference('api_meili_service'))
-            ->setArgument('$datatableService', new Reference('survos_api_grid_datatable_service'))
+            ->setAutoconfigured(true)
+            ->setAutowired(true)
+//            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+//            ->setArgument('$bag', new Reference('parameter_bag'))
+//            ->setArgument('$serializer', new Reference('serializer'))
+//            ->setArgument('$meiliService', new Reference('api_meili_service'))
+//            ->setArgument('$datatableService', new Reference('survos_api_grid_datatable_service'))
 //            ->setArgument('$normalizer', new Reference('normalizer'))
             ->addTag('console.command')
         ;

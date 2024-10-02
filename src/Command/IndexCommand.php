@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -41,6 +42,7 @@ class IndexCommand extends Command
         private MeiliService $meiliService,
         private DatatableService $datatableService,
         private NormalizerInterface $normalizer,
+        #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales=[],
 
     )
     {
@@ -99,7 +101,6 @@ class IndexCommand extends Command
 
             $this->io->title($indexName);
             if ($reset=$input->getOption('reset')) {
-//                dd($this->meiliService);
                 $this->meiliService->reset($indexName);
             }
 //            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));
@@ -159,11 +160,33 @@ class IndexCommand extends Command
 //            }
 //        }
 
+        $map = [
+            'es' => 'spa',
+            'en' => 'eng',
+            'de' => 'deu',
+            'hi' => 'hin',
+            'fr' => 'fra',
+            'da' => 'dan',
+        ];
+        $searchableAttrs = [];
+
+        $localizedAttributes = [];
+        foreach ($this->enabledLocales as $locale) {
+            $locale3 = $map[$locale];
+            $localizedAttributes[] = ['locales' => [$locale3],
+                'attributePatterns' => [sprintf('_translations.%s.*',$locale)]];
+
+//            foreach ($table->getTranslatable() as $property) {
+//                $searchableAttrs[] = '_translations.' . $locale . ".$property";
+//            }
+        }
+
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
 //        $index->updateSortableAttributes($this->datatableService->getFieldsWithAttribute($settings, 'sortable'));
 //        $index->updateSettings(); // could do this in one call
 
             $results = $index->updateSettings($settings = [
+                'localizedAttributes' => $localizedAttributes,
                 'displayedAttributes' => ['*'],
                 'filterableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),
                 'sortableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'sortable'),
@@ -288,7 +311,7 @@ class IndexCommand extends Command
         }
 //            $this->io->writeln("$count of $total loaded, this batch:" . count($records));
         if ($startingAt > $total) {
-//            dump($count, $total, $startingAt);
+    //            dump($count, $total, $startingAt);
         }
         } while ( ($count < $total)) ;
 //        dd($count, $total, $batchSize);

@@ -16,7 +16,7 @@ trait TwigBlocksTrait
             //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
             $path = $sourceContext->getPath();
-            $this->path = $path;
+//            $this->path = $path;
 //            dd($sourceContext, $sourceContext->getCode());
 
             //            dd($template);

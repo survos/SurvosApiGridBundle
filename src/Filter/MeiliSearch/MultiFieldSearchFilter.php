@@ -3,7 +3,7 @@
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
 use Survos\ApiGrid\Filter\MeiliSearch\FilterInterface;
-use ApiPlatform\Api\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
@@ -13,7 +13,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use ApiPlatform\Exception\InvalidArgumentException;
+use ApiPlatform\Metadata\InvalidArgumentException;
 
 /**
  * Selects entities where each search term is found somewhere

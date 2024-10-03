@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
-use ApiPlatform\Api\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use Survos\ApiGrid\Filter\MeiliSearch\MeilISearchUtilTrait;
 use ApiPlatform\Exception\PropertyNotFoundException;
 use ApiPlatform\Exception\ResourceClassNotFoundException;
@@ -23,7 +23,10 @@ abstract class AbstractSearchFilter implements FilterInterface
 {
     use UtilTrait { getNestedFieldPath as protected; }
 
-    public function __construct(protected PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, protected ?NameConverterInterface $nameConverter = null, protected ?array $properties = null)
+    public function __construct(protected PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory,
+                                PropertyMetadataFactoryInterface $propertyMetadataFactory,
+                                ?ResourceClassResolverInterface $resourceClassResolver=null,
+                                protected ?NameConverterInterface $nameConverter = null, protected ?array $properties = null)
     {
         $this->propertyMetadataFactory = $propertyMetadataFactory;
         $this->resourceClassResolver = $resourceClassResolver;

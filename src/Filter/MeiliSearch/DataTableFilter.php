@@ -2,7 +2,7 @@
 
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
-use ApiPlatform\Api\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
@@ -11,9 +11,14 @@ use Symfony\Component\PropertyInfo\Type;
 
 final class DataTableFilter extends AbstractSearchFilter implements FilterInterface
 {
-    public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, PropertyMetadataFactoryInterface $propertyMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, ?NameConverterInterface $nameConverter = null, private readonly string $orderParameterName = 'filter', ?array $properties = null)
+    public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory,
+                                PropertyMetadataFactoryInterface $propertyMetadataFactory,
+                                ?ResourceClassResolverInterfacexx $resourceClassResolverxx=null,
+                                ?NameConverterInterface $nameConverter = null,
+                                private readonly string $orderParameterName = 'filter',
+                                ?array $properties = null)
     {
-        parent::__construct($propertyNameCollectionFactory, $propertyMetadataFactory, $resourceClassResolver, $nameConverter, $properties);
+//        parent::__construct($propertyNameCollectionFactory, $propertyMetadataFactory, $resourceClassResolver, $nameConverter, $properties);
     }
 
     public function apply(array $clauseBody, string $resourceClass, ?Operation $operation = null, array $context = []): array {
@@ -31,8 +36,8 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
 
             $searchBuilder = $context['filters']['searchBuilder'];
             if(isset($searchBuilder['logic']) && isset($searchBuilder['criteria'])) {
-                $dataTablefilter = $this->criteria($searchBuilder['logic'], $searchBuilder['criteria']);
-                $clauseBody['filter'] = ($filter != "")?$filter." AND ".$dataTablefilter:$filter.$dataTablefilter;
+                $dataTableFilter = $this->criteria($searchBuilder['logic'], $searchBuilder['criteria']);
+                $clauseBody['filter'] = ($filter != "")?$filter." AND ".$dataTableFilter:$filter.$dataTableFilter;
             }
         }
 

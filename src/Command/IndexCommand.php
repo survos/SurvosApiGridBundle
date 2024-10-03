@@ -262,7 +262,7 @@ class IndexCommand extends Command
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
 //            if (count($data['keywords'])) dd($data);
             if (!array_key_exists($primaryKey, $data)) {
-//                dd($data, $primaryKey);
+                dd($data, $primaryKey);
                 $this->logger->error("No primary key $primaryKey for " . $class);
                 return ['numberOfDocuments'=>0];
                 break;

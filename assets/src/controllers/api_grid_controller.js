@@ -31,7 +31,10 @@ import deLanguage from 'datatables.net-plugins/i18n/de-DE.mjs';
 Twig.extend(function (Twig) {
     Twig._function.extend('path', (route, routeParams={}) => {
         // console.error(routeParams);
-        delete routeParams._keys; // seems to be added by twigjs
+        if('_keys' in routeParams){
+        // if(routeParams.hasOwnProperty('_keys')){
+            delete routeParams._keys; // seems to be added by twigjs
+        }
         let path = Routing.generate(route, routeParams);
         return path;
     });

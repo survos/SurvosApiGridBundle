@@ -2,9 +2,9 @@
 
 namespace Survos\ApiGrid\Hydra\Serializer;
 
-use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Api\ResourceClassResolverInterface;
-use ApiPlatform\Api\UrlGeneratorInterface;
+use ApiPlatform\Metadata\IriConverterInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\UrlGeneratorInterface;
 use ApiPlatform\JsonLd\AnonymousContextBuilderInterface;
 use ApiPlatform\JsonLd\ContextBuilder;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
@@ -14,7 +14,7 @@ use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInter
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
-use ApiPlatform\Util\IriHelper;
+use ApiPlatform\Metadata\Util\IriHelper;
 use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Event\FacetEvent;
@@ -35,7 +35,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     ];
 
     public function __construct(
-        private                                               $contextBuilder,
+        private             ContextBuilderInterface  $contextBuilder,
         ResourceClassResolverInterface                        $resourceClassResolver,
         private readonly LoggerInterface                      $logger,
         private EventDispatcherInterface                      $eventDispatcher,
@@ -46,6 +46,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         protected string                                      $pageParameterName = 'page'
     )
     {
+//        dd($this->contextBuilder::class);
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
 
         parent::__construct($resourceClassResolver, $pageParameterName);

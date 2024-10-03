@@ -2,7 +2,7 @@
 
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
-use ApiPlatform\Api\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;

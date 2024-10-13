@@ -88,6 +88,7 @@ class ApiGridComponent implements TwigBlocksInterface
     public iterable $data;
 
     public array $columns = [];
+    public array $facet_columns = []; // the facet columns, rendered in the sidebar
     public array $globals = [];
     public array $searchBuilderFields = [];
 
@@ -137,7 +138,7 @@ class ApiGridComponent implements TwigBlocksInterface
         }
         return $settings;
     }
-    public function getNormalizedColumns(): iterable
+    public function getNormalizedColumns(string $columnType='columns'): iterable
     {
         if ($this->class) {
             if (!$this->index) {
@@ -147,7 +148,11 @@ class ApiGridComponent implements TwigBlocksInterface
         // really we're getting the schema from the PHP Attributes here.
 
         $settings = $this->getDefaultColumns();
-        return $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks());
+        $value= match($columnType) {
+            'columns' => $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks()),
+            'facet_columns' => $this->datatableService->normalizedColumns($settings, $this->facet_columns, $this->getTwigBlocks())
+        };
+        return $value;
     }
 
     public function getModalTemplate(): ?string

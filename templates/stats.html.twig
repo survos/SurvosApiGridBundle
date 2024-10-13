@@ -30,7 +30,7 @@
                                 </li>
                             {% endfor %}
                         {% else %}
-                        {{ values|join(',') }}
+                        {{ values|json_encode }}
                             {% endif %}
                             </td>
                 </tr>

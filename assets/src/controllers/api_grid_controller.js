@@ -61,6 +61,7 @@ export default class extends Controller {
         apiCall: {type: String, default: ''},
         searchPanesDataUrl: {type: String, default: ''},
         columnConfiguration: {type: String, default: '[]'},
+        facetConfiguration: {type: String, default: '[]'},
         globals: {type: String, default: '[]'},
         modalTemplate: {type: String, default: ''},
         locale: {type: String, default: 'no-locale!'},
@@ -169,7 +170,8 @@ export default class extends Controller {
 
 
         this.columns = JSON.parse(this.columnConfigurationValue);
-        // console.error(this.columns);
+        this.facets = JSON.parse(this.facetConfigurationValue);
+        // console.error(this.facets);
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
@@ -649,7 +651,7 @@ export default class extends Controller {
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             // https://datatables.net/reference/option/ajax
             ajax: (params, callback, settings) => {
-                    this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
+                this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(this.apiParams);
                 // console.warn(params);
@@ -1055,11 +1057,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
             });
         }
         let facets = [];
-        this.columns.forEach(function (column, index) {
-            if ( column.browsable ) {
+        this.facets.forEach(function (column, index) {
+            // if ( column.browsable ) {
                 facets.push(column.name);
-            }
+            // }
         });
+
         // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {
             if (column.search && column.search.value) {
@@ -1068,12 +1071,19 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[column.data] = column.search.value;
             }
         });
-        console.log(apiData);
 
         apiData.offset = params.start;
         apiData.facets = [];
         // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
-        this.columns.forEach((column, index) => {
+        this.facets.forEach((column, index) => {
+            // if (column.browsable) {
+                apiData.facets.push(column.name);
+                // apiData.facets[column.name] = 1; // old way
+                // this seems odd, it should be a pipe-delimited list
+            // }
+        });
+
+        this.facets.forEach((column, index) => {
             if (column.browsable) {
                 apiData.facets.push(column.name);
                 // apiData.facets[column.name] = 1; // old way

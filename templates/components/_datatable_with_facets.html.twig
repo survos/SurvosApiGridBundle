@@ -7,6 +7,7 @@
     globals: globals,
     buttons: buttons|default([]),
     columnConfiguration: columns|json_encode,
+    facetConfiguration: facet_columns|json_encode,
     modalTemplate: this.modalTemplate,
     dom: this.dom|default(false),
     style: this.style,
@@ -22,7 +23,9 @@
                     Filters
                 </button>
                 <div class="card-body pt-0 pt-lg-3 collapse" id="dtsp-verticalPanes">
-                    <div class="dtsp-verticalPanes"></div>
+                    <div class="dtsp-verticalPanes">
+{#                        @sort columns here?#}
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,7 @@
 {# templates/components/datatable.html.twig #}
 {% if condition %}
     {% set columns = this.normalizedColumns %}
+    {% set facet_columns = this.normalizedColumns('facet_columns') %}
     <div
             {{ this.stimulusController ? stimulus_controller(this.stimulusController, {
                 useDatatables: this.useDatatables,

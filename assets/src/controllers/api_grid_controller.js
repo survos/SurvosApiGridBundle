@@ -91,12 +91,12 @@ export default class extends Controller {
             let render = null;
             c.className = c.title;
             if (c.twigTemplate) {
-                console.warn(c.twigTemplate);
+                // console.warn(c.twigTemplate);
                 let template = Twig.twig({
                     id: c.name,
                     data: c.twigTemplate
                 });
-                console.error(template.id);
+                // console.error(template.id);
                 render = (data, type, row, meta) => {
                     // Object.assign(row, );
                     // row.locale = this.localeValue;

@@ -47,6 +47,7 @@ export default class extends Controller {
 
 
     render() {
+        console.warn(this.blocksValue.content);
         let template = Twig.twig({
             data: this.blocksValue.content
         });
@@ -55,7 +56,7 @@ export default class extends Controller {
         this.fetchItem().then((item) => {
             let params = {data: item, globals: globals};
             params._keys = null;
-            // console.error(params);
+            console.error(params);
             let html = template.render(params);
             this.element.innerHTML = html;
         })

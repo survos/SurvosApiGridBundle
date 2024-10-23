@@ -75,6 +75,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $context['locale'] = $locale;
             if (isset($params['facets']) && is_array($params['facets'])) {
                 $context['pixieCode'] = $params['pixieCode'] ?? false;
+
                 $facets = $this->getFacetsData($object['data']->getFacetDistribution(),
                     $object['facets']->getFacetDistribution(), $context);
             }

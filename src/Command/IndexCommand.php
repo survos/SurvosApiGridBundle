@@ -103,6 +103,8 @@ class IndexCommand extends Command
             if ($reset=$input->getOption('reset')) {
                 $this->meiliService->reset($indexName);
             }
+
+            // skip if no documents?  Obviously, docs could be added later, e.g. an Owner record after import
 //            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));
 
             $index = $this->configureIndex($class, $indexName);

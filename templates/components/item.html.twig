@@ -1,9 +1,9 @@
 {# templates/components/datatable.html.twig #}
 {% set columns = this.normalizedColumns %}
 {% set facet_columns = this.normalizedColumns('facet_columns') %}
-{% if guard function dump %}
-{{ dump(facet_columns) }}
-{% endif %}
+{#{% if guard function dump %}#}
+{#{{ dump(facet_columns) }}#}
+{#{% endif %}#}
 
 <div {{ this.stimulusController ? stimulus_controller(this.stimulusController) }}>
     <div class="m-4">

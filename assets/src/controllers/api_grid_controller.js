@@ -174,7 +174,7 @@ export default class extends Controller {
 
         this.columns = JSON.parse(this.columnConfigurationValue);
         this.facets = JSON.parse(this.facetConfigurationValue);
-        // console.error(this.facets);
+        console.table(this.facets);
         // "compile" the custom twig blocks
         // var columnRender = [];
         this.dom = this.domValue;
@@ -182,7 +182,7 @@ export default class extends Controller {
         console.assert(this.dom, "Missing dom");
 
         this.filter = JSON.parse(this.filterValue || '[]')
-        console.error(this.buttonsValue);
+        // console.error(this.buttonsValue);
         this.buttons = JSON.parse(this.buttonsValue || '[]');
         this.buttonMap = new WeakMap();
         this.x = {};
@@ -719,8 +719,10 @@ export default class extends Controller {
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
+                            console.warn({searchPanes, hydraData})
                         } else {
                            searchPanes.options = options;
+                           console.error(options, 'no searchPanes returned in search');
                         }
                         // searchPanes.threshold = 0.01;
                         searchPanes.showZeroCounts = true;
@@ -1065,6 +1067,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facets.push(column.name);
             // }
         });
+        console.error({facets});
 
         // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {

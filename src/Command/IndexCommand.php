@@ -107,14 +107,17 @@ class IndexCommand extends Command
             // skip if no documents?  Obviously, docs could be added later, e.g. an Owner record after import
 //            $task = $this->waitForTask($this->getMeiliClient()->createIndex($indexName, ['primaryKey' => Instance::DB_CODE_FIELD]));
 
+            // pk of meili  index might be different than doctine pk, e.g. $imdbId
             $index = $this->configureIndex($class, $indexName);
             $batchSize = $input->getOption('batch-size');
 
             $stats = $this->indexClass($class, $index, batchSize: $batchSize, indexName: $indexName, groups: $groups,
                 limit: $input->getOption('limit'),
                 filter: $input->getOption('filter') ? $filterArray: null,
+                primaryKey: $index->getPrimaryKey(),
                 dump: $input->getOption('dump'),
             );
+
             $this->io->success($indexName . ' Document count:' .$stats['numberOfDocuments']);
             $this->meiliService->waitUntilFinished($index);
 
@@ -142,25 +145,8 @@ class IndexCommand extends Command
 //        $filterAttributes = [];
 //        $sortableAttributes = [];
         $settings = $this->datatableService->getSettingsFromAttributes($class);
-        $primaryKey = 'id'; // default, check for is_primary));
         $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
-        if (count($idFields)) $primaryKey = $idFields[0];
-//        dd($settings, $filterAttributes);
-//
-//        foreach ($settings as $fieldname=>$classAttributes) {
-//            if ($classAttributes['browsable']) {
-//                $filterAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['sortable']) {
-//                $sortableAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['searchable']) {
-////                $searchAttributes[] = $fieldname;
-//            }
-//            if ($classAttributes['is_primary']??null) {
-//                $primaryKey = $fieldname;
-//            }
-//        }
+        $primaryKey = count($idFields) ? $idFields[0] : 'id';
 
         $map = [
             'es' => 'spa',
@@ -177,10 +163,6 @@ class IndexCommand extends Command
             $locale3 = $map[$locale];
             $localizedAttributes[] = ['locales' => [$locale3],
                 'attributePatterns' => [sprintf('_translations.%s.*',$locale)]];
-
-//            foreach ($table->getTranslatable() as $property) {
-//                $searchableAttrs[] = '_translations.' . $locale . ".$property";
-//            }
         }
 
         $index = $this->meiliService->getIndex($indexName, $primaryKey);
@@ -202,17 +184,21 @@ class IndexCommand extends Command
         return $index;
     }
 
-    private function indexClass(string  $class, Indexes $index, int $batchSize, ?string $indexName=null,
+    private function indexClass(string  $class,
+                                Indexes $index,
+                                int $batchSize,
+                                ?string $indexName=null,
                                 array $groups=[],
                                 int $limit=0,
                                 ?array $filter=[],
                                 int $dump=0,
+                                ?string $primaryKey=null,
                                 ?string $subdomain=null,
     ): array
     {
         $startingAt = 0;
         $records = [];
-        $primaryKey = $index->getPrimaryKey();
+        $primaryKey ??= $index->getPrimaryKey();
         $count = 0;
         $qb = $this->entityManager->getRepository($class)->createQueryBuilder('e');
 
@@ -223,7 +209,7 @@ class IndexCommand extends Command
             }
 //            $qb->andWhere($filter);
         }
-        $total = (clone $qb)->select("count(e.$primaryKey)")->getQuery()->getSingleScalarResult();
+        $total = (clone $qb)->select("count(e.{$index->getPrimaryKey()})")->getQuery()->getSingleScalarResult();
         $this->io->title("Indexing $class ($total records, batches of $batchSize) ");
         if (!$total) {
             return ['numberOfDocuments'=>0];
@@ -262,10 +248,11 @@ class IndexCommand extends Command
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
-//            if (count($data['keywords'])) dd($data);
+            assert(array_key_exists('rp', $data), json_encode($data));
+
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);
-                dd($msg, $data, $primaryKey);
+                assert(false, $msg);
                 return ['numberOfDocuments'=>0];
                 break;
             }
@@ -275,10 +262,8 @@ class IndexCommand extends Command
                 $data['targetLocales'] = array_keys($data['_translations']);
 //                unset($data['keyedTranslations']);
             }
-//            dd($r, $data);
 //            assert(array_key_exists('_translations', $data), "Missing translations for " .$r::class);
             // if live, only add if indexed and meiliCount
-//            dd(array_keys($data), $data['keyedTranslations']);
             // total hack, this doesn't belong in the indexer, but in the deserializer before sending the results back,
             // so somewhere in meili?
 //            assert($data['locale'], "Missing locale for $class " . $code);
@@ -316,7 +301,6 @@ class IndexCommand extends Command
     //            dump($count, $total, $startingAt);
         }
         } while ( ($count < $total)) ;
-//        dd($count, $total, $batchSize);
 
         $progressBar->finish();
         // if there are some that aren't batched...

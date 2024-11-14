@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Survos\ApiGrid\Service;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\FilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use Doctrine\ORM\Mapping\Id;
+use Gedmo\Mapping\Event\Adapter\ORM;
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Attribute\Facet;
@@ -121,13 +125,15 @@ class DatatableService
         }
         return $fields;
     }
-    public function getSettingsFromAttributes(string $class)
+    public function getSettingsFromAttributes(string $class): array
     {
         assert(class_exists($class), $class);
         $reflectionClass = new \ReflectionClass($class);
         $settings = [];
+        // class attributes first.
         foreach ($reflectionClass->getAttributes() as $attribute) {
 
+            //
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
@@ -142,11 +148,9 @@ class DatatableService
             $filter = $arguments[0]??null;
             if (!$filter) {
                 return [];
-                dd($class);
             }
             if (!array_key_exists('properties', $arguments)) {
                 continue;
-//                dd($arguments);
             }
             $properties = $arguments['properties'];
             foreach ($properties as $property) {
@@ -181,8 +185,13 @@ class DatatableService
         foreach ($reflectionClass->getProperties() as $property) {
             $fieldname = $property->getName();
             foreach ($property->getAttributes() as $attribute) {
-                if ($attribute->getName() == MeiliId::class) {
+                if (in_array($attribute->getName(), [MeiliId::class, Id::class])) {
                     $settings[$fieldname]['is_primary'] = true;
+                }
+                if ($attribute->getName() == ApiProperty::class) {
+                    if ($attribute->getArguments()['identifier']??false) {
+                        $settings[$fieldname]['is_primary'] = true;
+                    }
                 }
                 if ($attribute->getName() == Facet::class) {
                     $settings[$fieldname]['browsable'] = true;
@@ -201,7 +210,6 @@ class DatatableService
                 }
             }
         }
-//        dd($settings);
         // @todo: methods
         return $settings;
     }
@@ -213,7 +221,8 @@ class DatatableService
         assert(class_exists($class), $class);
         $reflector = new \ReflectionClass($class);
         foreach ($reflector->getAttributes() as $attribute) {
-            if (!u($attribute->getName())->endsWith('ApiFilter')) {
+            $filter = $attribute->getName();
+            if (!u($filter)->endsWith('ApiFilter')) {
                 continue;
             }
             if (u($filter)->endsWith('OrderFilter')) {
@@ -240,13 +249,8 @@ class DatatableService
             if (in_array($filter, [RangeFilter::class, SearchFilter::class, MultiFieldSearchFilter::class])) {
                 $fields = $attribute->getArguments()['properties'];
                 $searchableFields = array_merge($searchableFields, $fields);
-                if ($filter === SearchFilter::class) {
-//                    dd($searchFields, $filter);
-                }
             }
         }
-//        dd($searchableFields);
-
         return $searchableFields;
     }
 
@@ -271,9 +275,6 @@ class DatatableService
 // @todo: handle other filters
             if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
                 $searchFields = $attribute->getArguments()['properties'];
-                if ($filter === SearchFilter::class) {
-//                    dd($searchFields, $filter);
-                }
                 foreach ($normalizedColumns as $idx => $column) {
                     if (in_array($column->name, $searchFields)) {
                         $columnNumbers[] = $idx;
@@ -284,7 +285,6 @@ class DatatableService
 //                    }
                 }
             }
-            dd($columnNumbers);
         }
 
 

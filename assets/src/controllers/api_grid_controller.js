@@ -695,7 +695,8 @@ export default class extends Controller {
                         // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
                         let d = hydraData['hydra:member'];
                         if (d.length) {
-                            console.log('first result', d[0]);
+                            console.table(d[0]);
+                            // console.log('first result', d[0]);
                         }
                         let searchPanes = {};
                         searchPanes = {
@@ -719,7 +720,7 @@ export default class extends Controller {
                         if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
                            searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
                            searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
-                            console.warn({searchPanes, hydraData})
+                            console.warn({searchPanes, searchPanesRaw, hydraData})
                         } else {
                            searchPanes.options = options;
                            console.error(options, 'no searchPanes returned in search');
@@ -1127,11 +1128,16 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         searchPanesOrder.forEach(function (index){
            if(typeof data[index.name] != 'undefined') {
                newOrderdata[index.name] =  data[index.name];
+           } else {
+               console.warn(index.name);
+               // newOrderdata[index.name] =  data[index.name];
            }
         });
 
+        console.error('error may be here!');
         let newOptionOrderData = [];
         newOptionOrderData['options'] = newOrderdata;
+        console.log({newOptionOrderData, newOrderdata, searchPanesOrder});
         return newOptionOrderData;
     }
 

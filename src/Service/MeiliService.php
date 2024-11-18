@@ -106,6 +106,7 @@ class MeiliService
             };
             if ($status == 'failed') {
                 if ($stopOnError) {
+                    $this->logger->warning(json_encode($dataToDump ?? [], JSON_PRETTY_PRINT+JSON_UNESCAPED_SLASHES));
                     throw new \Exception("Task has failed " . $task['error']['message']);
                 }
             }

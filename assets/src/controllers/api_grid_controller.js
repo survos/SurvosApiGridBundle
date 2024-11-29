@@ -1,4 +1,7 @@
-    // during dev, from project_dir run
+// see https://javascript.plainenglish.io/5-cool-chrome-devtools-features-most-developers-dont-know-about-cf55d3b46c95
+
+
+// during dev, from project_dir run
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import {Controller} from "@hotwired/stimulus";
 import $ from 'jquery';
@@ -1134,7 +1137,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
            }
         });
 
-        console.error('error may be here!');
         let newOptionOrderData = [];
         newOptionOrderData['options'] = newOrderdata;
         console.log({newOptionOrderData, newOrderdata, searchPanesOrder});

@@ -660,8 +660,8 @@ export default class extends Controller {
                 this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(this.apiParams);
-                // console.warn(params);
-                console.log(`DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
+                console.error(`starting at ${params.start}`);
+                // console.assert(params.start, `DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
                 // yet another locale hack
@@ -1071,7 +1071,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 facets.push(column.name);
             // }
         });
-        console.error({facets});
+        // console.error({facets});
 
         // we don't do anything with facets!  So we probably don't need the above.
         params.columns.forEach(function (column, index) {

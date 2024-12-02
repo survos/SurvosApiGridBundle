@@ -84,6 +84,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         if ($object instanceof PaginatorInterface) {
+            dd($object, $context);
             $data = $this->getNextData($object, $context, []);
             if ($context['request_uri']) {
                 parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
@@ -136,7 +137,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $itemsData = $this->getItemsData($object, $format, $context);
 
 
-        return array_merge_recursive($data, $paginationData, $itemsData, ['hydra:facets' => $facets]);
+        return array_merge_recursive($data, $paginationData, $itemsData, ['facets' => $facets]);
     }
 
     /**
@@ -144,23 +145,24 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
      */
     protected function getPaginationData(iterable $object, array $context = []): array
     {
+//        dd($object, $context);
         $resourceClass = $this->resourceClassResolver->getResourceClass($object, $context['resource_class']);
         // This adds "jsonld_has_context" by reference, we moved the code to this class.
         // To follow a note I wrote in the ItemNormalizer, we need to change the JSON-LD context generation as it is more complicated then it should.
         $data = $this->addJsonLdContext($this->contextBuilder, $resourceClass, $context);
         $data['@id'] = $this->iriConverter->getIriFromResource($resourceClass, UrlGeneratorInterface::ABS_PATH, $context['operation'] ?? null, $context);
-        $data['@type'] = 'hydra:Collection';
+        $data['@type'] = 'Collection';
 
         if ($object instanceof PaginatorInterface) {
-            $data['hydra:totalItems'] = $object->getTotalItems();
+            $data['totalItems'] = $object->getTotalItems();
         }
 
         if (\is_array($object) || ($object instanceof \Countable && !$object instanceof PartialPaginatorInterface)) {
-            $data['hydra:totalItems'] = \count($object);
+            $data['totalItems'] = \count($object);
         }
 
         if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
-            $data['hydra:totalItems'] = $object['data']->getEstimatedTotalHits();
+            $data['totalItems'] = $object['data']->getEstimatedTotalHits();
         }
 
         return $data;
@@ -172,7 +174,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     protected function getItemsData(iterable $object, string $format = null, array $context = []): array
     {
         $data = [];
-        $data['hydra:member'] = [];
+        $data['member'] = [];
         $this->logger->info(sprintf('%s %s for %s %s', __CLASS__, $context['root_operation_name'], $context['resource_class'], __METHOD__));
 
         $iriOnly = $context[self::IRI_ONLY] ?? $this->defaultContext[self::IRI_ONLY];
@@ -202,13 +204,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             } else {
                 $normalizedData = $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }
-            // hack -- this should be its own normalizer.  Plus, this needs to be recursive
+            // hack -- this should be its own normalizer.  Plus, it may need to be recursive
             if (array_key_exists('rp', $normalizedData)) {
                 $request = $this->requestStack->getCurrentRequest();
                 $normalizedData['rp']['_locale'] = $request->getLocale();
 
             }
-            $data['hydra:member'][] = $normalizedData;
+            $data['member'][] = $normalizedData;
         }
 
         return $data;
@@ -346,29 +348,35 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
     private function getNextData($object, $context, $data)
     {
+//        dd($object, $context, $data);
         $parsed = IriHelper::parseIri($context['request_uri'] ?? '/', $this->pageParameterName);
         $currentPage = $lastPage = $itemsPerPage = $pageTotalItems = null;
         if ($paginated = ($object instanceof PartialPaginatorInterface)) {
             if ($object instanceof PaginatorInterface) {
-                $paginated = 1. !== $lastPage = $object->getLastPage();
+                $lastPage = (int)$object->getLastPage();
+                $paginated = $lastPage !== 1;
             } else {
                 $itemsPerPage = $object->getItemsPerPage();
                 $pageTotalItems = (float)\count($object);
             }
 
-            $currentPage = $object->getCurrentPage();
+            $currentPage = (int)$object->getCurrentPage();
         }
 
-        if ($object instanceof SearchResult && $paginated = ($object instanceof SearchResult)) {
+        $paginated = ($object instanceof SearchResult);
+        if ($object instanceof SearchResult && $paginated) {
             $itemsPerPage = $object->getLimit();
-            $lastPage = ceil($object->getEstimatedTotalHits() / $itemsPerPage);
+            $lastPage = (int)ceil($object->getEstimatedTotalHits() / $itemsPerPage);
             $pageTotalItems = $object->getEstimatedTotalHits();
-            $currentPage = floor($object->getOffset() / $itemsPerPage) + 1;
+
+            $currentPage = (int)floor($object->getOffset() / $itemsPerPage) + 1;
+//            dd($object->getOffset(), $itemsPerPage, $currentPage, $lastPage, $paginated, $object::class, $object);
         }
 
-        $data['hydra:view'] = ['@id' => null, '@type' => 'hydra:PartialCollectionView'];
+        $id = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $paginated ? $currentPage : null);
+        // why isn't @type = Collection?
+        $data['view'] = ['@id' => $id, '@type' => 'PartialCollectionView'];
 
-        $data['hydra:view']['@id'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $paginated ? $currentPage : null);
 
         if ($paginated) {
             return $this->populateDataWithPagination($data, $parsed, $currentPage, $lastPage, $itemsPerPage, $pageTotalItems);
@@ -378,19 +386,20 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     }
 
 
-    private function populateDataWithPagination(array $data, array $parsed, ?float $currentPage, ?float $lastPage, ?float $itemsPerPage, ?float $pageTotalItems): array
+    private function populateDataWithPagination(array $data, array $parsed, int $currentPage, int $lastPage,
+                                                int $itemsPerPage, int $pageTotalItems): array
     {
         if (null !== $lastPage) {
-            $data['hydra:view']['hydra:first'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, 1.);
-            $data['hydra:view']['hydra:last'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $lastPage);
+            $data['view']['first'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, 1.);
+            $data['view']['last'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $lastPage);
         }
 
         if (1. !== $currentPage) {
-            $data['hydra:view']['hydra:previous'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage - 1.);
+            $data['view']['previous'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage - 1.);
         }
 
         if ((null !== $lastPage && $currentPage < $lastPage) || (null === $lastPage && $pageTotalItems >= $itemsPerPage)) {
-            $data['hydra:view']['hydra:next'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage + 1.);
+            $data['view']['next'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, $currentPage + 1.);
         }
 
         return $data;

@@ -252,7 +252,7 @@ class IndexCommand extends Command
 
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);
-                assert(false, $msg);
+                assert(false, $msg . "\n" . join("\n", array_keys($data)));
                 return ['numberOfDocuments'=>0];
                 break;
             }

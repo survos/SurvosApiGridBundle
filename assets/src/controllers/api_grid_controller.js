@@ -686,8 +686,8 @@ export default class extends Controller {
                         // handle success
                         let hydraData = response.data;
 
-                        var total = hydraData.hasOwnProperty('hydra:totalItems') ? hydraData['hydra:totalItems'] : 999999; // Infinity;
-                        var itemsReturned = hydraData['hydra:member'].length;
+                        var total = hydraData.hasOwnProperty('totalItems') ? hydraData['totalItems'] : 999999; // Infinity;
+                        var itemsReturned = hydraData['member'].length;
                         // let first = (params.page - 1) * params.itemsPerPage;
                         if (params.search.value) {
                             console.log(`dt search: ${params.search.value}`);
@@ -696,7 +696,7 @@ export default class extends Controller {
                         // console.log(`dt request: ${params.length} starting at ${params.start}`);
 
                         // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
-                        let d = hydraData['hydra:member'];
+                        let d = hydraData['member'];
                         if (d.length) {
                             console.table(d[0]);
                             // console.log('first result', d[0]);
@@ -720,9 +720,9 @@ export default class extends Controller {
                         // console.error('searchpanes', searchPanes, options);
 
                         // if searchPanes have been sent back from the results, sort them by browseOrder
-                        if(typeof hydraData['hydra:facets'] !== "undefined" && typeof hydraData['hydra:facets']['searchPanes'] !== "undefined") {
-                           searchPanesRaw = hydraData['hydra:facets']['searchPanes']['options'];
-                           searchPanes = this.sequenceSearchPanes(hydraData['hydra:facets']['searchPanes']['options']);
+                        if(typeof hydraData['facets'] !== "undefined" && typeof hydraData['facets']['searchPanes'] !== "undefined") {
+                           searchPanesRaw = hydraData['facets']['searchPanes']['options'];
+                           searchPanes = this.sequenceSearchPanes(hydraData['facets']['searchPanes']['options']);
                             console.warn({searchPanes, searchPanesRaw, hydraData})
                         } else {
                            searchPanes.options = options;
@@ -767,7 +767,7 @@ export default class extends Controller {
                         //     pagination_client_items_per_page: true
 
                         // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
-                        let next = hydraData["hydra:view"]['hydra:next'];
+                        let next = hydraData["view"]['next'];
                         // we need the searchpanes options, too.
 
 

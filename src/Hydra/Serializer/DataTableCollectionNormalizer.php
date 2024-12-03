@@ -84,7 +84,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         if ($object instanceof PaginatorInterface) {
-            dd($object, $context);
             $data = $this->getNextData($object, $context, []);
             if ($context['request_uri']) {
                 parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);

@@ -657,10 +657,10 @@ export default class extends Controller {
             columnDefs: this.columnDefs(searchFieldsByColumnNumber),
             // https://datatables.net/reference/option/ajax
             ajax: (params, callback, settings) => {
+                console.error(`starting at ${params.start}`);
                 this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(this.apiParams);
-                console.error(`starting at ${params.start}`);
                 // console.assert(params.start, `DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
 
                 Object.assign(this.apiParams, this.filter);
@@ -1065,12 +1065,12 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 apiData[c.origData + '[]'] = c.value1;
             });
         }
-        let facets = [];
-        this.facets.forEach(function (column, index) {
-            // if ( column.browsable ) {
-                facets.push(column.name);
-            // }
-        });
+        // let facets = [];
+        // this.facets.forEach(function (column, index) {
+        //     // if ( column.browsable ) {
+        //         facets.push(column.name);
+        //     // }
+        // });
         // console.error({facets});
 
         // we don't do anything with facets!  So we probably don't need the above.
@@ -1079,6 +1079,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
                 // check the first character for a range filter operator
                 // data is the column field, at least for right now.
                 apiData[column.data] = column.search.value;
+
             }
         });
 
@@ -1086,20 +1087,22 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         apiData.facets = [];
         // this could be replaced with sending a list of facets and skipping this =1, it'd be cleaner
         this.facets.forEach((column, index) => {
-            // if (column.browsable) {
-                apiData.facets.push(column.name);
-                // apiData.facets[column.name] = 1; // old way
-                // this seems odd, it should be a pipe-delimited list
-            // }
+            if (column.browsable) {
+                if (!apiData.facets.includes(column.name)) {
+                    apiData.facets.push(column.name);
+                }
+            }
         });
 
         this.facets.forEach((column, index) => {
             if (column.browsable) {
-                apiData.facets.push(column.name);
-                // apiData.facets[column.name] = 1; // old way
-                // this seems odd, it should be a pipe-delimited list
+                if (!apiData.facets.includes(column.name)) {
+                    apiData.facets.push(column.name);
+                }
             }
         });
+        console.table(apiData.facets);
+        // console.table(apiData);
 
         return apiData;
     }

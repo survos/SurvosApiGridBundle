@@ -658,6 +658,7 @@ export default class extends Controller {
             // https://datatables.net/reference/option/ajax
             ajax: (params, callback, settings) => {
                 console.error(`starting at ${params.start}`);
+                this.messageTarget.innerHTML = `starting at ${params.start}`;
                 this.apiParams = this.dataTableParamsToApiPlatformParams(params, searchPanesRaw);
                 // this.debug &&
                 // console.error(this.apiParams);

@@ -31,9 +31,9 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
      * @param string $searchParameterName The parameter whose value this filter searches for
      */
     public function __construct(ManagerRegistry        $managerRegistry,
-                                LoggerInterface        $logger = null,
-                                array                  $properties = null,
-                                NameConverterInterface $nameConverter = null,
+                                ?LoggerInterface        $logger = null,
+                                ?array                  $properties = null,
+                                ?NameConverterInterface $nameConverter = null,
                                 private string         $searchParameterName = 'json_search')
     {
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
@@ -47,7 +47,7 @@ class JsonSearchFilter extends AbstractFilter implements JsonSearchFilterInterfa
         QueryBuilder                $queryBuilder,
         QueryNameGeneratorInterface $queryNameGenerator,
         string                      $resourceClass,
-        Operation                   $operation = null,
+        ?Operation                   $operation = null,
         array                       $context = []
     ): void
     {

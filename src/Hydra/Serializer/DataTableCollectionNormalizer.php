@@ -57,7 +57,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
      *
      * @param iterable $object
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
 //        dd($object, $format, $context);
 //        $this->logger->error(sprintf("%s ", $format));
@@ -170,7 +170,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     /**
      * Gets items data.
      */
-    protected function getItemsData(iterable $object, string $format = null, array $context = []): array
+    protected function getItemsData(iterable $object, ?string $format = null, array $context = []): array
     {
         $data = [];
         $data['member'] = [];

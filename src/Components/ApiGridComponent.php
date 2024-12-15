@@ -200,8 +200,8 @@ class ApiGridComponent implements TwigBlocksInterface
     }
 
     public function mount(string $class,
-                          string $apiRoute=null,
-                          string $apiGetCollectionUrl=null,
+                          ?string $apiRoute=null,
+                          ?string $apiGetCollectionUrl=null,
                           array $filter = [],
                           array $buttons = [],
                           bool $meili=false)

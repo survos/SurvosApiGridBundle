@@ -131,7 +131,7 @@ class MeiliService
      * @param string|null $indexName
      * @return array
      */
-    public function waitUntilFinished(Indexes $index, SymfonyStyle $io = null): array
+    public function waitUntilFinished(Indexes $index, ?SymfonyStyle $io = null): array
     {
         do {
             $index->fetchInfo();

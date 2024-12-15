@@ -42,7 +42,7 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, Operation $operation = null, array $context = []): void
+    public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
     {
         if (null === $pagination = $this->getPagination($queryBuilder, $operation, $context)) {
             return;
@@ -66,7 +66,7 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
     /**
      * {@inheritdoc}
      */
-    public function supportsResult(string $resourceClass, Operation $operation = null, array $context = []): bool
+    public function supportsResult(string $resourceClass, ?Operation $operation = null, array $context = []): bool
     {
         if ($context['graphql_operation_name'] ?? false) {
             return $this->pagination->isGraphQlEnabled($operation, $context);
@@ -78,7 +78,7 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
     /**
      * {@inheritdoc}
      */
-    public function getResult(QueryBuilder $queryBuilder, string $resourceClass = null, Operation $operation = null, array $context = []): iterable
+    public function getResult(QueryBuilder $queryBuilder, ?string $resourceClass = null, ?Operation $operation = null, array $context = []): iterable
     {
         $query = $queryBuilder->getQuery();
 
@@ -132,7 +132,7 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
     /**
      * Determines the value of the $fetchJoinCollection argument passed to the Doctrine ORM Paginator.
      */
-    private function shouldDoctrinePaginatorFetchJoinCollection(QueryBuilder $queryBuilder, Operation $operation = null, array $context = []): bool
+    private function shouldDoctrinePaginatorFetchJoinCollection(QueryBuilder $queryBuilder, ?Operation $operation = null, array $context = []): bool
     {
         $fetchJoinCollection = $operation?->getPaginationFetchJoinCollection();
 
@@ -165,7 +165,7 @@ final class SlicePaginationExtension implements QueryResultCollectionExtensionIn
     /**
      * Determines whether the Doctrine ORM Paginator should use output walkers.
      */
-    private function shouldDoctrinePaginatorUseOutputWalkers(QueryBuilder $queryBuilder, Operation $operation = null, array $context = []): bool
+    private function shouldDoctrinePaginatorUseOutputWalkers(QueryBuilder $queryBuilder, ?Operation $operation = null, array $context = []): bool
     {
         $useOutputWalkers = $operation?->getPaginationUseOutputWalkers();
 

@@ -28,9 +28,9 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
      * @param string $searchParameterName The parameter whose value this filter searches for
      */
     public function __construct(ManagerRegistry        $managerRegistry,
-                                LoggerInterface $logger = null,
-                                array $properties = null,
-                                NameConverterInterface $nameConverter = null,
+                                ?LoggerInterface $logger = null,
+                                ?array $properties = null,
+                                ?NameConverterInterface $nameConverter = null,
                                 private string         $searchParameterName = 'search')
     {
         parent::__construct($managerRegistry, $logger, $properties, $nameConverter);
@@ -44,7 +44,7 @@ class MultiFieldSearchFilter extends AbstractFilter implements FilterInterface
         QueryBuilder $queryBuilder,
         QueryNameGeneratorInterface $queryNameGenerator,
         string $resourceClass,
-        Operation $operation = null,
+        ?Operation $operation = null,
         array $context = []
     ): void {
         if (null === $value || $property !== $this->searchParameterName) {

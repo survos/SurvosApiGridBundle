@@ -1,10 +1,12 @@
 import 'datatables.net-select-bs5';
-import 'datatables.net-searchpanes-bs5';
+// import 'datatables.net-searchpanes-bs5';
+import "https://cdn.datatables.net/searchpanes/2.3.3/js/dataTables.searchPanes.mjs";
 import 'datatables.net-searchbuilder-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-select-bs5';
 import 'datatables.net-responsive-bs5';
-import 'datatables.net-scroller-bs5';
+import "https://cdn.datatables.net/scroller/2.4.3/js/dataTables.scroller.mjs";
+
 // https://jsfiddle.net/tacman1123/b2f3hj08/23/
 
 // import {default as axios} from "axios";

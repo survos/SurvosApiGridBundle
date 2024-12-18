@@ -1,5 +1,5 @@
 import 'datatables.net-select-bs5';
-import 'datatables.net-searchpanes-bs5';
+import "https://cdn.datatables.net/tmp/dataTables.searchPanes.mjs";
 import 'datatables.net-searchbuilder-bs5';
 import 'datatables.net-buttons-bs5';
 import 'datatables.net-select-bs5';

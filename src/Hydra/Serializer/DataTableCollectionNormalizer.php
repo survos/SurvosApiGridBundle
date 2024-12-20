@@ -70,17 +70,19 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $data = [];
 
         if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
-            parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
-            $locale = $params['_locale'] ?? null;
-            $context['locale'] = $locale;
-            if (isset($params['facets']) && is_array($params['facets'])) {
-                $context['pixieCode'] = $params['pixieCode'] ?? false;
+            if ($context['request_uri']) {
+                parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+                $locale = $params['_locale'] ?? null;
+                $context['locale'] = $locale;
+                if (isset($params['facets']) && is_array($params['facets'])) {
+                    $context['pixieCode'] = $params['pixieCode'] ?? false;
 
-                $facets = $this->getFacetsData($object['data']->getFacetDistribution(),
-                    $object['facets']->getFacetDistribution(), $context);
+                    $facets = $this->getFacetsData($object['data']->getFacetDistribution(),
+                        $object['facets']->getFacetDistribution(), $context);
+                }
+                $data = $this->getNextData($object['data'], $context, []);
+                $object = $object['data']->getHits();
             }
-            $data = $this->getNextData($object['data'], $context, []);
-            $object = $object['data']->getHits();
         }
 
         if ($object instanceof PaginatorInterface) {

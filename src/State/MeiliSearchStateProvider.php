@@ -49,7 +49,7 @@ class MeiliSearchStateProvider implements ProviderInterface
             $body['attributesToHighlight'] = ['_translations'];
             $body['highlightPreTag'] = '<em class="bg-info">';
             $body['highlightPostTag'] =  '</em>';
-//            dd($uriVariables, $context);
+            $body['showRankingScore'] = true;
             $locale = $context['filters']['_locale'] ?? null;
 
             //

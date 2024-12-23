@@ -173,6 +173,7 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true)
             ->setAutoconfigured(true)
             ->setArgument('$contextBuilder', new Reference('api_platform.jsonld.context_builder'))
+            ->setArgument('$addLocaleToRouteParameters', $config['passLocale'])
 //            ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
 //            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
 //            ->setArgument('$iriConverter', new Reference('api_platform.symfony.iri_converter'))

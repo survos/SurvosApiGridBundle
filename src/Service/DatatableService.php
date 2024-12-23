@@ -200,11 +200,12 @@ class DatatableService
         }
 
         // now go through each property, including getting the primary key
-        // something's still not right here!
+        // something's still not right here!  Like setting browsable on getRp.
         foreach ($reflectionClass->getMethods() as $method) {
             $fieldname = $method->getName();
             foreach ($method->getAttributes() as $attribute) {
-                if ($attribute->getName() == Groups::class) {
+                if ($attribute->getName() == Facet::class) {
+//                if ($attribute->getName() == Groups::class) {
 //                    dump($settings, $fieldname, $attribute);
                     $settings[$fieldname]['browsable'] = true;
                 }

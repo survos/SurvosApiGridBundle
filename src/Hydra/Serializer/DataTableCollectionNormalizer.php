@@ -39,10 +39,11 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         ResourceClassResolverInterface                        $resourceClassResolver,
         private readonly LoggerInterface                      $logger,
         private EventDispatcherInterface                      $eventDispatcher,
-        private readonly RequestStack                         $requestStack, // hack to add locafle
+        private readonly RequestStack                         $requestStack, // hack to add locale
         private readonly IriConverterInterface                $iriConverter,
         protected ?ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
         array                                                 $defaultContext = [],
+        private $addLocaleToRouteParameters = false,
         protected string                                      $pageParameterName = 'page'
     )
     {
@@ -206,10 +207,9 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $normalizedData = $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }
             // hack -- this should be its own normalizer.  Plus, it may need to be recursive
-            if (array_key_exists('rp', $normalizedData)) {
+            if ($this->addLocaleToRouteParameters && array_key_exists('rp', $normalizedData)) {
                 $request = $this->requestStack->getCurrentRequest();
                 $normalizedData['rp']['_locale'] = $request->getLocale();
-
             }
             $data['member'][] = $normalizedData;
         }

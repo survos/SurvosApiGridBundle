@@ -11,19 +11,15 @@ trait TwigBlocksTrait
     {
         $customColumnTemplates = [];
         $allTwigBlocks = [];
-//        dd($this->twig->getLoader()->cache, $id, $this->caller);
         if ($this->caller) {
             //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
             $path = $sourceContext->getPath();
 //            $this->path = $path;
-//            dd($sourceContext, $sourceContext->getCode());
 
-            //            dd($template);
 
 
             //            $this->source = $source;
-            //            dd($this->twig);
             // get rid of comments
             $source = file_get_contents($path);
             $source = preg_replace('/{#.*?#}/', '', $source);
@@ -87,9 +83,7 @@ trait TwigBlocksTrait
                     $twigBlocks = $twigBlocks[0];
                 }
             } elseif ($crawler->filterXPath('//js_twig')->count() > 0) {
-                dd($crawler);
                     $twigBlocks = $crawler->filterXPath('//js_twig')->each(function (Crawler $node, $i) {
-                        dd($node);
                         return urldecode($node->html());
                     });
                     if (is_array($twigBlocks)) {
@@ -98,10 +92,23 @@ trait TwigBlocksTrait
             } else {
                 $twigBlocks = $source;
             }
+
+
             if ($crawler->filterXPath('//block')->count() > 0) {
 
+
+
+
+
+
                 $allTwigBlocks = $crawler->filterXPath('//block')->each(function (Crawler $node, $i) {
-//                    https://stackoverflow.com/questions/15133541/get-raw-html-code-of-element-with-symfony-domcrawler
+
+                    $attributes = [];
+                    foreach ($node->getNode(0)->attributes as $attribute) {
+                        $attributes[$attribute->name] = $attribute->value;
+                    }
+
+                    //                    https://stackoverflow.com/questions/15133541/get-raw-html-code-of-element-with-symfony-domcrawler
                     $blockName = $node->attr('name');
                     $html = rawurldecode($node->html());
                     // hack for twig > and <

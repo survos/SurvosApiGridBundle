@@ -59,6 +59,7 @@ class MeiliSearchStateProvider implements ProviderInterface
                 $index = $this->meili->getIndex($indexName);
             $event = $this->stopwatch->start('meili-search', 'meili');
                 $data = $index->search($searchQuery, $body);
+//                dd($data, $searchQuery);
                 $event->stop();
 
 //            dd($context, $indexName);

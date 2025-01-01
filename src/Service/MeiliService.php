@@ -103,6 +103,7 @@ class MeiliService
                 if (isset($this->logger)) {
 //                    $this->logger->info(sprintf("Task %s is at %s", $taskId, $status));
                 }
+                usleep(50_000);
             };
             if ($status == 'failed') {
                 if ($stopOnError) {

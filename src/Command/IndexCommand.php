@@ -156,20 +156,10 @@ class IndexCommand extends Command
         $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
         $primaryKey = count($idFields) ? $idFields[0] : 'id';
 
-        $map = [
-            'es' => 'spa',
-            'en' => 'eng',
-            'de' => 'deu',
-            'hi' => 'hin',
-            'fr' => 'fra',
-            'da' => 'dan',
-        ];
-        $searchableAttrs = [];
 
         $localizedAttributes = [];
         foreach ($this->enabledLocales as $locale) {
-            $locale3 = $map[$locale];
-            $localizedAttributes[] = ['locales' => [$locale3],
+            $localizedAttributes[] = ['locales' => [$locale],
                 'attributePatterns' => [sprintf('_translations.%s.*',$locale)]];
         }
 
@@ -178,6 +168,7 @@ class IndexCommand extends Command
 //        $index->updateSettings(); // could do this in one call
 
             $results = $index->updateSettings($debug = [
+//                'searchFacets' => false, // search _within_ facets
                 'localizedAttributes' => $localizedAttributes,
                 'displayedAttributes' => ['*'],
                 'filterableAttributes' => $this->datatableService->getFieldsWithAttribute($settings, 'browsable'),

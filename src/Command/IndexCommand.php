@@ -69,34 +69,23 @@ class IndexCommand extends Command
         $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
             $classes = [];
+
+
             // https://abendstille.at/blog/?p=163
             $metas = $this->entityManager->getMetadataFactory()->getAllMetadata();
             foreach ($metas as $meta) {
+                // check argument
                 if ($class && ($meta->getName() <> $class)) {
                     continue;
                 }
 
-                // actually, ApiResource or GetCollection
-                $apiRouteAttributes = $meta->getReflectionClass()->getAttributes(ApiResource::class);
-                if ($output->isVerbose() && !count($apiRouteAttributes)) {
-                    $output->writeln(sprintf("Skipping %s, not an API Resource", $meta->getName()));
+                // skip if no groups defined
+                if (!$groups = $this->meiliService->getNormalizationGroups($meta->getName())) {
+                    continue;
                 }
 
-                foreach ($apiRouteAttributes as $attribute) {
-                    $args = $attribute->getArguments();
-                    // @todo: this could also be inside of the operation!
-                    if (array_key_exists('normalizationContext', $args)) {
-                        assert(array_key_exists('groups', $args['normalizationContext']), "Add a groups to " . $meta->getName());
-                        $groups = $args['normalizationContext']['groups'];
-                        if (is_string($groups)) {
-                            $groups = [$groups];
-                        }
-                        // dd($class, $meta->getName(), $groups);
-                        $classes[$meta->getName()] = $groups;
-                    }
-                }
+                $classes[$meta->getName()] = $groups;
             }
-
 
         $this->io = new SymfonyStyle($input, $output);
 

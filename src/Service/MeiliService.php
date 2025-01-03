@@ -2,6 +2,7 @@
 
 namespace Survos\ApiGrid\Service;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Entity\Core;
 use App\Entity\CoreInterface;
 use App\Entity\Owner;
@@ -47,6 +48,7 @@ class MeiliService
         private string $meiliHost,
         private string $meiliKey,
         private array $config = [],
+        private array $groupsByClass = [],
         private ?LoggerInterface $logger = null,
         protected ?ClientInterface $httpClient = null,
     ) {
@@ -55,6 +57,34 @@ class MeiliService
     public function getConfig(): array
     {
         return $this->config;
+    }
+
+    public function getNormalizationGroups(string $class): ?array
+    {
+        if ($this->groupsByClass[$class] ?? null) {
+            return $this->groupsByClass[$class];
+        }
+        $groups = null;
+        $meta = $this->entityManager->getMetadataFactory()->getMetadataFor($class);
+        // so this can be used by the index updater
+        // actually, ApiResource or GetCollection
+        $apiRouteAttributes = $meta->getReflectionClass()->getAttributes(ApiResource::class);
+
+        foreach ($apiRouteAttributes as $attribute) {
+            $args = $attribute->getArguments();
+            // @todo: this could also be inside of the operation!
+            if (array_key_exists('normalizationContext', $args)) {
+                assert(array_key_exists('groups', $args['normalizationContext']), "Add a groups to " . $meta->getName());
+                $groups = $args['normalizationContext']['groups'];
+                if (is_string($groups)) {
+                    $groups = [$groups];
+                }
+            }
+        }
+        $this->groupsByClass[$class]=$groups;
+
+        return $groups;
+
     }
 
     public function setConfig(array $config): void

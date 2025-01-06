@@ -83,6 +83,9 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
                 return $condition["origData"]." = NULL";
             case "!null" :
                 return $condition["origData"]." != NULL";
+            case "starts" :
+//                https://www.meilisearch.com/docs/learn/filtering_and_sorting/filter_expression_reference#starts-with
+                return $condition["origData"]." STARTS WITH ".$condition["value1"];
             default:
                 return $condition["origData"]." ".$condition["condition"]." ".$condition[0];
         }

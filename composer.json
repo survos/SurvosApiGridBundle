@@ -24,7 +24,7 @@
         "symfony/http-kernel": "^6.4 || ^7.1",
         "symfony/options-resolver": "^6.4 || ^7.1",
         "symfony/ux-twig-component": "^2.8",
-        "twig/twig": "^3.1",
+        "twig/twig": "^3.18",
         "symfony/dom-crawler": "^6.4 || ^7.1",
         "zenstruck/console-extra": "^1.4"
     },

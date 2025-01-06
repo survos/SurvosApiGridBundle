@@ -138,6 +138,11 @@ class ApiGridComponent implements TwigBlocksInterface
         }
         return $settings;
     }
+
+    /**
+     * @param string $columnType
+     * @return Column[]
+     */
     public function getNormalizedColumns(string $columnType='columns'): iterable
     {
         if ($this->class) {
@@ -153,6 +158,18 @@ class ApiGridComponent implements TwigBlocksInterface
             'facet_columns' => $this->datatableService->normalizedColumns($settings, $this->facet_columns, $this->getTwigBlocks())
         };
         return $value;
+    }
+
+    public function getSearchBuilderColumns(): array
+    {
+        $searchBuilderColumns = [];
+        foreach ($this->getNormalizedColumns() as $idx => $column) {
+            if ($column->browsable) {
+                $searchBuilderColumns[] = $idx+1;
+            }
+        }
+        return $searchBuilderColumns;
+
     }
 
     public function getModalTemplate(): ?string
@@ -200,6 +217,7 @@ class ApiGridComponent implements TwigBlocksInterface
     }
 
     public function mount(string $class,
+//                          array $columns=[],
                           ?string $apiRoute=null,
                           ?string $apiGetCollectionUrl=null,
                           array $filter = [],
@@ -211,13 +229,17 @@ class ApiGridComponent implements TwigBlocksInterface
 //        $this->twig->addGlobal('owner', []);
 //        dd($this->twig->getGlobals());
 
+//        dd($columns, $meili);
+        // if meili, get the index and validate the columns
+
+
+
         $this->filter = $filter;
         $this->buttons = $buttons;
 //        assert($class == $this->class, "$class <> $this->class");
         $this->class = $class; // ??
 //            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),
 //                context: $context ?? []);
-
 
         $routes = $this->inspectionService->getAllUrlsForResource($class);
         // the problem with this is that it always gets the _first_ one.
@@ -259,6 +281,14 @@ class ApiGridComponent implements TwigBlocksInterface
         return;
         dd(func_get_args());;
         dd($this->apiUrl);
+    }
+
+    public function facetColumns(): iterable
+    {
+        return array_values(array_filter($this->getNormalizedColumns(), function ($column) {
+            return $column->inSearchPane || $column->browsable;
+        }));
+
     }
 
 

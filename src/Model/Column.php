@@ -15,6 +15,9 @@ class Column
         public ?string $prefix = null,
         public ?string $internalCode = null, // e.g. label, description, type
         public ?string $className = null, // e.g. pull-right for numbers
+        public ?string $class_name = null, // e.g. pull-right for numbers
+        public ?bool $facet = null, // e.g. pull-right for numbers
+        public ?bool $grid = null, // e.g. pull-right for numbers
         public bool $searchable = false,
         public bool $useDatatables = true,
 
@@ -38,7 +41,7 @@ class Column
         }
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->name;
     }

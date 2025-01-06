@@ -3,9 +3,11 @@
 namespace Survos\ApiGrid\Twig;
 
 use ApiPlatform\Metadata\IriConverterInterface;
+
 //use ApiPlatform\Core\Api\IriConverterInterface as LegacyIriConverterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\GetCollection;
+use Survos\ApiGrid\Model\Column;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
@@ -48,7 +50,24 @@ class TwigExtension extends AbstractExtension
                 $object[$attribute] = $value;
                 return $object;
             }),
+//            new TwigFunction('c', fn (string $name, array $params=[]) => $this->column($name, $params)),
+            new TwigFunction('col', function(...$params) {
+                foreach ($params as $key => $value) {
+                    $newParams[u($key)->camel()->toString()] = $value;
+                }
+                return new Column(...$newParams);
+            } ,
+                ['is_variadic' => true]
+            )
         ];
+    }
+
+    private function column(array $params)
+    {
+        dd($params);
+        $column = new Column(...$params);
+        return $column;
+        // validate facets, sort, etc. here? Or in datatable component
     }
 
     public function datatable($data)

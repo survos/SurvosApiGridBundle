@@ -73,7 +73,7 @@ export default class extends Controller {
         viewTotal: {type: Boolean, default: false},
         index: {type: String, default: ''}, // meili
         dom: {type: String, default: 'QBlfrtip'}, // use P for searchPanes
-        searchBuilderFields: {type: String, default: '[]'},
+        searchBuilderColumns: {type: String, default: '[]'},
         filter: String, // json, from queryString, e.g. party=dem
         buttons: String // json, from queryString, e.g. party=dem
     }
@@ -93,6 +93,7 @@ export default class extends Controller {
         let x = columns.map(c => {
             let render = null;
             c.className = c.title;
+            c.searchBuilderType = 'num';
             if (c.twigTemplate) {
                 // console.warn(c.twigTemplate);
                 let template = Twig.twig({
@@ -134,6 +135,10 @@ export default class extends Controller {
                 sortable: (typeof c.sortable)?c.sortable:false,
                 className: c.className
             });
+
+            column.searchBuilder = {
+                type: 'num',
+            }
 
             column.searchPanes = {
                 show: c.browsable,
@@ -232,7 +237,7 @@ export default class extends Controller {
 
         // this.sortableFields = JSON.parse(this.sortableFieldsValue);
         // this.searchableFields = JSON.parse(this.searchableFieldsValue);
-        this.searchBuilderFields = JSON.parse(this.searchBuilderFieldsValue);
+        this.searchBuilderColumns = JSON.parse(this.searchBuilderColumnsValue);
 
         this.locale = this.localeValue;
         this.viewTotal = true; // this.viewTotalValue;
@@ -643,7 +648,9 @@ export default class extends Controller {
                 preSelect: preSelectArray
             },
             searchBuilder: {
-                columns: this.searchBuilderFields,
+                // columns: this.searchBuilderColumns, // this.searchBuilderFields,
+                columns: ['.lyricsLength'], // this.searchBuilderFields,
+
                 depthLimit: 1,
                 threshold: 0,
                 showEmptyPanes: true
@@ -1062,8 +1069,8 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
 
         if (params.searchBuilder && params.searchBuilder.criteria) {
             params.searchBuilder.criteria.forEach((c, index) => {
-                console.warn(c);
-                apiData[c.origData + '[]'] = c.value1;
+                console.warn(c, c.origData);
+                // apiData[c.origData + '[]'] = c.value1;
             });
         }
         // let facets = [];

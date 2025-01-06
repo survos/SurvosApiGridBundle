@@ -1,13 +1,23 @@
+{% set searchBuilderFields = [
+    'year'
+] %}
+
 <div {{ apiCall ? stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,
     api_call:  apiCall,
+    searchBuilderColumns: this.searchBuilderColumns,
     searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
     locale: locale,
     globals: globals,
     buttons: buttons|default([]),
+
+# arguably combined
     columnConfiguration: columns|json_encode,
-    facetConfiguration: facet_columns|json_encode,
+    facetConfiguration: this.facetColumns|json_encode,
+    searchBuilderFields: searchBuilderFields|json_encode,
+
+
     modalTemplate: this.modalTemplate,
     dom: this.dom|default(false),
     style: this.style,

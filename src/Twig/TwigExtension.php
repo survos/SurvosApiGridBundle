@@ -52,6 +52,9 @@ class TwigExtension extends AbstractExtension
             }),
 //            new TwigFunction('c', fn (string $name, array $params=[]) => $this->column($name, $params)),
             new TwigFunction('col', function(...$params) {
+
+                // https://github.com/twigphp/Twig/di   scussions/4539
+                $newParams = [];
                 foreach ($params as $key => $value) {
                     $newParams[u($key)->camel()->toString()] = $value;
                 }

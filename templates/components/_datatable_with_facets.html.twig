@@ -1,7 +1,3 @@
-{% set searchBuilderFields = [
-    'year'
-] %}
-
 <div {{ apiCall ? stimulus_controller(this.stimulusController, {
     schema: schema,
     globals: this.globals,
@@ -54,9 +50,8 @@
         <div class="col-sm-12 col-md-7 col-lg-8 col-xl-9">
             <div class="card">
                 <div class="card-body">
-                    {{ this.stimulusController }}
                     <div class="" {{ stimulus_target(this.stimulusController, 'message') }}>
-                        message
+
                     </div>
         {#            {{ component('menu', {#}
         {#                type: PAGE_MENU,#}

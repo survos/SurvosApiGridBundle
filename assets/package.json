@@ -10,8 +10,7 @@
         "webpackMode": "eager",
         "fetch": "lazy",
         "enabled": true,
-        "autoimport": {
-        }
+        "autoimport": {}
       },
       "api_grid": {
         "main": "src/controllers/api_grid_controller.js",
@@ -43,7 +42,6 @@
           "datatables.net-select-bs5/css/select.bootstrap5.min.css": true
         }
       }
-
     },
     "importmap": {
       "twig": "^1.17.1",

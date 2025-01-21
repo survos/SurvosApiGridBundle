@@ -730,7 +730,7 @@ export default class extends Controller {
             // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
             let d = hydraData["member"];
             if (d.length) {
-              console.table(d[0]);
+              // console.table(d[0]);
               // console.log('first result', d[0]);
             }
             let searchPanes = {};

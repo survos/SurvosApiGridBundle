@@ -46,17 +46,18 @@ class MeiliSearchStateProvider implements ProviderInterface
 
             $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
             $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
-            $body['attributesToHighlight'] = ['_translations'];
+            $body['attributesToHighlight'] = ['t']; // from PixieInterface!
             $body['highlightPreTag'] = '<em class="bg-info">';
             $body['highlightPostTag'] =  '</em>';
             $body['showRankingScore'] = true;
             $locale = $context['filters']['_locale'] ?? null;
+            // @todo: get from request?
 
             //
             if (!$indexName = $context['uri_variables']['indexName'] ?? false) {
                 $indexName = $this::getSearchIndexObject($operation->getClass(), $locale);
             }
-                $index = $this->meili->getIndex($indexName);
+            $index = $this->meili->getIndex($indexName);
             $event = $this->stopwatch->start('meili-search', 'meili');
                 $data = $index->search($searchQuery, $body);
 //                dd($data, $searchQuery);

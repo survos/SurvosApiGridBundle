@@ -19,6 +19,7 @@ use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Event\FacetEvent;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\Intl\Languages;
@@ -39,7 +40,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         ResourceClassResolverInterface                        $resourceClassResolver,
         private readonly LoggerInterface                      $logger,
         private EventDispatcherInterface                      $eventDispatcher,
-        private readonly RequestStack                         $requestStack, // hack to add locale
+        private readonly RequestStack                         $requestStack,
         private readonly IriConverterInterface                $iriConverter,
         protected ?ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
         array                                                 $defaultContext = [],
@@ -51,6 +52,11 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
 
         parent::__construct($resourceClassResolver, $pageParameterName);
+    }
+
+    private function getRequest(): Request
+    {
+        return $this->requestStack->getCurrentRequest();
     }
 
     /**
@@ -137,7 +143,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         unset($context['operation_type'], $context['operation_name']);
 
         $itemsData = $this->getItemsData($object, $format, $context);
-
+//        dd($data, $itemsData, $paginationData);
 
         return array_merge_recursive($data, $paginationData, $itemsData, ['facets' => $facets]);
     }
@@ -207,10 +213,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $normalizedData = $this->normalizer->normalize($obj, $format, $context + ['jsonld_has_context' => true]);
             }
             // hack -- this should be its own normalizer.  Plus, it may need to be recursive
-            if ($this->addLocaleToRouteParameters && array_key_exists('rp', $normalizedData)) {
-                $request = $this->requestStack->getCurrentRequest();
-                $normalizedData['rp']['_locale'] = $request->getLocale();
-            }
+//            if ($this->addLocaleToRouteParameters && array_key_exists('rp', $normalizedData)) {
+//                $request = $this->requestStack->getCurrentRequest();
+//                $normalizedData['rp']['_locale'] = $request->getLocale();
+//            }
             $data['member'][] = $normalizedData;
         }
 
@@ -228,7 +234,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
     private function getFacetsData(array $facets, ?array $params, ?array $context): array
     {
         $facetsData = [];
-        $locale = $context['locale'] ?? null;
+        $locale = $this->getRequest()->getLocale();
         // a mess, needs refactoring
         if ($pixieCode = $context['uri_variables']['pixieCode'] ?? false) {
             $event = $this->eventDispatcher->dispatch(new FacetEvent($params,

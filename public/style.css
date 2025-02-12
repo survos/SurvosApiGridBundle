@@ -5,7 +5,8 @@
     line-height: 21px;
     font-size: 14px;
 }
-.customTable span ,
+
+.customTable span,
 .customTable a {
     font-size: 14px;
 }
@@ -22,6 +23,7 @@
 .customTable div.dtsb-searchBuilder div.dtsb-titleRow {
     height: 28px;
 }
+
 .customTable div.dtsb-searchBuilder div.dtsb-titleRow div.dtsb-title {
     padding-top: 0;
     color: #495057;
@@ -30,13 +32,15 @@
     letter-spacing: 0.001em;
 }
 
-.customTable .dt-length, .customTable .dtsb-searchBuilder {
+.customTable .dt-length,
+.customTable .dtsb-searchBuilder {
     float: left;
 }
 
 .customTable .dtsb-searchBuilder {
     width: auto;
 }
+
 .customTable .dt-search {
     float: right;
 }
@@ -60,6 +64,7 @@
     --tblr-badge-color: #FFF !important;
     color: var(--tblr-badge-color) !important;
 }
+
 .width-100 {
     max-width: 100px;
     background: #0a58ca;
@@ -101,11 +106,13 @@
 td.dtr-control:has(> .custom-heading) {
     white-space: normal;
 }
+
 .custom-dtr-data {
     text-wrap: wrap;
     vertical-align: text-top;
     white-space: normal !important;
 }
+
 .custom-heading a {
     text-wrap: wrap;
 }
@@ -131,6 +138,7 @@ table.dataTable>tbody>tr.child ul.dtr-details {
 .customTable .dt-search {
     float: right;
 }
+
 .current.active {
     color: var(--tblr-primary);
 }
@@ -139,7 +147,7 @@ table.dataTable>tbody>tr.child ul.dtr-details {
     margin-top: -17px;
 }
 
-@media (min-width: 768px){
+@media (min-width: 768px) {
     #dtsp-verticalPanes {
         display: block;
         padding-top: 16px !important;

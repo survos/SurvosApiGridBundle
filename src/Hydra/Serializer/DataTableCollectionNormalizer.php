@@ -78,7 +78,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
             if ($context['request_uri']) {
-                parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+                parse_str((string)parse_url($context['request_uri'], PHP_URL_QUERY), $params);
                 $locale = $params['_locale'] ?? null;
                 $context['locale'] = $locale;
                 if (isset($params['facets']) && is_array($params['facets'])) {
@@ -95,7 +95,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         if ($object instanceof PaginatorInterface) {
             $data = $this->getNextData($object, $context, []);
             if ($context['request_uri']) {
-                parse_str(parse_url($context['request_uri'], PHP_URL_QUERY), $params);
+                parse_str((string)parse_url($context['request_uri'], PHP_URL_QUERY), $params);
                 $em = $object->getQuery()->getEntityManager();
                 $metadata = $em->getClassMetadata($context['operation']->getClass());
                 $repo = $em->getRepository($context['operation']->getClass());

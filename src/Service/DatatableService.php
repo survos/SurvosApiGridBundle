@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Survos\ApiGrid\Service;
 
+use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\FilterInterface;
@@ -11,7 +12,6 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Doctrine\ORM\Mapping\Id;
-use Gedmo\Mapping\Event\Adapter\ORM;
 use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Attribute\Facet;
@@ -145,14 +145,17 @@ class DatatableService
             //            dd($attribute);
             /** @var FilterInterface $filter */
             $arguments = $attribute->getArguments();
-            $filter = $arguments[0]??null;
+
+            /** @var ApiFilter $attrInstance */
+            $attrInstance = $attribute->newInstance();
+//            dump($attribute->newInstance(), $arguments, $attribute->getName(), $attribute);
+            $filter = $attrInstance->filterClass;
             if (!$filter) {
+                dd($arguments, $attribute->getName(), $attribute);
+                continue;
                 return [];
             }
-            if (!array_key_exists('properties', $arguments)) {
-                continue;
-            }
-            $properties = $arguments['properties'];
+            $properties = $attrInstance->properties;
             foreach ($properties as $property) {
                 if (!array_key_exists($property, $settings)) {
                     $settings[$property] = [
@@ -167,6 +170,7 @@ class DatatableService
                         $settings[$property]['browsable'] = true;
                         break;
                     case SortFilter::class:
+                        assert(false, "why not OrderFilter?");
                     case OrderFilter::class:
                         $settings[$property]['sortable'] = true;
                         break;
@@ -195,6 +199,17 @@ class DatatableService
                 }
                 if ($attribute->getName() == Facet::class) {
                     $settings[$fieldname]['browsable'] = true;
+                }
+
+                if ($attribute->getName() == ApiFilter::class) {
+                    $attrInstance = $attribute->newInstance();
+                    switch ($filterClass = $attrInstance->filterClass) {
+                        case OrderFilter::class:
+                            $settings[$fieldname]['sortable'] = true;
+                            break;
+                        default:
+                            dd("@todo: handle " . $filterClass);
+                    }
                 }
             }
         }
@@ -242,13 +257,14 @@ class DatatableService
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-            $filter = $attribute->getArguments()[0];
+            $attrInstance = $attribute->newInstance();
+            $filter = $attrInstance->filterClass;
 //            if (u($filter)->endsWith('MultiFieldSearchFilter')) {
 //                $fields = $attribute->getArguments()['properties'];
 //                $searchableFields = array_merge($searchableFields,$fields );
 //            }
             if (in_array($filter, [RangeFilter::class, SearchFilter::class, MultiFieldSearchFilter::class])) {
-                $fields = $attribute->getArguments()['properties'];
+                $fields = $attrInstance->properties;
                 $searchableFields = array_merge($searchableFields, $fields);
             }
         }
@@ -264,26 +280,15 @@ class DatatableService
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-            $filterClass = $attribute->getName();
-            $filterReflector = new \ReflectionClass($filterClass);
-// this is the Doctrine ORM interface ONLY
-//            if ($reflector->implementsInterface(FilterInterface::class))
-//            {
-//                dd("Yep!");
-//            }
-
-            $filter = $attribute->getArguments()[0];
+            $attrInstance = $attribute->newInstance();
+            $filter = $attrInstance->filterClass;
 // @todo: handle other filters
             if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
-                $searchFields = $attribute->getArguments()['properties'];
+                $searchFields = $attrInstance->properties;
                 foreach ($normalizedColumns as $idx => $column) {
                     if (in_array($column->name, $searchFields)) {
                         $columnNumbers[] = $idx;
                     }
-
-//                    if (array_key_exists($column->name, $searchFields)) {
-//                        $columnNumbers[] = $idx;
-//                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGrid\Service\DatatableService;
 use Survos\ApiGrid\Service\MeiliService;
+use Survos\CoreBundle\Service\SurvosUtils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -81,6 +82,9 @@ class IndexCommand extends Command
 
                 // skip if no groups defined
                 if (!$groups = $this->meiliService->getNormalizationGroups($meta->getName())) {
+//                    if ($input->ver) {
+                        $output->writeln("Skipping {$class}: no normalization groups for " . $meta->getName());
+//                    }
                     continue;
                 }
 
@@ -196,6 +200,7 @@ class IndexCommand extends Command
             }
 //            $qb->andWhere($filter);
         }
+
         $total = (clone $qb)->select("count(e.{$index->getPrimaryKey()})")->getQuery()->getSingleScalarResult();
         $this->io->title("Indexing $class ($total records, batches of $batchSize) ");
         if (!$total) {
@@ -236,9 +241,9 @@ class IndexCommand extends Command
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
             assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
-
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);
+                SurvosUtils::assertKeyExists($primaryKey, $data);
                 assert(false, $msg . "\n" . join("\n", array_keys($data)));
                 return ['numberOfDocuments'=>0];
                 break;

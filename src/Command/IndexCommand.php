@@ -29,6 +29,7 @@ use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Yaml\Yaml;
+use Zenstruck\Alias;
 
 #[AsCommand(
     name: 'grid:index',
@@ -69,6 +70,11 @@ class IndexCommand extends Command
         $filter = $input->getOption('filter');
         $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
+        if (!class_exists($class)) {
+            if (class_exists(Alias::class)) {
+                $class = Alias::classFor('user');
+            }
+        }
             $classes = [];
 
 
@@ -148,6 +154,7 @@ class IndexCommand extends Command
         $settings = $this->datatableService->getSettingsFromAttributes($class);
         $idFields = $this->datatableService->getFieldsWithAttribute($settings, 'is_primary');
         $primaryKey = count($idFields) ? $idFields[0] : 'id';
+//        dd($settings, $idFields, $primaryKey);
 
 
         $localizedAttributes = [];
@@ -201,7 +208,8 @@ class IndexCommand extends Command
 //            $qb->andWhere($filter);
         }
 
-        $total = (clone $qb)->select("count(e.{$index->getPrimaryKey()})")->getQuery()->getSingleScalarResult();
+
+        $total = (clone $qb)->select("count(e.{$primaryKey})")->getQuery()->getSingleScalarResult();
         $this->io->title("Indexing $class ($total records, batches of $batchSize) ");
         if (!$total) {
             return ['numberOfDocuments'=>0];

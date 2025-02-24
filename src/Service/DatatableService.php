@@ -207,6 +207,9 @@ class DatatableService
                         case OrderFilter::class:
                             $settings[$fieldname]['sortable'] = true;
                             break;
+                        case SearchFilter::class:
+                            $settings[$fieldname]['searchable'] = true;
+                            break;
                         default:
                             dd("@todo: handle " . $filterClass);
                     }

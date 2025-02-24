@@ -244,8 +244,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
             ->booleanNode('passLocale')->defaultValue(false)->end()
             ->integerNode('maxValuesPerFacet')
-                ->info('https://specs.meilisearch.com/specifications/text/157-faceting-setting-api.html#_3-functional-specification')
-                ->defaultValue(100)
+                ->info('https://www.meilisearch.com/docs/reference/api/settings#faceting-object')
+                ->defaultValue(1000)
             ->end()
             ->end();;
     }

@@ -44,7 +44,8 @@
         "symfony/intl": "^6.4 || ^7.1",
         "symfony/stopwatch": "^6.4 || ^7.1",
         "rector/rector": "^2.0",
-        "api-platform/doctrine-orm": "^4.0"
+        "api-platform/doctrine-orm": "^4.0",
+        "zenstruck/class-metadata": "^1.1"
     },
     "autoload": {
         "psr-4": {
@@ -70,7 +71,8 @@
     },
     "config": {
         "allow-plugins": {
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "zenstruck/class-metadata": true
         }
     },
     "prefer-stable": true

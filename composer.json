@@ -16,8 +16,8 @@
     "require": {
         "php": "^8.3",
         "doctrine/doctrine-bundle": "^2.7",
-        "doctrine/orm": "^2.12 || ^3.3",
-        "doctrine/persistence": "^2.0 || ^3.0",
+        "doctrine/orm": "^3.3",
+        "doctrine/persistence": "^3.0 || ^4.0",
         "survos/inspection-bundle": "^1.5",
         "symfony/config": "^6.4 || ^7.1",
         "symfony/dependency-injection": "^6.4 || ^7.1",
@@ -49,6 +49,7 @@
     },
     "autoload": {
         "psr-4": {
+            "Survos\\ApiGridBundle\\": "src/",
             "Survos\\ApiGrid\\": "src/"
         }
     },

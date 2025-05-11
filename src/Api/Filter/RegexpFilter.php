@@ -9,8 +9,7 @@ use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use ApiPlatform\Metadata\Operation;
 use Doctrine\ORM\QueryBuilder;
-use Symfony\Component\PropertyInfo\Type;
-
+use Symfony\Component\TypeInfo\Type;
 final class RegexpFilter extends AbstractFilter
 {
     protected function filterProperty(

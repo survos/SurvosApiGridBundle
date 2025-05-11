@@ -1,6 +1,6 @@
-survos_api_grid:
-  prefix: /api-grid
-  type: attribute
-  resource:
-    path: '@SurvosApiGridBundle/src/Controller/'
-    namespace: Survos\ApiGridBundle\Controller
+#survos_api_grid:
+#  prefix: /api-grid
+#  type: attribute
+#  resource:
+#    path: '@SurvosApiGridBundle/src/Controller/'
+#    namespace: Survos\ApiGridBundle\Controller

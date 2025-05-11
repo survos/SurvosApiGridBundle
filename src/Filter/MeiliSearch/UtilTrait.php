@@ -5,8 +5,7 @@ namespace Survos\ApiGrid\Filter\MeiliSearch;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Exception\PropertyNotFoundException;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
-use Symfony\Component\PropertyInfo\Type;
-
+use Symfony\Component\TypeInfo\Type;
 /**
  * Field datatypes helpers.
  *

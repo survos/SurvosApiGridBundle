@@ -18,19 +18,16 @@ use Symfony\Component\Stopwatch\Stopwatch;
 class MeiliSearchStateProvider implements ProviderInterface
 {
     public function __construct(
-        private NormalizerInterface            $normalizer,
-        private EntityManagerInterface         $em,
         private Pagination                     $pagination,
-        private iterable                 $meiliSearchFilters,
+        private iterable                       $meiliSearchFilters,
         protected MeiliService                 $meili,
-        private string                         $meiliHost,
-        private string                         $meiliKey,
         private readonly DenormalizerInterface $denormalizer,
-        protected ?ClientInterface              $httpClient=null,
-        private ?Stopwatch $stopwatch = null
+        protected ?ClientInterface             $httpClient = null,
+        private ?Stopwatch                     $stopwatch = null
     )
     {
     }
+
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         if ($operation instanceof CollectionOperationInterface) {
@@ -42,13 +39,13 @@ class MeiliSearchStateProvider implements ProviderInterface
                 $body = $meiliSearchFilter->apply($body, $resourceClass, $operation, $context);
             }
 
-            $searchQuery = $context['filters']['search']??'';
+            $searchQuery = $context['filters']['search'] ?? '';
 
-            $body['limit'] = (int) $context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
-            $body['offset'] = (int) $context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
+            $body['limit'] = (int)$context['filters']['limit'] ??= $this->pagination->getLimit($operation, $context);
+            $body['offset'] = (int)$context['filters']['offset'] ??= $this->pagination->getOffset($operation, $context);
             $body['attributesToHighlight'] = ['t']; // from PixieInterface!
             $body['highlightPreTag'] = '<em class="bg-info">';
-            $body['highlightPostTag'] =  '</em>';
+            $body['highlightPostTag'] = '</em>';
             $body['showRankingScore'] = true;
             $locale = $context['filters']['_locale'] ?? null;
             // @todo: get from request?
@@ -59,15 +56,15 @@ class MeiliSearchStateProvider implements ProviderInterface
             }
             $index = $this->meili->getIndex($indexName);
             $event = $this->stopwatch->start('meili-search', 'meili');
-                $data = $index->search($searchQuery, $body);
+            $data = $index->search($searchQuery, $body);
 //                dd($data, $searchQuery);
-                $event->stop();
+            $event->stop();
 
 //            dd($context, $indexName);
             try {
 //                $client = $this->meili->getMeiliClient();
 //                $index = $client->index($indexName);
-            //dd($body);
+                //dd($body);
             } catch (\Exception $exception) {
                 throw new \Exception($indexName . ' -- ' . $exception->getMessage());
             }
@@ -89,12 +86,14 @@ class MeiliSearchStateProvider implements ProviderInterface
         return null;
     }
 
-    public static function getSearchIndexObject(string $class, ?string $locale=null) {
-        $class = explode("\\",$class);
+    public static function getSearchIndexObject(string $class, ?string $locale = null)
+    {
+        $class = explode("\\", $class);
         return end($class);
     }
 
-    private function denormalizeObject(SearchResult $data, $resourceClass) {
+    private function denormalizeObject(SearchResult $data, $resourceClass)
+    {
         $returnObject['offset'] = $data->getOffset();
         $returnObject['limit'] = $data->getLimit();
         $returnObject['estimatedTotalHits'] = $data->getEstimatedTotalHits();

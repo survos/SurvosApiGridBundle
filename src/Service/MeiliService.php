@@ -99,6 +99,8 @@ class MeiliService
     {
         $client = $this->getMeiliClient();
         try {
+            // hmm, this should be clearer!
+//            $index = $client->index($indexName);
             $index = $client->getIndex($indexName);
             $response = $client->deleteIndex($indexName);
             $task = $this->waitForTask($response['taskUid'], $index);
@@ -239,7 +241,7 @@ class MeiliService
                     $index = null;
                 }
             } else {
-                dd($exception, $exception::class);
+                dd($exception, $indexName, $client, $exception::class);
             }
         }
         return $index;

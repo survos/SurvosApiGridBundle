@@ -44,11 +44,11 @@ class MultiFieldSearchFilter  extends AbstractSearchFilter implements FilterInte
             }
             $key = $words[0];
             $values = explode('|', $words[2]);
-            $contition = "";
+            $condition = "";
             foreach ($values as $value) {
-                $contition .= " ".$key." = '".$value."' OR ";
+                $condition .= " ".$key." = '".$value."' OR ";
             }
-            $facetFilter .=" ( ".rtrim($contition,"OR "). " ) AND";
+            $facetFilter .=" ( ".rtrim($condition,"OR "). " ) AND";
         }
 
         $clauseBody['filter'] = rtrim($facetFilter, "AND");

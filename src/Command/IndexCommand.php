@@ -5,8 +5,6 @@ namespace Survos\ApiGrid\Command;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
-use App\Entity\Article;
-use App\Entity\Site;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
@@ -70,7 +68,7 @@ class IndexCommand extends Command
         $filter = $input->getOption('filter');
         $filterArray = $filter ? Yaml::parse($filter) : null;
         $class = $input->getArgument('class');
-        if (!class_exists($class)) {
+        if (!$class && !class_exists($class)) {
             if (class_exists(Alias::class)) {
                 $class = Alias::classFor('user');
             }
@@ -248,6 +246,7 @@ class IndexCommand extends Command
             // for now, just match the groups in the normalization groups of the entity
 //            $groups = ['rp', 'searchable', 'marking', 'translation', sprintf("%s.read", strtolower($indexName))];
             $data = $this->normalizer->normalize($r, null, ['groups' => $groups]);
+            $data = SurvosUtils::removeNullsAndEmptyArrays($data);
             assert(array_key_exists('rp', $data), "missing rp in $class\n\n" . join("\n", array_keys($data)));
             if (!array_key_exists($primaryKey, $data)) {
                 $this->logger->error($msg = "No primary key $primaryKey for " . $class);

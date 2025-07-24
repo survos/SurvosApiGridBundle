@@ -25,12 +25,12 @@
         "symfony/options-resolver": "^6.4 || ^7.3",
         "symfony/ux-twig-component": "^2.27",
         "twig/twig": "^3.21.1",
-        "symfony/dom-crawler": "^6.4 || ^7.3.1"
+        "symfony/dom-crawler": "^6.4 || ^7.3.1",
+        "api-platform/symfony": "^4.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "phpstan/phpstan": "^2.1.19",
-        "api-platform/symfony": "^3.2||^4.1.19",
         "symfony/browser-kit": "^6.4 || ^7.3",
         "symfony/framework-bundle": "^6.4 || ^7.3.1",
         "symfony/phpunit-bridge": "^6.4 || ^7.3.1",

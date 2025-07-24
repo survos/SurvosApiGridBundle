@@ -318,18 +318,18 @@ class IndexCommand extends Command
 
     }
 
-    private function getTranslationArray($entity, $accessor) {
-        $rows = [];
-        $updatedRow = [Instance::DB_CODE_FIELD => $entity->getCode()];
-        foreach ($entity->getTranslations() as $translation) {
-            foreach (Instance::TRANSLATABLE_FIELDS as $fieldName) {
-                $translatedValue = $accessor->getValue($translation, $fieldName);
-                $updatedRow['_translations'][$translation->getLocale()][$fieldName] = $translatedValue;
-            }
-        }
+    // private function getTranslationArray($entity, $accessor) {
+    //     $rows = [];
+    //     $updatedRow = [Instance::DB_CODE_FIELD => $entity->getCode()];
+    //     foreach ($entity->getTranslations() as $translation) {
+    //         foreach (Instance::TRANSLATABLE_FIELDS as $fieldName) {
+    //             $translatedValue = $accessor->getValue($translation, $fieldName);
+    //             $updatedRow['_translations'][$translation->getLocale()][$fieldName] = $translatedValue;
+    //         }
+    //     }
 
-        return $updatedRow;
-    }
+    //     return $updatedRow;
+    // }
 
     public function getProcessBar(int $total=0): ProgressBar
     {

@@ -182,7 +182,7 @@ class ApiGridComponent implements TwigBlocksInterface
     {
         $count = 0;
         // count the number, if > 6 we could figured out the best layout
-        foreach ($this->normalizedColumns() as $column) {
+        foreach ($this->getNormalizedColumns() as $column) {
 //            dd($column);
             if ($column->inSearchPane) {
                 $count++;

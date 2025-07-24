@@ -21,6 +21,7 @@ use Survos\ApiGrid\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\Attribute\Groups;
 use function Symfony\Component\String\u;
+use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 
 class DatatableService
 {

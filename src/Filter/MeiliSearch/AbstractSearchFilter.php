@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Survos\ApiGrid\Filter\MeiliSearch;
 
+use ApiPlatform\Metadata\Exception\PropertyNotFoundException;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use Survos\ApiGrid\Filter\MeiliSearch\MeilISearchUtilTrait;
-use ApiPlatform\Exception\PropertyNotFoundException;
-use ApiPlatform\Exception\ResourceClassNotFoundException;
+use ApiPlatform\Metadata\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
 use Symfony\Component\TypeInfo\Type;
@@ -95,7 +95,7 @@ abstract class AbstractSearchFilter implements FilterInterface
             ++$index;
             $builtinType = $type->getBuiltinType();
 
-            if (Type::BUILTIN_TYPE_OBJECT !== $builtinType && Type::BUILTIN_TYPE_ARRAY !== $builtinType) {
+            if (Type::object() !== $builtinType && Type::array() !== $builtinType) {
                 if ($totalProperties === $index) {
                     break;
                 }
@@ -107,7 +107,7 @@ abstract class AbstractSearchFilter implements FilterInterface
                 return $noop;
             }
 
-            if (Type::BUILTIN_TYPE_ARRAY === $builtinType && Type::BUILTIN_TYPE_OBJECT !== $type->getBuiltinType()) {
+            if (Type::array() === $builtinType && Type::object() !== $type->getBuiltinType()) {
                 if ($totalProperties === $index) {
                     break;
                 }

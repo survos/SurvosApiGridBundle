@@ -52,7 +52,7 @@ trait UtilTrait
         }
 
         if (
-            Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType()
+            Type::object() === $type->getBuiltinType()
             && null !== ($nextResourceClass = $type->getClassName())
             && $this->resourceClassResolver->isResourceClass($nextResourceClass)
         ) {
@@ -63,7 +63,7 @@ trait UtilTrait
 
         if (
             null !== ($type = $type->getCollectionValueTypes()[0] ?? null)
-            && Type::BUILTIN_TYPE_OBJECT === $type->getBuiltinType()
+            && Type::object() !== $type->getBuiltinType()
             && null !== ($className = $type->getClassName())
             && $this->resourceClassResolver->isResourceClass($className)
         ) {

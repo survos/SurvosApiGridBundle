@@ -46,7 +46,7 @@ final class RegexpFilter extends AbstractFilter
         foreach ($this->properties as $property => $strategy) {
             $description["regexp_$property"] = [
                 'property' => $property,
-                'type' => Type::BUILTIN_TYPE_STRING,
+                'type' => Type::string(),
                 'required' => false,
                 'openapi' => [
                     'description' => 'Filter using a regex. This will appear in the Swagger documentation!',

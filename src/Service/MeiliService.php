@@ -251,21 +251,17 @@ class MeiliService
     public function applyToIndex(string $indexName, callable $callback, int $batch = 50)
     {
         $index = $this->getMeiliClient()->index($indexName);
-
         $documents = $index->getDocuments((new DocumentsQuery())->setLimit(0));
         $total = $documents->getTotal();
         $currentPosition = 0;
-        $progressBar = $this->getProcessBar($total);
-
+        
         while ($currentPosition < $total) {
             $documents = $index->getDocuments((new DocumentsQuery())->setOffset($currentPosition)->setLimit($batch));
             $currentPosition += $documents->count();
             foreach ($documents->getIterator() as $row) {
-                $progressBar->advance();
                 $callback($row, $index);
             }
             $currentPosition++;
         }
-        $progressBar->finish();
     }
 }

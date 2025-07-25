@@ -12,7 +12,7 @@ final class DataTableFilter extends AbstractSearchFilter implements FilterInterf
 {
     public function __construct(PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory,
                                 PropertyMetadataFactoryInterface $propertyMetadataFactory,
-                                ?ResourceClassResolverInterfacexx $resourceClassResolverxx=null,
+                                ?ResourceClassResolverInterface $resourceClassResolver = null,
                                 ?NameConverterInterface $nameConverter = null,
                                 private readonly string $orderParameterName = 'filter',
                                 ?array $properties = null)

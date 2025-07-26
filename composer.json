@@ -58,7 +58,7 @@
             "dev-main": "1.6-dev"
         },
         "symfony": {
-            "require": "^6.4 || ^7.1"
+            "require": "^7.3"
         }
     },
     "scripts": {

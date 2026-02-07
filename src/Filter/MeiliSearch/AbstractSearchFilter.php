@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Survos\ApiGrid\Filter\MeiliSearch;
+namespace Survos\ApiGridBundle\Filter\MeiliSearch;
 
 use ApiPlatform\Metadata\Exception\PropertyNotFoundException;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
-use Survos\ApiGrid\Filter\MeiliSearch\MeilISearchUtilTrait;
+use Survos\ApiGridBundle\Filter\MeiliSearch\MeilISearchUtilTrait;
 use ApiPlatform\Metadata\Exception\ResourceClassNotFoundException;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;

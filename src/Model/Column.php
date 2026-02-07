@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Model;
+namespace Survos\ApiGridBundle\Model;
 
 class Column
 {

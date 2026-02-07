@@ -48,7 +48,7 @@ For those columns you want to add searchable: true
 
 **3) For search you need to include below**
 ```
-use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
 
 
 #[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
@@ -70,7 +70,7 @@ class OfficialRepository extends ServiceEntityRepository implements QueryBuilder
 
 Then add the filterable properties to the entity class.  You may want to index them to speed up the count query
 ```php
-use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
+use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
 
 
 #[ApiFilter(FacetsFieldSearchFilter::class, properties: ['gender','state'])]

@@ -25,7 +25,8 @@
         "symfony/ux-twig-component": "^2.8",
         "twig/twig": "^3.4",
         "symfony/dom-crawler": "^7.4||^8.0",
-        "api-platform/symfony": "^4.1"
+        "api-platform/symfony": "^4.1",
+        "survos/core-bundle": "^2.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
@@ -48,8 +49,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Survos\\ApiGridBundle\\": "src/",
-            "Survos\\ApiGrid\\": "src/"
+            "Survos\\ApiGridBundle\\": "src/"
         }
     },
     "extra": {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Survos\ApiGrid\Controller;
+namespace Survos\ApiGridBundle\Controller;
 
-use Survos\ApiGrid\Service\MeiliService;
+use Survos\ApiGridBundle\Service\MeiliService;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\HttpClient;

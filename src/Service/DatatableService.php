@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Survos\ApiGrid\Service;
+namespace Survos\ApiGridBundle\Service;
 
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
@@ -12,16 +12,16 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Doctrine\ORM\Mapping\Id;
-use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
-use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
-use Survos\ApiGrid\Attribute\Facet;
-use Survos\ApiGrid\Attribute\MeiliId;
-use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
-use Survos\ApiGrid\Model\Column;
+use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
+use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGridBundle\Attribute\Facet;
+use Survos\ApiGridBundle\Attribute\MeiliId;
+use Survos\ApiGridBundle\Filter\MeiliSearch\SortFilter;
+use Survos\ApiGridBundle\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Serializer\Attribute\Groups;
 use function Symfony\Component\String\u;
-use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
+use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 
 class DatatableService
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Attribute;
+namespace Survos\ApiGridBundle\Attribute;
 
 use \Attribute;
 

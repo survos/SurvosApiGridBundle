@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Command;
+namespace Survos\ApiGridBundle\Command;
 
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Metadata\ApiFilter;
@@ -8,9 +8,9 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
-use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
-use Survos\ApiGrid\Service\DatatableService;
-use Survos\ApiGrid\Service\MeiliService;
+use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGridBundle\Service\DatatableService;
+use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\CoreBundle\Service\SurvosUtils;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

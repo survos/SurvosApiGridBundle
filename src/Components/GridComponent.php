@@ -1,10 +1,10 @@
 <?php
 
-namespace Survos\ApiGrid\Components;
+namespace Survos\ApiGridBundle\Components;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Log\LoggerInterface;
-use Survos\ApiGrid\Model\Column;
+use Survos\ApiGridBundle\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;

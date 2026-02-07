@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Survos\ApiGrid\Paginator;
+namespace Survos\ApiGridBundle\Paginator;
 
 use ApiPlatform\Doctrine\Orm\AbstractPaginator;
 use ApiPlatform\Doctrine\Orm\Paginator;

@@ -1,21 +1,21 @@
 <?php
 
-namespace Survos\ApiGrid;
+namespace Survos\ApiGridBundle;
 
-use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
-use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
-use Survos\ApiGrid\Command\IndexCommand;
-use Survos\ApiGrid\Components\GridComponent;
-use Survos\ApiGrid\Components\ItemGridComponent;
-use Survos\ApiGrid\Components\JsTwigComponent;
-use Survos\ApiGrid\Controller\GridController;
-use Survos\ApiGrid\Controller\MeiliController;
-use Survos\ApiGrid\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
-use Survos\ApiGrid\Components\ApiGridComponent;
-use Survos\ApiGrid\Paginator\SlicePaginationExtension;
-use Survos\ApiGrid\Service\DatatableService;
-use Survos\ApiGrid\Service\MeiliService;
-use Survos\ApiGrid\Twig\TwigExtension;
+use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
+use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGridBundle\Command\IndexCommand;
+use Survos\ApiGridBundle\Components\GridComponent;
+use Survos\ApiGridBundle\Components\ItemGridComponent;
+use Survos\ApiGridBundle\Components\JsTwigComponent;
+use Survos\ApiGridBundle\Controller\GridController;
+use Survos\ApiGridBundle\Controller\MeiliController;
+use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
+use Survos\ApiGridBundle\Components\ApiGridComponent;
+use Survos\ApiGridBundle\Paginator\SlicePaginationExtension;
+use Survos\ApiGridBundle\Service\DatatableService;
+use Survos\ApiGridBundle\Service\MeiliService;
+use Survos\ApiGridBundle\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\InspectionBundle\Services\InspectionService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -28,11 +28,11 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\UX\Chartjs\Builder\ChartBuilder;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Twig\Environment;
-use Survos\ApiGrid\Filter\MeiliSearch\SortFilter;
-use Survos\ApiGrid\Filter\MeiliSearch\DataTableFilter;
-use Survos\ApiGrid\Filter\MeiliSearch\DataTableFacetsFilter;
-use Survos\ApiGrid\State\MeiliSearchStateProvider;
-use Survos\ApiGrid\Hydra\Serializer\DataTableCollectionNormalizer;
+use Survos\ApiGridBundle\Filter\MeiliSearch\SortFilter;
+use Survos\ApiGridBundle\Filter\MeiliSearch\DataTableFilter;
+use Survos\ApiGridBundle\Filter\MeiliSearch\DataTableFacetsFilter;
+use Survos\ApiGridBundle\State\MeiliSearchStateProvider;
+use Survos\ApiGridBundle\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 

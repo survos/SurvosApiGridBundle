@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Event;
+namespace Survos\ApiGridBundle\Event;
 
 use Survos\PixieBundle\Command\IterateCommand;
 use Survos\PixieBundle\Model\Config;

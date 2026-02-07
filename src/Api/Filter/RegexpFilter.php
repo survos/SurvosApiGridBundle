@@ -2,7 +2,7 @@
 
 // api/src/Filter/RegexpFilter.php
 
-namespace Survos\ApiGrid\Api\Filter;
+namespace Survos\ApiGridBundle\Api\Filter;
 
 use ApiPlatform\Doctrine\Orm\Filter\AbstractContextAwareFilter;
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;

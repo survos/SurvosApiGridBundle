@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Filter\MeiliSearch;
+namespace Survos\ApiGridBundle\Filter\MeiliSearch;
 
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Metadata\Exception\PropertyNotFoundException;

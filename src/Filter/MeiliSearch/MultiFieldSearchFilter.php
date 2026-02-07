@@ -1,8 +1,8 @@
 <?php
 
-namespace Survos\ApiGrid\Filter\MeiliSearch;
+namespace Survos\ApiGridBundle\Filter\MeiliSearch;
 
-use Survos\ApiGrid\Filter\MeiliSearch\FilterInterface;
+use Survos\ApiGridBundle\Filter\MeiliSearch\FilterInterface;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
 use ApiPlatform\Doctrine\Orm\Filter\AbstractFilter;
 use ApiPlatform\Doctrine\Orm\Util\QueryNameGeneratorInterface;

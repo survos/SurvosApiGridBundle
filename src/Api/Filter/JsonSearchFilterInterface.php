@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Survos\ApiGrid\Api\Filter;
+namespace Survos\ApiGridBundle\Api\Filter;
 
 interface JsonSearchFilterInterface
 {

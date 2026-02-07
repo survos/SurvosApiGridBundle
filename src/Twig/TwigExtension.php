@@ -1,13 +1,13 @@
 <?php
 
-namespace Survos\ApiGrid\Twig;
+namespace Survos\ApiGridBundle\Twig;
 
 use ApiPlatform\Metadata\IriConverterInterface;
 
 //use ApiPlatform\Core\Api\IriConverterInterface as LegacyIriConverterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\GetCollection;
-use Survos\ApiGrid\Model\Column;
+use Survos\ApiGridBundle\Model\Column;
 use Survos\CoreBundle\Entity\RouteParametersInterface;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\PropertyAccess\PropertyAccessorInterface;

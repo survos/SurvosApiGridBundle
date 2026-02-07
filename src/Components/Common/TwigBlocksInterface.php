@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Components\Common;
+namespace Survos\ApiGridBundle\Components\Common;
 
 interface TwigBlocksInterface
 {

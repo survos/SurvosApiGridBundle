@@ -1,13 +1,13 @@
 <?php
 
-namespace Survos\ApiGrid\State;
+namespace Survos\ApiGridBundle\State;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Doctrine\DBAL\Exception;
 use Psr\Http\Client\ClientInterface;
-use Survos\ApiGrid\Service\MeiliService;
+use Survos\ApiGridBundle\Service\MeiliService;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Doctrine\ORM\EntityManagerInterface;

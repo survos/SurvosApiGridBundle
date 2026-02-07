@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid\Hydra\Serializer;
+namespace Survos\ApiGridBundle\Hydra\Serializer;
 
 use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\ResourceClassResolverInterface;
@@ -17,7 +17,7 @@ use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use ApiPlatform\Metadata\Util\IriHelper;
 use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
-use Survos\ApiGrid\Event\FacetEvent;
+use Survos\ApiGridBundle\Event\FacetEvent;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

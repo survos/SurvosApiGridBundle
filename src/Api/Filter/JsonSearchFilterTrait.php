@@ -4,7 +4,7 @@
 
 declare(strict_types=1);
 
-namespace Survos\ApiGrid\Api\Filter;
+namespace Survos\ApiGridBundle\Api\Filter;
 
 use ApiPlatform\Doctrine\Common\PropertyHelperTrait;
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;

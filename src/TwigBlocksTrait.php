@@ -1,6 +1,6 @@
 <?php
 
-namespace Survos\ApiGrid;
+namespace Survos\ApiGridBundle;
 
 use Symfony\Component\DomCrawler\Crawler;
 

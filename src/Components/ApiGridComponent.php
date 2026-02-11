@@ -13,13 +13,13 @@ use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\ApiGridBundle\State\MeiliSearchStateProvider;
 use Survos\ApiGridBundle\TwigBlocksTrait;
-use Survos\InspectionBundle\Services\InspectionService;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
+use Twig\TemplateWrapper;
 
 #[AsTwigComponent('api_grid', template: '@SurvosApiGrid/components/api_grid.html.twig')]
 class ApiGridComponent implements TwigBlocksInterface
@@ -33,7 +33,7 @@ class ApiGridComponent implements TwigBlocksInterface
         private DatatableService $datatableService,
         private UrlGeneratorInterface $urlGenerator,
         private IriConverterInterface $iriConverter,
-        private ?InspectionService $inspectionService=null,
+        private ?object $inspectionService=null,
         private ?MeiliService $meiliService=null,
         public ?string $stimulusController=null,
         private bool $meili = false,
@@ -41,13 +41,8 @@ class ApiGridComponent implements TwigBlocksInterface
         private array $filter = [],
         private $collectionRoutes = [],
     ) {
-        if ($this->class) {
-            $this->setCollectionRoutes($this->inspectionService->getAllUrlsForResource($class));
-        } else {
-//            assert(false, "missing class");
-        }
-
-        //        ='@survos/grid-bundle/api_grid';
+        // Intentionally keep constructor side-effect free.
+        // Older versions tried to resolve routes here via InspectionService.
     }
 
     public function getClass(): ?string
@@ -66,10 +61,12 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public function getCollectionRoutes(): array
     {
-        assert($this->getClass());
-        // @todo: move to compilerpass
-        return $this->inspectionService->getAllUrlsForResource($this->getClass());
-        return $this->collectionRoutes;
+        if (!$this->class || !$this->inspectionService || !method_exists($this->inspectionService, 'getAllUrlsForResource')) {
+            return [];
+        }
+
+        // @todo: move to compiler pass if this stays.
+        return $this->inspectionService->getAllUrlsForResource($this->class);
     }
 
     public function setCollectionRoutes(array $collectionRoutes): void
@@ -92,7 +89,7 @@ class ApiGridComponent implements TwigBlocksInterface
     public array $globals = [];
     public array $searchBuilderFields = [];
 
-    public ?string $caller = null;
+    public string|TemplateWrapper|null $caller = null;
     public array|object|null $schema = null;
 
 //    public ?string $class = null;
@@ -123,6 +120,10 @@ class ApiGridComponent implements TwigBlocksInterface
     public ?string $tableId = null;
     public string $tableClasses = '';
 
+    // Filter UI (SearchPanes sidebar vs ColumnControl in headers)
+    public bool $searchPanes = true;
+    public bool $columnControl = false;
+
 
     public function getLocale(): string
     {
@@ -145,12 +146,14 @@ class ApiGridComponent implements TwigBlocksInterface
      */
     public function getNormalizedColumns(string $columnType='columns'): iterable
     {
-        if ($this->class) {
-            if (!$this->index) {
-                $this->index =  $this->meiliService->getPrefixedIndexName(MeiliSearchStateProvider::getSearchIndexObject($this->class));
-            }
+        // Only compute a Meili index when Meili is explicitly enabled.
+        if ($this->meili && $this->class && !$this->index && $this->meiliService) {
+            $this->index = $this->meiliService->getPrefixedIndexName(
+                MeiliSearchStateProvider::getSearchIndexObject($this->class)
+            );
         }
-        // really we're getting the schema from the PHP Attributes here.
+
+        // Settings are inferred from PHP attributes (ApiFilter/Facet/MeiliId/etc).
 
         $settings = $this->getDefaultColumns();
         $value= match($columnType) {
@@ -218,11 +221,11 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public function mount(string $class,
 //                          array $columns=[],
-                          ?string $apiRoute=null,
-                          ?string $apiGetCollectionUrl=null,
-                          array $filter = [],
-                          array $buttons = [],
-                          bool $meili=false)
+                           ?string $apiRoute=null,
+                           ?string $apiGetCollectionUrl=null,
+                           array $filter = [],
+                           array $buttons = [],
+                           bool $meili=false)
         // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
     {
         // this allows the jstwig templates to compile, but needs to happen earlier.
@@ -236,27 +239,43 @@ class ApiGridComponent implements TwigBlocksInterface
 
         $this->filter = $filter;
         $this->buttons = $buttons;
+        $this->meili = $meili;
 //        assert($class == $this->class, "$class <> $this->class");
         $this->class = $class; // ??
 //            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),
 //                context: $context ?? []);
-
-        $routes = $this->inspectionService->getAllUrlsForResource($class);
-        // the problem with this is that it always gets the _first_ one.
-        if ($apiRoute) {
-//            $apiGetCollectionUrl = $this->iriConverter->getIriFromResource($class,  operation: new GetCollection());
-//        } else {
-            // to get the params
-            $urls = $this->inspectionService->getAllUrlsForResource($class);
-            $routeKey = $apiRoute ?: array_key_first($urls);
-            // the real route is the opname
-            assert(array_key_exists($routeKey, $routes), "Missing route $routeKey in " . join(',', array_keys($routes)));
-            $route = $routes[$routeKey]['opName'];
-            $apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
-//            dd($this->apiGetCollectionUrl);
+        // Doctrine-first: prefer passing apiGetCollectionUrl explicitly.
+        if ($apiGetCollectionUrl) {
+            $this->apiGetCollectionUrl = $apiGetCollectionUrl;
+            return;
         }
-        $this->apiGetCollectionUrl = $apiGetCollectionUrl;
-//        try {
+
+        // Backward compatibility: apiRoute requires InspectionService to map a "route key" to an operation.
+        if ($apiRoute) {
+            if (!$this->inspectionService || !method_exists($this->inspectionService, 'getAllUrlsForResource')) {
+                throw new \RuntimeException(
+                    'ApiGrid: apiRoute requires Survos\\InspectionBundle. Prefer passing apiGetCollectionUrl instead.'
+                );
+            }
+
+            $routes = $this->inspectionService->getAllUrlsForResource($class);
+            $routeKey = $apiRoute;
+            if (!array_key_exists($routeKey, $routes)) {
+                throw new \RuntimeException(sprintf(
+                    'ApiGrid: unknown apiRoute "%s". Known keys: %s',
+                    $routeKey,
+                    implode(', ', array_keys($routes))
+                ));
+            }
+
+            $opName = $routes[$routeKey]['opName'] ?? null;
+            if (!$opName) {
+                throw new \RuntimeException(sprintf('ApiGrid: route metadata missing opName for "%s".', $routeKey));
+            }
+
+            $this->apiGetCollectionUrl = $this->urlGenerator->generate($opName);
+        }
+        //        try {
 //        } catch (InvalidArgumentException $exception) {
 //            $urls = $this->inspectionService->getAllUrlsForResource($class);
 //            dd($urls, $exception);

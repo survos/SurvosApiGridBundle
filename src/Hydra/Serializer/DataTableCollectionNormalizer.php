@@ -106,8 +106,10 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                     $doctrineFacets = [];
 
                     foreach ($params['facets'] as $key => $facet) {
-                        $keyArray = array_keys($metadata->getReflectionProperties());
-                        if (in_array($facet, $keyArray)) {
+                        // Doctrine ORM 3 no longer returns a plain array for reflection properties.
+                        // Use field names for safety.
+                        $fieldNames = $metadata->getFieldNames();
+                        if (in_array($facet, $fieldNames, true)) {
                             try {
                                 $counts = $repo->getCounts($facet);
                                 $doctrineFacets[$facet] = $counts;
@@ -278,12 +280,39 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             }
 
             $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
+
+            // ColumnControl expects a top-level "columnControl" object in the JSON response.
+            // We expose it under facets so the JS bridge can forward it to DataTables.
+            $returnData['columnControl'] = $this->createColumnControlOptions($facetsData);
+
             return $returnData;
         }
 
         $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
 
+        $returnData['columnControl'] = $this->createColumnControlOptions($facetsData);
+
         return $returnData;
+    }
+
+    /**
+     * @param array<string, array<int, array{label:mixed,value:mixed}>> $facetsData
+     * @return array<string, array<int, array{label:mixed,value:mixed}>>
+     */
+    private function createColumnControlOptions(array $facetsData): array
+    {
+        $columnControl = [];
+
+        foreach ($facetsData as $field => $options) {
+            $columnControl[$field] = array_values(array_map(static function (array $o): array {
+                return [
+                    'label' => $o['label'] ?? $o['value'] ?? null,
+                    'value' => $o['value'] ?? $o['label'] ?? null,
+                ];
+            }, $options));
+        }
+
+        return $columnControl;
     }
 
     private function createAllSearchPanesRecords(array $params)

@@ -2,7 +2,7 @@
   "name": "@survos/api-grid-bundle",
   "description": "integrate php and javascript helpers for DataTables.net           \"perfectscroll-bar/dist/perfect-scrollbar.min.js\": true,\n          \"perfectscroll-bar/css/perfect-scrollbar.css\": true,\n",
   "license": "MIT",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "symfony": {
     "controllers": {
       "js_twig": {
@@ -18,6 +18,7 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
+          "datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
           "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css": true,
           "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
@@ -33,6 +34,7 @@
         "fetch": "lazy",
         "enabled": true,
         "autoimport": {
+          "datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.min.css": true,
           "datatables.net-bs5/css/dataTables.bootstrap5.min.css": true,
           "datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css": true,
           "datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css": true,
@@ -45,19 +47,21 @@
     },
     "importmap": {
       "twig": "^1.17.1",
-      "axios": "^1.7.7",
+      "axios": "^1.7.9",
       "fos-routing": "^0.0.6",
-      "perfect-scrollbar": "^1.5.5",
-      "datatables.net-plugins/i18n/en-GB.mjs": "^2.0",
-      "datatables.net-plugins/i18n/es-ES.mjs": "^2.0",
-      "datatables.net-plugins/i18n/de-DE.mjs": "^2.0",
-      "datatables.net-bs5": "^2.0.3",
-      "datatables.net-buttons-bs5": "^3.0.1",
-      "datatables.net-responsive-bs5": "^3.0.1",
-      "datatables.net-scroller-bs5": "^2.4.1",
-      "datatables.net-searchpanes-bs5": "^2.3.0",
-      "datatables.net-searchbuilder-bs5": "^1.7",
-      "datatables.net-select-bs5": "^2.0"
+      "perfect-scrollbar": "^1.5.6",
+      "datatables.net-plugins/i18n/en-GB.mjs": "^2.1.7",
+      "datatables.net-plugins/i18n/es-ES.mjs": "^2.1.7",
+      "datatables.net-plugins/i18n/de-DE.mjs": "^2.1.7",
+      "datatables.net-bs5": "^2.2.0",
+      "datatables.net-buttons-bs5": "^3.2.0",
+      "datatables.net-responsive-bs5": "^3.0.3",
+      "datatables.net-scroller-bs5": "^2.4.3",
+      "datatables.net-searchpanes-bs5": "^2.3.3",
+      "datatables.net-searchbuilder-bs5": "^1.8.1",
+      "datatables.net-select-bs5": "^2.1.0",
+      "datatables.net-columncontrol": "^1.2.0",
+      "datatables.net-columncontrol-bs5": "^1.2.0"
     }
   },
   "peerDependencies": {
@@ -68,22 +72,24 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
-    "axios": "^1.7.7",
+    "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
-    "datatables.net": "^2.0.3",
-    "datatables.net-bs5": "^2.0.3",
-    "datatables.net-buttons-bs5": "^3.0.1",
+    "datatables.net": "^2.2.0",
+    "datatables.net-bs5": "^2.2.0",
+    "datatables.net-buttons-bs5": "^3.2.0",
     "datatables.net-colreorder": "^2.0.0",
     "datatables.net-colreorder-bs5": "^2.0.0",
     "datatables.net-datetime": "^1.5.2",
     "datatables.net-fixedcolumns-bs5": "^5.0.0",
     "datatables.net-fixedheader-bs5": "^4.0.1",
-    "datatables.net-responsive": "^3.0.1",
-    "datatables.net-responsive-bs5": "^3.0.1",
-    "datatables.net-scroller": "^2.4.1",
-    "datatables.net-scroller-bs5": "^2.3.0",
+    "datatables.net-responsive": "^3.0.3",
+    "datatables.net-responsive-bs5": "^3.0.3",
+    "datatables.net-scroller": "^2.4.3",
+    "datatables.net-scroller-bs5": "^2.4.3",
     "jszip": "^3.10.1",
-    "perfect-scrollbar": "^1.5.5",
-    "twig": "^1.17.1"
+    "perfect-scrollbar": "^1.5.6",
+    "twig": "^1.17.1",
+    "datatables.net-columncontrol": "^1.2.0",
+    "datatables.net-columncontrol-bs5": "^1.2.0"
   }
 }

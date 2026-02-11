@@ -653,18 +653,21 @@ export default class extends Controller {
         return buttons;
       },
       columns: this.cols(),
-      searchPanes: {
-        initCollapsed: true,
-        dtOpts: {
-          scrollCollapse: true,
-          // paging: true
-        },
-        layout: "columns-1",
-        show: true,
-        cascadePanes: this.cascadePanes,
-        viewTotal: true,
-        preSelect: preSelectArray,
-      },
+      ...(this.searchPanesValue
+        ? {
+            searchPanes: {
+              initCollapsed: true,
+              dtOpts: {
+                scrollCollapse: true,
+              },
+              layout: "columns-1",
+              show: true,
+              cascadePanes: this.cascadePanes,
+              viewTotal: true,
+              preSelect: preSelectArray,
+            },
+          }
+        : {}),
       searchBuilder: {
         // columns: this.searchBuilderColumns, // this.searchBuilderFields,
         columns: [".lyricsLength"], // this.searchBuilderFields,
@@ -716,10 +719,25 @@ export default class extends Controller {
             // handle success
             let hydraData = response.data;
 
-            var total = hydraData.hasOwnProperty("totalItems")
-              ? hydraData["totalItems"]
-              : 999999; // Infinity;
-            var itemsReturned = hydraData["member"].length;
+            // Be resilient to different formats (.jsonld vs .json, etc.)
+            let member = [];
+            if (Array.isArray(hydraData)) {
+              member = hydraData;
+            } else if (Array.isArray(hydraData["member"])) {
+              member = hydraData["member"];
+            } else if (Array.isArray(hydraData["hydra:member"])) {
+              member = hydraData["hydra:member"];
+            } else if (Array.isArray(hydraData["items"])) {
+              member = hydraData["items"];
+            }
+
+            let total =
+              hydraData["totalItems"] ??
+              hydraData["hydra:totalItems"] ??
+              hydraData["total"] ??
+              member.length;
+
+            var itemsReturned = member.length;
             // let first = (params.page - 1) * params.itemsPerPage;
             if (params.search.value) {
               console.log(`dt search: ${params.search.value}`);
@@ -728,7 +746,7 @@ export default class extends Controller {
             // console.log(`dt request: ${params.length} starting at ${params.start}`);
 
             // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
-            let d = hydraData["member"];
+            let d = member;
             if (d.length) {
               // console.table(d[0]);
               // console.log('first result', d[0]);
@@ -803,13 +821,15 @@ export default class extends Controller {
             //     pagination_client_items_per_page: true
 
             // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
-            let next = hydraData["view"]["next"];
+            let next = hydraData?.view?.next ?? hydraData?.["hydra:view"]?.["hydra:next"] ?? null;
             // we need the searchpanes options, too.
 
             let callbackValues = {
               draw: params.draw,
               data: d,
               searchPanes: searchPanes,
+              columnControl:
+                (hydraData.facets && hydraData.facets.columnControl) || {},
               recordsTotal: total,
               recordsFiltered: total, //  itemsReturned,
             };
@@ -830,10 +850,18 @@ export default class extends Controller {
           });
       },
     };
+    if (this.columnControlValue) {
+      setup.columnControl = this.columnControlConfig();
+      // Avoid duplicate ordering UI when ColumnControl is active.
+      setup.ordering = { indicators: false, handler: false };
+    }
+
     let dt = new DataTable(el, setup);
     if (this.filter.hasOwnProperty("P")) {
     }
-    dt.searchPanes();
+    if (this.searchPanesValue) {
+      dt.searchPanes();
+    }
     if (this.filter.hasOwnProperty("q")) {
       dt.search(this.filter.q).draw();
     }
@@ -845,8 +873,10 @@ export default class extends Controller {
       }
     });
 
-    console.log("moving panes to div.search-panes");
-    $("div.dtsp-verticalPanes").append(dt.searchPanes.container());
+    if (this.searchPanesValue) {
+      console.log("moving panes to div.search-panes");
+      $("div.dtsp-verticalPanes").append(dt.searchPanes.container());
+    }
     // $("div.search-panes").append(dt.searchPanes.container());
     if (this.filter.hasOwnProperty("P")) {
     }
@@ -858,19 +888,57 @@ export default class extends Controller {
   }
 
   columnDefs(searchPanesColumns) {
-    return [
-      {
+    let defs = [];
+
+    if (this.searchPanesValue) {
+      defs.push({
         searchPanes: { show: true },
         target: searchPanesColumns,
-      },
-      { targets: [0, 1], visible: true },
-      // {targets: '_all',  order:  },
-      // defaultContent is critical! Otherwise, lots of stuff fails.
-      { targets: "_all", visible: true, sortable: false, defaultContent: "~~" },
-    ];
+      });
+    }
 
-    // { targets: [0, 1], visible: true},
-    // { targets: '_all', visible: true, sortable: false,  "defaultContent": "~~" }
+    if (this.columnControlValue) {
+      // Enable ColumnControl search list for browsable fields.
+      this.columns.forEach((c, idx) => {
+        if (c.browsable) {
+          defs.push({
+            targets: idx,
+            columnControl: [
+              "order",
+              [
+                {
+                  extend: "searchList",
+                  ajaxOnly: true,
+                  search: true,
+                  select: true,
+                },
+              ],
+            ],
+          });
+        } else if (c.searchable) {
+          defs.push({
+            targets: idx,
+            columnControl: ["order", ["search"]],
+          });
+        }
+      });
+    }
+
+    defs.push({ targets: [0, 1], visible: true });
+    // defaultContent is critical! Otherwise, lots of stuff fails.
+    defs.push({
+      targets: "_all",
+      visible: true,
+      sortable: false,
+      defaultContent: "~~",
+    });
+
+    return defs;
+  }
+
+  columnControlConfig() {
+    // Baseline content for all columns (individual columns can override via columnDefs).
+    return ["order", ["orderAsc", "orderDesc", "search"]];
   }
 
   // get columns() {
@@ -1085,10 +1153,6 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
       history.replaceState(null, "", path);
     }
 
-    if (facetsFilter.length > 0) {
-      apiData["facet_filter"] = facetsFilter;
-    }
-
     if (params.searchBuilder && params.searchBuilder.criteria) {
       params.searchBuilder.criteria.forEach((c, index) => {
         console.warn(c, c.origData);
@@ -1103,14 +1167,30 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
     // });
     // console.error({facets});
 
-    // we don't do anything with facets!  So we probably don't need the above.
+    // Column-specific filtering
     params.columns.forEach(function (column, index) {
+      // Classic DataTables column search
       if (column.search && column.search.value) {
-        // check the first character for a range filter operator
-        // data is the column field, at least for right now.
         apiData[column.data] = column.search.value;
       }
+
+      // ColumnControl server-side filters
+      if (column.columnControl) {
+        if (column.columnControl.search && column.columnControl.search.value) {
+          apiData[column.data] = column.columnControl.search.value;
+        }
+        if (Array.isArray(column.columnControl.list) && column.columnControl.list.length) {
+          // Reuse our facet_filter backend format: field,in,val1|val2
+          facetsFilter.push(
+            column.data + ",in," + column.columnControl.list.join("|"),
+          );
+        }
+      }
     });
+
+    if (facetsFilter.length > 0) {
+      apiData["facet_filter"] = facetsFilter;
+    }
 
     apiData.offset = params.start;
     apiData.facets = [];

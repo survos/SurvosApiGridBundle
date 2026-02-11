@@ -3,6 +3,7 @@
 namespace Survos\ApiGridBundle;
 
 use Symfony\Component\DomCrawler\Crawler;
+use Twig\TemplateWrapper;
 
 trait TwigBlocksTrait
 {
@@ -12,6 +13,12 @@ trait TwigBlocksTrait
         $customColumnTemplates = [];
         $allTwigBlocks = [];
         if ($this->caller) {
+            // UX TwigComponent callers often pass `caller: _self` which is a TemplateWrapper.
+            // Normalize to the template name string for the loader.
+            if ($this->caller instanceof TemplateWrapper) {
+                $this->caller = $this->caller->getTemplateName();
+            }
+
             //            $template = $this->twig->resolveTemplate($this->caller);
             $sourceContext = $this->twig->getLoader()->getSourceContext($this->caller);
             $path = $sourceContext->getPath();

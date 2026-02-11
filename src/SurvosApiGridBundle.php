@@ -17,7 +17,6 @@ use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\ApiGridBundle\Twig\TwigExtension;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
-use Survos\InspectionBundle\Services\InspectionService;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -50,19 +49,21 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutowired(true);
 
 //        dd($config);
-        $builder->register($id = 'api_meili_service', MeiliService::class)
-            ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
-            ->setArgument('$config',$config)
-            ->setArgument('$meiliHost',$config['meiliHost'])
-            ->setArgument('$meiliKey',$config['meiliKey'])
-            ->setArgument('$httpClient',new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$bag', new Reference('parameter_bag'))
-            ->setAutowired(true)
-            ->setPublic(true)
-            ->setAutoconfigured(true)
-        ;
-        $container->services()->alias(MeiliService::class,$id);
+        // Meili is optional. Avoid registering the service when the PHP client isn't installed.
+        if (class_exists('Meilisearch\\Client')) {
+            $builder->register($id = 'api_meili_service', MeiliService::class)
+                ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
+                ->setArgument('$config', $config)
+                ->setArgument('$meiliHost', $config['meiliHost'])
+                ->setArgument('$meiliKey', $config['meiliKey'])
+                ->setArgument('$httpClient', new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+                ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+                ->setArgument('$bag', new Reference('parameter_bag'))
+                ->setAutowired(true)
+                ->setPublic(true)
+                ->setAutoconfigured(true);
+            $container->services()->alias(MeiliService::class, $id);
+        }
 
         // doctrine entities and inspection
         $builder->autowire(GridController::class)
@@ -198,8 +199,8 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setArgument('$twig', new Reference('twig'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
-            ->setArgument('$inspectionService', new Reference(InspectionService::class))
-            ->setArgument('$meiliService', new Reference('api_meili_service'))
+            ->setArgument('$inspectionService', new Reference('Survos\\InspectionBundle\\Services\\InspectionService', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+            ->setArgument('$meiliService', new Reference('api_meili_service', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
 
 
@@ -250,6 +251,8 @@ class SurvosApiGridBundle extends AbstractBundle
         $builder->prependExtensionConfig('framework', [
             'asset_mapper' => [
                 'paths' => [
+                    // JS assets are exposed under this namespace.
+                    // Note: Stimulus/importmap integration expects this prefix (without "-bundle").
                     $dir => '@survos/api-grid',
                 ],
             ],

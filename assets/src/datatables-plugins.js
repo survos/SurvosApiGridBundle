@@ -2,8 +2,8 @@ import 'datatables.net-select-bs5';
 // import "https://cdn.datatables.net/tmp/dataTables.searchPanes.mjs";
 import 'datatables.net-searchpanes-bs5';
 import 'datatables.net-searchbuilder-bs5';
+import 'datatables.net-columncontrol-bs5';
 import 'datatables.net-buttons-bs5';
-import 'datatables.net-select-bs5';
 import 'datatables.net-responsive-bs5';
 import 'datatables.net-scroller-bs5';
 // https://jsfiddle.net/tacman1123/b2f3hj08/23/
@@ -15,6 +15,8 @@ import 'datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.min.css';
 import 'datatables.net-responsive-bs5/css/responsive.bootstrap5.min.css';
 import 'datatables.net-scroller-bs5/css/scroller.bootstrap5.min.css';
 import 'datatables.net-buttons-bs5/css/buttons.bootstrap5.min.css';
+
+import 'datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.min.css';
 
 
 

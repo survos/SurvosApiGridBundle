@@ -14,6 +14,85 @@ composer req survos/api-grid-bundle
 
 ## Quick Start (Doctrine)
 
+## Doctrine setup
+
+This bundle is designed to point DataTables at an API Platform collection endpoint.
+It uses Hydra JSON-LD and a custom paginator that accepts `limit` and `offset`.
+
+### 1) Add QueryBuilder helper to your repository
+
+This enables facet counts for SearchPanes.
+
+```php
+use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
+use Survos\CoreBundle\Traits\QueryBuilderHelperTrait;
+
+class OfficialRepository extends ServiceEntityRepository implements QueryBuilderHelperInterface
+{
+    use QueryBuilderHelperTrait;
+}
+```
+
+### 2) Define columns
+
+```twig
+{% set columns = [
+    'code',
+    'description',
+    {name: 'countryCode', sortable: true, browsable: true, searchable: true},
+    {name: 'privacyPolicy', browsable: true},
+    {name: 'projectLocale', browsable: true},
+] %}
+```
+
+By default, `sortable`, `browsable`, and `searchable` are false.
+
+### 3) Add filters to the resource
+
+```php
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use Survos\ApiGrid\Api\Filter\MultiFieldSearchFilter;
+use Survos\ApiGrid\Api\Filter\FacetsFieldSearchFilter;
+
+#[ApiFilter(MultiFieldSearchFilter::class, properties: ['name', 'code'])]
+#[ApiFilter(FacetsFieldSearchFilter::class, properties: ['gender', 'state'])]
+#[ApiFilter(OrderFilter::class, properties: ['id', 'countryCode'])]
+```
+
+### 4) Choose the API route
+
+If your resource has a single collection operation, the grid can infer it. If there are
+multiple collection operations, pass the `apiRoute` (operation name) explicitly.
+
+```twig
+<twig:api_grid class="App\\Entity\\Official" apiRoute="api_officials_get_collection" />
+```
+
+To discover operation names, run:
+
+```bash
+bin/console debug:router | grep api_
+```
+
+Or bypass discovery entirely and pass a URL:
+
+```twig
+<twig:api_grid apiGetCollectionUrl="/api/officials.jsonld" />
+```
+
+### 5) Pagination settings
+
+Datatables uses `limit` and `offset`. Ensure API Platform allows client pagination:
+
+```yaml
+api_platform:
+  collection:
+    pagination:
+      client_items_per_page: true
+      client_enabled: true
+```
+
 The recommended approach is:
 
 - pass the entity class from your controller (avoid class strings in Twig)
@@ -157,3 +236,9 @@ class VideoRepository extends ServiceEntityRepository implements QueryBuilderHel
 ## Implementation Notes
 
 See `docs/implementation.md` for how the Twig component, Stimulus controller, API Platform normalizer, and pagination extension fit together.
+
+## Dev only
+
+```bash
+composer config repositories.survos_grid_bundle '{"type": "vcs", "url": "git@github.com:survos/SurvosApiGridBundle.git"}'
+```

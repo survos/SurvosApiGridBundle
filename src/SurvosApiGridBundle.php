@@ -44,13 +44,14 @@ class SurvosApiGridBundle extends AbstractBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        $meiliAvailable = class_exists(\Meilisearch\Client::class);
 
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
             ->setAutowired(true);
 
 //        dd($config);
         // Meili is optional. Avoid registering the service when the PHP client isn't installed.
-        if (class_exists('Meilisearch\\Client')) {
+        if ($meiliAvailable) {
             $builder->register($id = 'api_meili_service', MeiliService::class)
                 ->setArgument('$entityManager', new Reference('doctrine.orm.entity_manager'))
                 ->setArgument('$config', $config)
@@ -76,15 +77,17 @@ class SurvosApiGridBundle extends AbstractBundle
         ;
 
         // meili index stats, etc.
-        $builder->autowire(MeiliController::class)
-            ->addTag('container.service_subscriber')
-            ->addTag('controller.service_arguments')
-            ->setArgument('$meili', new Reference('api_meili_service'))
-            ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setAutoconfigured(true)
-            ->setAutowired(true)
-            ->setPublic(true)
-        ;
+        if ($meiliAvailable) {
+            $builder->autowire(MeiliController::class)
+                ->addTag('container.service_subscriber')
+                ->addTag('controller.service_arguments')
+                ->setArgument('$meili', new Reference('api_meili_service'))
+                ->setArgument('$chartBuilder', new Reference('chartjs.builder', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+                ->setAutoconfigured(true)
+                ->setAutowired(true)
+                ->setPublic(true)
+            ;
+        }
 
         // check https://github.com/zenstruck/console-extra/issues/59
         $definition = $builder->autowire(IndexCommand::class)
@@ -125,37 +128,36 @@ class SurvosApiGridBundle extends AbstractBundle
             ->setAutoconfigured(true)
         ;
 
-        $builder->register(DataTableFilter::class)
-            ->setAutowired(true)
-            ->setAutoconfigured(true)
-//            ->setArgument('$resourceClassResolver', new Reference('api_platform.resource_class_resolver'))
-            ->addTag('meili_search_filter')
-        ;
-        $builder->register(MeiliMultiFieldSearchFilter::class)
-            ->setAutowired(true)
-            ->addTag('meili_search_filter')
-        ;
-        $builder->register(DataTableFacetsFilter::class)
-            ->setAutowired(true)
-            ->addTag('meili_search_filter')
-        ;
+        if ($meiliAvailable) {
+            $builder->register(DataTableFilter::class)
+                ->setAutowired(true)
+                ->setAutoconfigured(true)
+                ->addTag('meili_search_filter')
+            ;
+            $builder->register(MeiliMultiFieldSearchFilter::class)
+                ->setAutowired(true)
+                ->addTag('meili_search_filter')
+            ;
+            $builder->register(DataTableFacetsFilter::class)
+                ->setAutowired(true)
+                ->addTag('meili_search_filter')
+            ;
 
-        $builder->register(SortFilter::class)
-            ->setAutowired(true)
-            ->addTag('meili_search_filter')
-        ;
+            $builder->register(SortFilter::class)
+                ->setAutowired(true)
+                ->addTag('meili_search_filter')
+            ;
 
-        $builder->register(MeiliSearchStateProvider::class)
-            ->setArgument('$meiliSearchFilters', tagged_iterator('meili_search_filter'))
-            ->setArgument('$meili', new Reference('api_meili_service'))
-            ->setArgument('$httpClient',new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-//            ->setArgument('$meiliHost',$config['meiliHost'])
-//            ->setArgument('$meiliKey',$config['meiliKey'])
-            ->setArgument('$denormalizer', new Reference('serializer'))
-            ->addTag('api_platform.state_provider')
-            ->setAutowired(true)
-            ->setPublic(true)
-        ;
+            $builder->register(MeiliSearchStateProvider::class)
+                ->setArgument('$meiliSearchFilters', tagged_iterator('meili_search_filter'))
+                ->setArgument('$meili', new Reference('api_meili_service'))
+                ->setArgument('$httpClient', new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
+                ->setArgument('$denormalizer', new Reference('serializer'))
+                ->addTag('api_platform.state_provider')
+                ->setAutowired(true)
+                ->setPublic(true)
+            ;
+        }
 
 
         $builder->register(DataTableCollectionNormalizer::class)

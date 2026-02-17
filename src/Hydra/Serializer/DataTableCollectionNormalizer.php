@@ -15,7 +15,6 @@ use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use ApiPlatform\Metadata\Util\IriHelper;
-use Meilisearch\Search\SearchResult;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGridBundle\Event\FacetEvent;
 use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
@@ -76,7 +75,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $facets = [];
         $data = [];
 
-        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        if (is_array($object) && isset($object['data']) && $this->isMeiliSearchResult($object['data'])) {
             if ($context['request_uri']) {
                 parse_str((string)parse_url($context['request_uri'], PHP_URL_QUERY), $params);
                 $locale = $params['_locale'] ?? null;
@@ -171,7 +170,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $data['totalItems'] = \count($object);
         }
 
-        if (is_array($object) && isset($object['data']) && $object['data'] instanceof SearchResult) {
+        if (is_array($object) && isset($object['data']) && $this->isMeiliSearchResult($object['data'])) {
             $data['totalItems'] = $object['data']->getEstimatedTotalHits();
         }
 
@@ -399,8 +398,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
             $currentPage = (int)$object->getCurrentPage();
         }
 
-        $paginated = ($object instanceof SearchResult);
-        if ($object instanceof SearchResult && $paginated) {
+        $paginated = $this->isMeiliSearchResult($object);
+        if ($this->isMeiliSearchResult($object) && $paginated) {
             $itemsPerPage = $object->getLimit();
             $lastPage = (int)ceil($object->getEstimatedTotalHits() / $itemsPerPage);
             $pageTotalItems = $object->getEstimatedTotalHits();
@@ -423,7 +422,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
 
     private function populateDataWithPagination(array $data, array $parsed, int $currentPage, int $lastPage,
-                                                int $itemsPerPage, int $pageTotalItems): array
+                                                 int $itemsPerPage, int $pageTotalItems): array
     {
         if (null !== $lastPage) {
             $data['view']['first'] = IriHelper::createIri($parsed['parts'], $parsed['parameters'], $this->pageParameterName, 1.);
@@ -439,5 +438,14 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         return $data;
+    }
+
+    private function isMeiliSearchResult(mixed $object): bool
+    {
+        if (!class_exists('Meilisearch\Search\SearchResult')) {
+            return false;
+        }
+
+        return $object instanceof \Meilisearch\Search\SearchResult;
     }
 }

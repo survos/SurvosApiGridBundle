@@ -893,7 +893,7 @@ export default class extends Controller {
     if (this.searchPanesValue) {
       defs.push({
         searchPanes: { show: true },
-        target: searchPanesColumns,
+        targets: searchPanesColumns,
       });
     }
 

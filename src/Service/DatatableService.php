@@ -100,9 +100,9 @@ class DatatableService
                         'is_primary' => false,
                         'browsable' => false
                     ])->resolve($existingSettings);
-                $column->searchable = $options['searchable'];
-                $column->sortable = $options['sortable'];
-                $column->browsable = $options['browsable'];
+                $column->searchable = $column->searchable || $options['searchable'];
+                $column->sortable = $column->sortable || $options['sortable'];
+                $column->browsable = $column->browsable || $options['browsable'];
             }
             if ($column->condition) {
                 $normalizedColumns[] = $column;
@@ -181,6 +181,11 @@ class DatatableService
                     case RangeFilter::class:
                     case MultiFieldSearchFilter::class:
                         $settings[$property]['searchable'] = true;
+                        break;
+                    default:
+                        if (str_ends_with($filter, '\\FacetsFieldSearchFilter')) {
+                            $settings[$property]['browsable'] = true;
+                        }
                         break;
                 }
             }
@@ -303,4 +308,3 @@ class DatatableService
 
 
 }
-

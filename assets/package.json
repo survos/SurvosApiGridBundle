@@ -5,13 +5,6 @@
   "version": "1.0.5",
   "symfony": {
     "controllers": {
-      "js_twig": {
-        "main": "src/controllers/js_twig_controller.js",
-        "webpackMode": "eager",
-        "fetch": "lazy",
-        "enabled": true,
-        "autoimport": {}
-      },
       "api_grid": {
         "main": "src/controllers/api_grid_controller.js",
         "webpackMode": "eager",

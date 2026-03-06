@@ -19,30 +19,43 @@ import "../datatables-plugins.js";
 
 import PerfectScrollbar from "perfect-scrollbar";
 
-import Routing from "fos-routing";
-import RoutingData from "/js/fos_js_routes.js";
-Routing.setData(RoutingData);
-
-import Twig from "twig";
+import { createEngine } from "@tacman1123/twig-browser";
+import { installSymfonyTwigAPI } from "@tacman1123/twig-browser/adapters/symfony";
 import enLanguage from "datatables.net-plugins/i18n/en-GB.mjs";
 import esLanguage from "datatables.net-plugins/i18n/es-ES.mjs";
 import deLanguage from "datatables.net-plugins/i18n/de-DE.mjs";
 // import ukLanguage from 'datatables.net-plugins/i18n/uk.mjs';
 // import huLanguage from 'datatables.net-plugins/i18n/hu.mjs';
 // import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
-Twig.extend(function (Twig) {
-  Twig._function.extend("path", (route, routeParams = {}) => {
-    // console.error(routeParams);
-    if ("_keys" in routeParams) {
-      // if(routeParams.hasOwnProperty('_keys')){
-      delete routeParams._keys; // seems to be added by twigjs
-    }
-    let path = Routing.generate(route, routeParams);
-    return path;
-  });
-});
+let Routing = null;
+try {
+  const mod = await import("fos-routing");
+  Routing = mod.default;
 
-console.assert(Routing, "Routing is not defined");
+  let routingLoaded = false;
+  try {
+    const response = await fetch("/js/fos_js_routes.json", {
+      headers: { Accept: "application/json" },
+    });
+    if (response.ok) {
+      Routing.setData(await response.json());
+      routingLoaded = true;
+    }
+  } catch {
+    routingLoaded = false;
+  }
+
+  if (!routingLoaded) {
+    const routingData = await import("/js/fos_js_routes.js");
+    Routing.setData(routingData.default);
+  }
+} catch {
+  Routing = null;
+}
+
+if (!Routing) {
+  console.warn("[api-grid] FOS routing is unavailable, path() calls in client Twig may fail.");
+}
 // global.Routing = Routing;
 
 // try {
@@ -94,12 +107,8 @@ export default class extends Controller {
       c.className = c.title;
       c.searchBuilderType = "num";
       if (c.twigTemplate) {
-        // console.warn(c.twigTemplate);
-        let template = Twig.twig({
-          id: c.name,
-          data: c.twigTemplate,
-        });
-        // console.error(template.id);
+        const templateName = `column:${c.name}`;
+        this.twigEngine.compileBlock(templateName, c.twigTemplate);
         render = (data, type, row, meta) => {
           // Object.assign(row, );
           // row.locale = this.localeValue;
@@ -119,12 +128,11 @@ export default class extends Controller {
           // [key]: 'ES6!'
           // params[c.name] = row[c.name];
           params._keys = null;
-          // console.error(params);
-          return template.render(params);
+          return this.twigEngine.renderBlock(templateName, params);
         };
       }
 
-      if (c.name === "_actions") {
+      if (c.name === "_actions" && !c.twigTemplate) {
         return this.actions({ prefix: c.prefix, actions: c.actions });
       }
 
@@ -183,6 +191,17 @@ export default class extends Controller {
     });
     window.dispatchEvent(event);
     this.globals = JSON.parse(this.globalsValue);
+    this.twigEngine = createEngine({
+      pathGenerator: (route, routeParams = {}) => {
+        const safeParams = { ...(routeParams ?? {}) };
+        delete safeParams._keys;
+        if (Routing?.generate) {
+          return Routing.generate(route, safeParams);
+        }
+        throw new Error(`Routing is unavailable for path('${route}').`);
+      },
+    });
+    installSymfonyTwigAPI(this.twigEngine, { Routing });
 
     this.columns = JSON.parse(this.columnConfigurationValue);
     this.facets = JSON.parse(this.facetConfigurationValue);
@@ -534,21 +553,16 @@ export default class extends Controller {
       //     language = hilanguage;
     }
 
-    var modalTemplate;
+    const modalTemplateName = "modal:responsive";
     var modalRenderer = DataTable.Responsive.renderer.tableAll({
       tableClass: "ui table",
     });
     if (this.modalTemplateValue) {
-      modalTemplate = Twig.twig({
-        data: this.modalTemplateValue,
-      });
+      this.twigEngine.compileBlock(modalTemplateName, this.modalTemplateValue);
       modalRenderer = (api, rowIdx, columns) => {
         let data = api.row(rowIdx).data();
         let params = { data: data, columns: columns, globals: this.globals };
-        // params._keys = null;
-        // console.error(params);
-        // return this.modalTemplateValue;
-        return modalTemplate.render(params);
+        return this.twigEngine.renderBlock(modalTemplateName, params);
         console.log(rowIdx);
       };
     }
@@ -949,21 +963,29 @@ export default class extends Controller {
   //     ]
   // }
 
-  actions({ prefix = null, actions = ["edit", "show", "qr"] } = {}) {
+  actions({ prefix = "", actions = ["edit", "show", "qr"] } = {}) {
+    const resolvedPrefix = prefix ?? "";
+    const resolvedActions = Array.isArray(actions) && actions.length
+      ? actions
+      : ["edit", "show", "qr"];
+
     let icons = {
-      edit: "fas fa-edit",
-      show: "fas fa-eye text-success",
-      qr: "fas fa-qrcode",
-      delete: "fas fa-trash text-danger",
+      edit: "pencil",
+      show: "eye text-success",
+      qr: "qr-code",
+      delete: "trash text-danger",
     };
-    let buttons = actions.map((action) => {
-      let modal_route = prefix + action;
+    let buttons = resolvedActions.map((action) => {
+      let modal_route = `${resolvedPrefix}${action}`;
       let icon = icons[action];
+      if (!icon) {
+        icon = "fas fa-circle";
+      }
       // return action + ' ' + modal_route;
       // Routing.generate()
 
       return `<button data-modal-route="${modal_route}" class="btn btn-modal btn-action-${action}" 
-title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></button>`;
+title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     });
 
     // console.log(buttons);
@@ -973,7 +995,7 @@ title="${modal_route}"><span class="action-${action} fas fa-${icon}"></span></bu
         return buttons.join(" ");
       },
     };
-    actions.forEach((action) => {});
+    resolvedActions.forEach((action) => {});
   }
 
   c({

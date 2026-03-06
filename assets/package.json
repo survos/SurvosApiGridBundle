@@ -39,7 +39,8 @@
       }
     },
     "importmap": {
-      "twig": "^1.17.1",
+      "@tacman1123/twig-browser": "^0.2.1",
+      "@tacman1123/twig-browser/adapters/symfony": "^0.2.1",
       "axios": "^1.7.9",
       "fos-routing": "^0.0.6",
       "perfect-scrollbar": "^1.5.6",
@@ -81,7 +82,6 @@
     "datatables.net-scroller-bs5": "^2.4.3",
     "jszip": "^3.10.1",
     "perfect-scrollbar": "^1.5.6",
-    "twig": "^1.17.1",
     "datatables.net-columncontrol": "^1.2.0",
     "datatables.net-columncontrol-bs5": "^1.2.0"
   }

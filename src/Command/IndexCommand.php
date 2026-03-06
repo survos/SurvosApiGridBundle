@@ -40,7 +40,7 @@ class IndexCommand extends Command
         protected ParameterBagInterface $bag,
         protected EntityManagerInterface $entityManager,
         private LoggerInterface $logger,
-        private MeiliService $meiliService,
+        private ?MeiliService $meiliService,
         private DatatableService $datatableService,
         private NormalizerInterface $normalizer,
         #[Autowire('%kernel.enabled_locales%')] private array $enabledLocales=[],
@@ -64,6 +64,11 @@ class IndexCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!$this->meiliService) {
+            $io = new SymfonyStyle($input, $output);
+            $io->warning('Meilisearch integration is not installed/enabled. Install survos/meili-bundle or meilisearch-php to use grid:index.');
+            return self::SUCCESS;
+        }
 
         $filter = $input->getOption('filter');
         $filterArray = $filter ? Yaml::parse($filter) : null;

@@ -16,13 +16,15 @@
 
     modalTemplate: this.modalTemplate,
     dom: this.dom|default(false),
+    layout: this.layout|default(null),
     style: this.style,
     index: this.index|default(false),
     pageLength: this.pageLength,
     filter: this.filter,
 
     searchPanes: this.searchPanes,
-    columnControl: this.columnControl
+    columnControl: this.columnControl,
+    searchBuilder: this.searchBuilder
 }) }}>
 
     {% if this.searchPanes %}

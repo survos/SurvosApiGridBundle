@@ -4,11 +4,12 @@
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import { Controller } from "@hotwired/stimulus";
 import $ from "jquery";
+import * as StimAttrs from "stimulus-attributes";
 
 import { default as axios } from "axios";
 
 import DataTable from "datatables.net-bs5";
-import "../datatables-plugins.js";
+import { dtPlugins } from "../datatables-plugins.js";
 // https://stackoverflow.com/questions/68084742/dropdown-doesnt-work-after-modal-of-bootstrap-imported
 // import bootstrap from 'bootstrap'; // bootstrap javascript
 // import * as bootstrap from 'bootstrap';
@@ -19,8 +20,7 @@ import "../datatables-plugins.js";
 
 import PerfectScrollbar from "perfect-scrollbar";
 
-import { createEngine } from "@tacman1123/twig-browser";
-import { installSymfonyTwigAPI } from "@tacman1123/twig-browser/adapters/symfony";
+import { installTwigAPI } from "@survos/js-twig-bundle/twig_api";
 import enLanguage from "datatables.net-plugins/i18n/en-GB.mjs";
 import esLanguage from "datatables.net-plugins/i18n/es-ES.mjs";
 import deLanguage from "datatables.net-plugins/i18n/de-DE.mjs";
@@ -29,25 +29,20 @@ import deLanguage from "datatables.net-plugins/i18n/de-DE.mjs";
 // import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 let Routing = null;
 try {
-  const mod = await import("fos-routing");
-  Routing = mod.default;
-
-  let routingLoaded = false;
   try {
-    const response = await fetch("/js/fos_js_routes.json", {
-      headers: { Accept: "application/json" },
-    });
-    if (response.ok) {
-      Routing.setData(await response.json());
-      routingLoaded = true;
+    const mod = await import("@survos/js-twig/generated/fos_routes.js");
+    if (typeof mod.path === "function") {
+      Routing = { generate: mod.path };
     }
   } catch {
-    routingLoaded = false;
-  }
-
-  if (!routingLoaded) {
-    const routingData = await import("/js/fos_js_routes.js");
-    Routing.setData(routingData.default);
+    const mod = await import("fos-routing");
+    Routing = mod.default;
+    try {
+      const routingData = await import("/js/fos_js_routes.js");
+      Routing.setData(routingData.default);
+    } catch {
+      Routing = null;
+    }
   }
 } catch {
   Routing = null;
@@ -81,10 +76,15 @@ export default class extends Controller {
     modalTemplate: { type: String, default: "" },
     locale: { type: String, default: "no-locale!" },
     style: { type: String, default: "spreadsheet" },
+    layout: { type: String, default: "" },
     cascadePanes: { type: Boolean, default: false },
     viewTotal: { type: Boolean, default: false },
     index: { type: String, default: "" }, // meili
-    dom: { type: String, default: "QBlfrtip" }, // use P for searchPanes
+    dom: { type: String, default: "" },
+    pageLength: { type: Number, default: 50 },
+    searchPanes: { type: Boolean, default: true },
+    columnControl: { type: Boolean, default: false },
+    searchBuilder: { type: Boolean, default: false },
     searchBuilderColumns: { type: String, default: "[]" },
     filter: String, // json, from queryString, e.g. party=dem
     buttons: String, // json, from queryString, e.g. party=dem
@@ -146,7 +146,21 @@ export default class extends Controller {
         render: render,
         sortable: typeof c.sortable ? c.sortable : false,
         className: c.className,
+        visible: typeof c.visible === 'boolean' ? c.visible : undefined,
       });
+
+      if (c.width) {
+        column.width = c.width;
+      }
+      if (c.titleAttr) {
+        column.titleAttr = c.titleAttr;
+      }
+      if (Number.isInteger(c.responsivePriority)) {
+        column.responsivePriority = c.responsivePriority;
+      }
+      if (typeof c.visible === 'boolean') {
+        column.visible = c.visible;
+      }
 
       column.searchBuilder = {
         type: "num",
@@ -191,7 +205,9 @@ export default class extends Controller {
     });
     window.dispatchEvent(event);
     this.globals = JSON.parse(this.globalsValue);
-    this.twigEngine = createEngine({
+    this.twigEngine = installTwigAPI({
+      Routing,
+      StimAttrs,
       pathGenerator: (route, routeParams = {}) => {
         const safeParams = { ...(routeParams ?? {}) };
         delete safeParams._keys;
@@ -201,7 +217,6 @@ export default class extends Controller {
         throw new Error(`Routing is unavailable for path('${route}').`);
       },
     });
-    installSymfonyTwigAPI(this.twigEngine, { Routing });
 
     this.columns = JSON.parse(this.columnConfigurationValue);
     this.facets = JSON.parse(this.facetConfigurationValue);
@@ -209,6 +224,7 @@ export default class extends Controller {
     // "compile" the custom twig blocks
     // var columnRender = [];
     this.dom = this.domValue;
+    this.layout = this._parseLayout(this.layoutValue);
     // dom: 'Plfrtip',
     console.assert(this.dom, "Missing dom");
 
@@ -265,6 +281,9 @@ export default class extends Controller {
     this.locale = this.localeValue;
     this.viewTotal = true; // this.viewTotalValue;
     this.cascadePanes = false; // never with serverSide: true! this.cascadePanesValue;
+    if (!this.layout && !this.dom) {
+      this.layout = this.defaultLayout();
+    }
     console.log(
       "hola from " + this.identifier + " locale: " + this.localeValue,
     );
@@ -584,6 +603,7 @@ export default class extends Controller {
       // scrollCollapse: true,
       scroller: true,
       responsive: true,
+      pageLength: this.pageLengthValue || 50,
       // responsive: {
       //     details: {
       //         renderer: modalRenderer,
@@ -618,6 +638,8 @@ export default class extends Controller {
           box[0].style.display = "none";
         }
 
+        this.applyHeaderMetadata(dt);
+
         // let xapi = new DataTable.Api(obj);
         // console.log(xapi);
         // console.log(xapi.table);
@@ -627,7 +649,8 @@ export default class extends Controller {
         // dt.search(dt.columns().search()).draw();
       },
 
-      dom: this.dom,
+      ...(this.normalizedLayout() ? { layout: this.normalizedLayout() } : {}),
+      ...(!this.layout && this.dom ? { dom: this.dom } : {}),
       buttons: this.buttons,
       xxbuttons: (x) => {
         // why isn't this being called?
@@ -682,14 +705,16 @@ export default class extends Controller {
             },
           }
         : {}),
-      searchBuilder: {
-        // columns: this.searchBuilderColumns, // this.searchBuilderFields,
-        columns: [".lyricsLength"], // this.searchBuilderFields,
-
-        depthLimit: 1,
-        threshold: 0,
-        showEmptyPanes: true,
-      },
+      ...((this.searchBuilderValue || this.searchBuilderColumns.length)
+        ? {
+            searchBuilder: {
+              ...(this.searchBuilderColumns.length ? { columns: this.searchBuilderColumns } : {}),
+              depthLimit: 1,
+              threshold: 0,
+              showEmptyPanes: true,
+            },
+          }
+        : {}),
       // columns:
       //     [
       //     this.c({
@@ -864,7 +889,7 @@ export default class extends Controller {
           });
       },
     };
-    if (this.columnControlValue) {
+    if (this.columnControlValue && this.hasColumnControlPlugin()) {
       setup.columnControl = this.columnControlConfig();
       // Avoid duplicate ordering UI when ColumnControl is active.
       setup.ordering = { indicators: false, handler: false };
@@ -899,6 +924,65 @@ export default class extends Controller {
       const ps = new PerfectScrollbar(contentContainer[0]);
     }
     return dt;
+  }
+
+  _parseLayout(raw) {
+    if (!raw) return null;
+    if (typeof raw === 'object') return raw;
+    const value = String(raw).trim();
+    if (!value) return null;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return null;
+    }
+  }
+
+  defaultLayout() {
+    return {
+      topStart: ["pageLength"],
+      topEnd: [
+        ...(this.searchBuilderValue ? ["searchBuilder"] : []),
+        this.hasColumnControlPlugin() && this.columnControlValue ? "columnControl" : "search",
+      ],
+      bottomStart: ["info"],
+      bottomEnd: ["paging"],
+    };
+  }
+
+  hasColumnControlPlugin() {
+    return !!dtPlugins.columnControl;
+  }
+
+  normalizedLayout() {
+    const replaceFeature = (value) => {
+      if (Array.isArray(value)) {
+        return value.map(replaceFeature).filter((item) => item !== null);
+      }
+      if (value === "columnControl" && !this.hasColumnControlPlugin()) {
+        return "search";
+      }
+      if (value === "searchBuilder" && !this.searchBuilderValue) {
+        return null;
+      }
+      return value;
+    };
+
+    return this.layout ? replaceFeature(this.layout) : null;
+  }
+
+  applyHeaderMetadata(dt) {
+    const headerCells = dt.table().header()?.querySelectorAll("th") || [];
+    this.columns.forEach((column, index) => {
+      const th = headerCells[index];
+      if (!th) return;
+      if (column.titleAttr) {
+        th.setAttribute("title", column.titleAttr);
+      }
+      if (column.width) {
+        th.style.width = column.width;
+      }
+    });
   }
 
   columnDefs(searchPanesColumns) {
@@ -938,13 +1022,39 @@ export default class extends Controller {
       });
     }
 
-    defs.push({ targets: [0, 1], visible: true });
-    // defaultContent is critical! Otherwise, lots of stuff fails.
+    this.columns.forEach((column, index) => {
+      const def = { targets: index };
+      let hasConfig = false;
+
+      if (typeof column.visible === "boolean") {
+        def.visible = column.visible;
+        hasConfig = true;
+      }
+      if (typeof column.orderable === "boolean") {
+        def.orderable = column.orderable;
+        hasConfig = true;
+      } else if (typeof column.sortable === "boolean") {
+        def.orderable = column.sortable;
+        hasConfig = true;
+      }
+      if (column.width) {
+        def.width = column.width;
+        hasConfig = true;
+      }
+      if (Number.isInteger(column.responsivePriority)) {
+        def.responsivePriority = column.responsivePriority;
+        hasConfig = true;
+      }
+
+      if (hasConfig) {
+        defs.push(def);
+      }
+    });
+
     defs.push({
       targets: "_all",
       visible: true,
-      sortable: false,
-      defaultContent: "~~",
+      defaultContent: "",
     });
 
     return defs;
@@ -1010,6 +1120,7 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     renderType = "string",
     sortable = false,
     className = null,
+    visible = undefined,
   } = {}) {
     if (render === null) {
       render = (data, type, row, meta) => {
@@ -1063,7 +1174,8 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
       className: className,
       data: propertyName || "",
       render: render,
-      sortable: sortable,
+      orderable: sortable,
+      ...(typeof visible === "boolean" ? { visible } : {}),
     };
     // ...function body...
   }

@@ -94,7 +94,8 @@ class ApiGridComponent implements TwigBlocksInterface
 
 //    public ?string $class = null;
     public ?string $index = null; // name of the meili index
-    public string $dom='BQlfrtpP';
+    public string $dom='';
+    public string|array|null $layout = null;
     public int $pageLength=50;
     public string $searchPanesDataUrl; // maybe deprecate this?
     public ?string $apiGetCollectionUrl=null;
@@ -123,6 +124,7 @@ class ApiGridComponent implements TwigBlocksInterface
     // Filter UI (SearchPanes sidebar vs ColumnControl in headers)
     public bool $searchPanes = true;
     public bool $columnControl = false;
+    public bool $searchBuilder = false;
 
 
     public function getLocale(): string

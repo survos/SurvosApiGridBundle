@@ -39,6 +39,7 @@
       }
     },
     "importmap": {
+      "@survos/js-twig-bundle/twig_api": "^1.0.5",
       "@tacman1123/twig-browser": "^0.4.14",
       "@tacman1123/twig-browser/adapters/symfony": "^0.4.14",
       "axios": "^1.13.6",
@@ -55,7 +56,8 @@
       "datatables.net-searchbuilder-bs5": "^1.8.4",
       "datatables.net-select-bs5": "^2.1.0",
       "datatables.net-columncontrol": "^1.2.1",
-      "datatables.net-columncontrol-bs5": "^1.2.1"
+      "datatables.net-columncontrol-bs5": "^1.2.1",
+      "stimulus-attributes": "^1.0.2"
     }
   },
   "peerDependencies": {

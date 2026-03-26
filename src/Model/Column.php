@@ -16,8 +16,12 @@ class Column
         public ?string $internalCode = null, // e.g. label, description, type
         public ?string $className = null, // e.g. pull-right for numbers
         public ?string $class_name = null, // e.g. pull-right for numbers
+        public ?string $width = null,
+        public ?int $responsivePriority = null,
+        public ?string $titleAttr = null,
         public ?bool $facet = null, // e.g. pull-right for numbers
         public ?bool $grid = null, // e.g. pull-right for numbers
+        public ?bool $visible = null,
         public bool $searchable = false,
         public bool $useDatatables = true,
 

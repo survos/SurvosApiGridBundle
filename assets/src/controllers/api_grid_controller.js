@@ -4,7 +4,8 @@
 // ln -s ~/survos/bundles/api-grid-bundle/assets/src/controllers/sandbox_api_controller.js assets/controllers/sandbox_api_controller.js
 import { Controller } from "@hotwired/stimulus";
 import $ from "jquery";
-import * as StimAttrs from "stimulus-attributes";
+import { createEngine } from "@tacman1123/twig-browser";
+import { installSymfonyTwigAPI } from "@tacman1123/twig-browser/adapters/symfony";
 
 import { default as axios } from "axios";
 
@@ -20,7 +21,6 @@ import { dtPlugins } from "../datatables-plugins.js";
 
 import PerfectScrollbar from "perfect-scrollbar";
 
-import { installTwigAPI } from "@survos/js-twig-bundle/twig_api";
 import enLanguage from "datatables.net-plugins/i18n/en-GB.mjs";
 import esLanguage from "datatables.net-plugins/i18n/es-ES.mjs";
 import deLanguage from "datatables.net-plugins/i18n/de-DE.mjs";
@@ -205,9 +205,8 @@ export default class extends Controller {
     });
     window.dispatchEvent(event);
     this.globals = JSON.parse(this.globalsValue);
-    this.twigEngine = installTwigAPI({
-      Routing,
-      StimAttrs,
+    this.twigEngine = createEngine();
+    installSymfonyTwigAPI(this.twigEngine, {
       pathGenerator: (route, routeParams = {}) => {
         const safeParams = { ...(routeParams ?? {}) };
         delete safeParams._keys;

@@ -7,7 +7,7 @@ import $ from "jquery";
 import { createEngine } from "@tacman1123/twig-browser";
 import { installSymfonyTwigAPI } from "@tacman1123/twig-browser/adapters/symfony";
 
-import { default as axios } from "axios";
+
 
 import DataTable from "datatables.net-bs5";
 import { dtPlugins } from "../datatables-plugins.js";
@@ -412,9 +412,9 @@ export default class extends Controller {
 
         console.log("getting formURL " + formUrl);
 
-        axios
-          .get(formUrl)
-          .then((response) => (this.modalBodyTarget.innerHTML = response.data))
+        fetch(formUrl)
+          .then((response) => response.text())
+          .then((data) => (this.modalBodyTarget.innerHTML = data))
           .catch((error) => (this.modalBodyTarget.innerHTML = error));
       }
     });
@@ -444,15 +444,13 @@ export default class extends Controller {
         console.assert(data.rp, "missing rp, add @Groups to entity");
         let formUrl = Routing.generate(modalRoute, data.rp);
 
-        axios({
-          method: "get", //you can set what request you want to be
-          url: formUrl,
-          // data: {id: varID},
+        fetch(formUrl, {
           headers: {
-            _page_content_only: "1", // could send blocks that we want??
+            _page_content_only: "1",
           },
         })
-          .then((response) => (this.modalBodyTarget.innerHTML = response.data))
+          .then((response) => response.text())
+          .then((data) => (this.modalBodyTarget.innerHTML = data))
           .catch((error) => (this.modalBodyTarget.innerHTML = error));
       }
     });
@@ -748,12 +746,12 @@ export default class extends Controller {
 
         // console.warn(apiPlatformHeaders);
 
-        let request = axios
-          .get(this.apiCallValue, {
-            params: this.apiParams,
-            headers: apiPlatformHeaders,
-          })
-          .then((response) => {
+        let request = fetch(
+          this.apiCallValue + "?" + new URLSearchParams(this.apiParams),
+          { headers: apiPlatformHeaders }
+        )
+          .then((response) => response.json())
+          .then((hydraData) => {
             // handle success
             let hydraData = response.data;
 

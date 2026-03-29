@@ -224,15 +224,13 @@ export default class extends Controller {
         );
         let formUrl = Routing.generate(modalRoute, data.uniqueIdentifiers);
 
-        axios({
-          method: "get", //you can set what request you want to be
-          url: formUrl,
-          // data: {id: varID},
+        fetch(formUrl, {
           headers: {
-            _page_content_only: "1", // could send blocks that we want??
+            _page_content_only: "1",
           },
         })
-          .then((response) => (this.modalBodyTarget.innerHTML = response.data))
+          .then((response) => response.text())
+          .then((data) => (this.modalBodyTarget.innerHTML = data))
           .catch((error) => (this.modalBodyTarget.innerHTML = error));
       }
     });

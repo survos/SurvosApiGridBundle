@@ -39,7 +39,6 @@
       }
     },
     "importmap": {
-      "@survos/js-twig-bundle/twig_api": "^1.0.5",
       "@tacman1123/twig-browser": "^0.4.14",
       "@tacman1123/twig-browser/adapters/symfony": "^0.4.14",
       "axios": "^1.13.6",

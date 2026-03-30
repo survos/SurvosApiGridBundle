@@ -2,8 +2,6 @@
 
 namespace Survos\ApiGridBundle\Twig;
 
-use ApiPlatform\Metadata\IriConverterInterface;
-
 //use ApiPlatform\Core\Api\IriConverterInterface as LegacyIriConverterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\GetCollection;
@@ -24,9 +22,7 @@ use function Symfony\Component\String\u;
 
 class TwigExtension extends AbstractExtension
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function getFilters(): array
     {

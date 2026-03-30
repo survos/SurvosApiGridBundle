@@ -753,8 +753,6 @@ export default class extends Controller {
           .then((response) => response.json())
           .then((hydraData) => {
             // handle success
-            let hydraData = response.data;
-
             // Be resilient to different formats (.jsonld vs .json, etc.)
             let member = [];
             if (Array.isArray(hydraData)) {

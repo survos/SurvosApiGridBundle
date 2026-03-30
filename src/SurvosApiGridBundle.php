@@ -16,14 +16,13 @@ use Survos\ApiGridBundle\Paginator\SlicePaginationExtension;
 use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\ApiGridBundle\Twig\TwigExtension;
-use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\CoreBundle\Bundle\AssetMapperBundle;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\UX\Chartjs\Builder\ChartBuilder;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Twig\Environment;
@@ -35,9 +34,10 @@ use Survos\ApiGridBundle\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
-class SurvosApiGridBundle extends AbstractBundle
+class SurvosApiGridBundle extends AssetMapperBundle
 {
-    use HasAssetMapperTrait;
+    public const ASSET_PACKAGE = 'api-grid';
+
     // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
     /**
      * @param array<mixed> $config
@@ -226,10 +226,10 @@ class SurvosApiGridBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
             ->scalarNode('stimulus_controller')
-                ->info('The stimulus controller to use, should extend @survos/api-grid-bundle/api_grid')
-                ->defaultValue('@survos/api-grid-bundle/api_grid')
+                ->info('The stimulus controller to use, should extend @survos/api-grid/api-grid')
+                ->defaultValue('@survos/api-grid/api-grid')
             ->end()
-            ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid-bundle/grid')->end()
+            ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('%env(MEILI_SERVER)%')->end()
             ->scalarNode('meiliKey')->defaultValue('%env(MEILI_API_KEY)%')->end()
             ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
@@ -241,23 +241,4 @@ class SurvosApiGridBundle extends AbstractBundle
             ->end();;
     }
 
-    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
-    {
-        if (!$this->isAssetMapperAvailable($builder)) {
-            return;
-        }
-
-        $dir = realpath(__DIR__.'/../assets/');
-        assert(file_exists($dir), $dir);
-
-        $builder->prependExtensionConfig('framework', [
-            'asset_mapper' => [
-                'paths' => [
-                    // JS assets are exposed under this namespace.
-                    // Note: Stimulus/importmap integration expects this prefix (without "-bundle").
-                    $dir => '@survos/api-grid',
-                ],
-            ],
-        ]);
-    }
 }

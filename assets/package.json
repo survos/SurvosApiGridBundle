@@ -1,11 +1,12 @@
 {
-  "name": "@survos/api-grid-bundle",
+  "name": "@survos/api-grid",
   "description": "integrate php and javascript helpers for DataTables.net           \"perfectscroll-bar/dist/perfect-scrollbar.min.js\": true,\n          \"perfectscroll-bar/css/perfect-scrollbar.css\": true,\n",
   "license": "MIT",
   "version": "1.0.5",
   "symfony": {
     "controllers": {
       "api_grid": {
+        "name": "survos/api-grid/api-grid",
         "main": "src/controllers/api_grid_controller.js",
         "webpackMode": "eager",
         "fetch": "lazy",
@@ -22,6 +23,7 @@
         }
       },
       "grid": {
+        "name": "survos/api-grid/grid",
         "main": "src/controllers/grid_controller.js",
         "webpackMode": "eager",
         "fetch": "lazy",

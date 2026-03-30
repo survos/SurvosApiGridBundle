@@ -40,7 +40,7 @@ Output:
 
 ### Stimulus + DataTables
 
-Controller: `@survos/api-grid-bundle/api_grid`
+Controller: `@survos/api-grid/api_grid`
 
 - file: `assets/src/controllers/api_grid_controller.js`
 

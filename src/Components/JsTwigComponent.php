@@ -33,7 +33,7 @@ class JsTwigComponent implements TwigBlocksInterface
         private LoggerInterface $logger,
     ) {
 
-        //        ='@survos/grid-bundle/api_grid';
+        //        ='@survos/grid/api_grid';
     }
 
 

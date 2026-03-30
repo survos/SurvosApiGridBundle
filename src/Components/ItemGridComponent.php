@@ -20,7 +20,7 @@ class ItemGridComponent
 
     public array $columns;
 
-    public ?string $stimulusController = '@survos/api-grid-bundle/item_grid';
+    public ?string $stimulusController = '@survos/api-grid/item_grid';
 
     #[PreMount]
     public function preMount(array $parameters = []): array

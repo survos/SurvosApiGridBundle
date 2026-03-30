@@ -134,11 +134,26 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public function getDefaultColumns(): array
     {
-        if ($this->class) {
-            $settings = $this->datatableService->getSettingsFromAttributes($this->class);
-        } else {
-            $settings = []; // really settings should probably be passed in via a json schema or something like that.
+        if (!$this->class) {
+            return [];
         }
+
+        $settings = $this->datatableService->getSettingsFromAttributes($this->class);
+        if ($this->inspectionService && method_exists($this->inspectionService, 'defaultColumns')) {
+            foreach ($this->inspectionService->defaultColumns($this->class) as $field => $config) {
+                if (!array_key_exists($field, $settings)) {
+                    $settings[$field] = [
+                        'name' => $field,
+                        'browsable' => false,
+                        'sortable' => false,
+                        'searchable' => false,
+                    ];
+                }
+                $settings[$field]['sortable'] = (bool) (($settings[$field]['sortable'] ?? false) || ($config['sortable'] ?? false));
+                $settings[$field]['searchable'] = (bool) (($settings[$field]['searchable'] ?? false) || ($config['searchable'] ?? false));
+            }
+        }
+
         return $settings;
     }
 
@@ -158,6 +173,12 @@ class ApiGridComponent implements TwigBlocksInterface
         // Settings are inferred from PHP attributes (ApiFilter/Facet/MeiliId/etc).
 
         $settings = $this->getDefaultColumns();
+        if (!$this->columns) {
+            $this->columns = array_values(array_map(
+                static fn(string $name): array => ['name' => $name],
+                array_keys($settings)
+            ));
+        }
         $value= match($columnType) {
             'columns' => $this->datatableService->normalizedColumns($settings, $this->columns, $this->getTwigBlocks()),
             'facet_columns' => $this->datatableService->normalizedColumns($settings, $this->facet_columns, $this->getTwigBlocks())

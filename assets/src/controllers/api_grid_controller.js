@@ -29,27 +29,16 @@ import deLanguage from "datatables.net-plugins/i18n/de-DE.mjs";
 // import hilanguage from 'datatables.net-plugins/i18n/hi.mjs';
 let Routing = null;
 try {
-  try {
-    const mod = await import("@survos/js-twig/generated/fos_routes.js");
-    if (typeof mod.path === "function") {
-      Routing = { generate: mod.path };
-    }
-  } catch {
-    const mod = await import("fos-routing");
-    Routing = mod.default;
-    try {
-      const routingData = await import("/js/fos_js_routes.js");
-      Routing.setData(routingData.default);
-    } catch {
-      Routing = null;
-    }
+  const mod = await import("@survos/js-twig/generated/fos_routes.js");
+  if (typeof mod.path === "function") {
+    Routing = { generate: mod.path };
   }
 } catch {
   Routing = null;
 }
 
 if (!Routing) {
-  console.warn("[api-grid] FOS routing is unavailable, path() calls in client Twig may fail.");
+  console.error("[api-grid] js-twig routing is unavailable. Ensure @survos/js-twig/generated/fos_routes.js is in importmap.");
 }
 // global.Routing = Routing;
 
@@ -588,18 +577,17 @@ export default class extends Controller {
       language: language,
       createdRow: this.createdRow,
       // paging: true,
-      scrollY: "70vh", // vh is percentage of viewport height, https://css-tricks.com/fun-viewport-units/
       // scrollY: true,
       // displayLength: 50, // not sure how to adjust the 'length' sent to the server
       // pageLength: 15,
       orderCellsTop: true,
-      fixedHeader: true,
+      fixedHeader: false,
       //cascadePanes  : true,
       deferRender: true,
       // scrollX:        true,
       // scrollCollapse: true,
-      scroller: true,
-      responsive: true,
+      scroller: false,
+      responsive: false,
       pageLength: this.pageLengthValue || 50,
       // responsive: {
       //     details: {
@@ -721,7 +709,6 @@ export default class extends Controller {
       columnDefs: this.columnDefs(searchFieldsByColumnNumber),
       // https://datatables.net/reference/option/ajax
       ajax: (params, callback, settings) => {
-        console.error(`starting at ${params.start}`);
         this.messageTarget.innerHTML = `starting at ${params.start}`;
         this.apiParams = this.dataTableParamsToApiPlatformParams(
           params,
@@ -785,7 +772,7 @@ export default class extends Controller {
               // console.table(d[0]);
               // console.log('first result', d[0]);
             }
-            let searchPanes = {};
+            let searchPanes = null;
             searchPanes = {
               initCollapsed: true,
               layout: "columns-1",
@@ -813,15 +800,24 @@ export default class extends Controller {
                 hydraData["facets"]["searchPanes"]["options"],
               );
               console.warn({ searchPanes, searchPanesRaw, hydraData });
+            } else if (this.searchPanesValue) {
+              const fallbackOptions = this.buildSearchPaneOptionsFromRows(member);
+              if (Object.keys(fallbackOptions).length > 0) {
+                searchPanesRaw = fallbackOptions;
+                searchPanes = this.sequenceSearchPanes(fallbackOptions);
+              } else {
+                searchPanes = null;
+              }
             } else {
-              searchPanes.options = options;
-              console.error(options, "no searchPanes returned in search");
+              searchPanes = null;
             }
             // searchPanes.threshold = 0.01;
-            searchPanes.showZeroCounts = true;
-            searchPanes.cascadePanes = true;
-            searchPanes.viewTotal = true;
-            searchPanes.show = true;
+            if (searchPanes) {
+              searchPanes.showZeroCounts = true;
+              searchPanes.cascadePanes = true;
+              searchPanes.viewTotal = true;
+              searchPanes.show = true;
+            }
             let targetMessage = "";
             if (typeof this.apiParams.facet_filter != "undefined") {
               this.apiParams.facet_filter.forEach((index) => {
@@ -835,7 +831,7 @@ export default class extends Controller {
                   let splitValue = string[2].split("|");
                   let returnValue = [];
                   splitValue.forEach((index) => {
-                    if (firstPart in searchPanes["options"]) {
+                    if (searchPanes?.options && firstPart in searchPanes["options"]) {
                       searchPanes["options"][firstPart].forEach((array) => {
                         if (index === array.value) {
                           returnValue.push(array.label);
@@ -861,20 +857,22 @@ export default class extends Controller {
             let callbackValues = {
               draw: params.draw,
               data: d,
-              searchPanes: searchPanes,
               columnControl:
                 (hydraData.facets && hydraData.facets.columnControl) || {},
               recordsTotal: total,
               recordsFiltered: total, //  itemsReturned,
             };
+            if (searchPanes?.options && Object.keys(searchPanes.options).length > 0) {
+              callbackValues.searchPanes = searchPanes;
+            }
             callback(callbackValues);
           })
           .catch((error) => {
-            console.error(error, error.request);
-            let url = error.request.responseURL;
-            var a = document.createElement("a");
-            var linkText = document.createTextNode(url);
-            a.href = url;
+            console.error(error, error?.request);
+            let url =
+              error?.request?.responseURL ||
+              error?.response?.url ||
+              (this.apiCallValue + "?" + new URLSearchParams(this.apiParams));
             this.messageTarget.innerHTML =
               '<div class="bg-danger">' +
               error.message +
@@ -893,7 +891,7 @@ export default class extends Controller {
     let dt = new DataTable(el, setup);
     if (this.filter.hasOwnProperty("P")) {
     }
-    if (this.searchPanesValue) {
+    if (this.searchPanesValue && dt.searchPanes) {
       dt.searchPanes();
     }
     if (this.filter.hasOwnProperty("q")) {
@@ -907,9 +905,12 @@ export default class extends Controller {
       }
     });
 
-    if (this.searchPanesValue) {
+    if (this.searchPanesValue && dt.searchPanes) {
       console.log("moving panes to div.search-panes");
-      $("div.dtsp-verticalPanes").append(dt.searchPanes.container());
+      const paneContainer = dt.searchPanes.container?.();
+      if (paneContainer) {
+        $("div.dtsp-verticalPanes").append(paneContainer);
+      }
     }
     // $("div.search-panes").append(dt.searchPanes.container());
     if (this.filter.hasOwnProperty("P")) {
@@ -1343,6 +1344,54 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     // console.table(apiData);
 
     return apiData;
+  }
+
+  buildSearchPaneOptionsFromRows(rows) {
+    const options = {};
+    const browsableColumns = this.columns.filter((column) => column.browsable === true);
+
+    browsableColumns.forEach((column) => {
+      const counts = new Map();
+      rows.forEach((row) => {
+        const value = row?.[column.name];
+        const normalized = this.normalizeFacetValue(value);
+        if (normalized === null || normalized === "") {
+          return;
+        }
+        counts.set(normalized, (counts.get(normalized) || 0) + 1);
+      });
+
+      if (counts.size === 0) {
+        return;
+      }
+
+      options[column.name] = Array.from(counts.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([value, count]) => ({
+          label: String(value),
+          value: String(value),
+          total: count,
+          count: count,
+        }));
+    });
+
+    return options;
+  }
+
+  normalizeFacetValue(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (Array.isArray(value)) {
+      return value.length ? String(value[0]) : null;
+    }
+    if (typeof value === "object") {
+      if (typeof value.name === "string") return value.name;
+      if (typeof value.label === "string") return value.label;
+      if (typeof value.id === "string" || typeof value.id === "number") return String(value.id);
+      return null;
+    }
+    return String(value);
   }
 
   sequenceSearchPanes(data) {

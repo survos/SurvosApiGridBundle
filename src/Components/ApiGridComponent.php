@@ -82,6 +82,19 @@ class ApiGridComponent implements TwigBlocksInterface
         return $this;
     }
 
+    public function setFacets(bool|string $facets): self
+    {
+        $value = is_bool($facets)
+            ? $facets
+            : filter_var($facets, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
+
+        if ($value !== null) {
+            $this->searchPanes = $value;
+        }
+
+        return $this;
+    }
+
     public iterable $data;
 
     public array $columns = [];

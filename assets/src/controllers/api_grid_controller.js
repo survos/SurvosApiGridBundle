@@ -733,8 +733,17 @@ export default class extends Controller {
 
         // console.warn(apiPlatformHeaders);
 
+        // Build URLSearchParams manually to handle array values as key[]=v1&key[]=v2
+        const searchParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(this.apiParams)) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => searchParams.append(key + "[]", v));
+          } else if (value !== null && value !== undefined) {
+            searchParams.append(key, value);
+          }
+        }
         let request = fetch(
-          this.apiCallValue + "?" + new URLSearchParams(this.apiParams),
+          this.apiCallValue + "?" + searchParams,
           { headers: apiPlatformHeaders }
         )
           .then((response) => response.json())
@@ -1260,20 +1269,18 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
 
     // Extract the path
     let path = urlWithoutProtocolAndDomain.split("?")[0];
-    let facetsFilter = [];
     if (params.searchPanes) {
       for (const [key, value] of Object.entries(params.searchPanes)) {
-        if (Object.values(value).length) {
-          facetsFilter.push(key + ",in," + Object.values(value).join("|"));
-          facetsUrl.push(key + "=" + Object.values(value).join("|"));
+        const values = Object.values(value);
+        if (values.length) {
+          // Use API Platform's native array format: role[]=TENANT_ADMIN
+          apiData[key] = values;
+          facetsUrl.push(values.map((v) => `${key}[]=${encodeURIComponent(v)}`).join("&"));
         }
       }
     }
 
     for (const [key, value] of Object.entries(this.filter)) {
-      if (key !== "q") {
-        facetsFilter.push(key + ",in," + value);
-      }
       facetsUrl.push(key + "=" + value);
     }
     if (facetsUrl.length > 0) {
@@ -1310,17 +1317,11 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
           apiData[column.data] = column.columnControl.search.value;
         }
         if (Array.isArray(column.columnControl.list) && column.columnControl.list.length) {
-          // Reuse our facet_filter backend format: field,in,val1|val2
-          facetsFilter.push(
-            column.data + ",in," + column.columnControl.list.join("|"),
-          );
+          // Use API Platform's native array format: field[]=val1&field[]=val2
+          apiData[column.data] = column.columnControl.list;
         }
       }
     });
-
-    if (facetsFilter.length > 0) {
-      apiData["facet_filter"] = facetsFilter;
-    }
 
     apiData.offset = params.start;
     apiData.facets = [];

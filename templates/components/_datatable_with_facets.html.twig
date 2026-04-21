@@ -24,7 +24,13 @@
 
     searchPanes: this.searchPanes,
     columnControl: this.columnControl,
-    searchBuilder: this.searchBuilder
+    searchBuilder: this.searchBuilder,
+
+    select: this.select,
+    bulkActions: this.bulkActions|json_encode,
+    entityClass: this.entityClass ?? '',
+    csrfToken: this.select and this.bulkActions ? csrf_token(this.csrfTokenId) : '',
+    defaultOrder: this.defaultOrder ?? '',
 }) }}>
 
     {% if this.searchPanes %}

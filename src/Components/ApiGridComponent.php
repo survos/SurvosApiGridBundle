@@ -119,6 +119,31 @@ class ApiGridComponent implements TwigBlocksInterface
     public string|bool|null $domain = null;
     public array $buttons=[]; // for now, simply a keyed list of urls to open
 
+    /** Enable DataTables Select extension — prepends a checkbox column, multi-select. */
+    public bool $select = false;
+
+    /**
+     * Initial sort, comma-separated "field:asc|desc" pairs.
+     * Example: "id:desc"  or  "updatedAt:desc,id:desc".
+     * Falls through to DataTables' `order` option. Columns must be `sortable: true`.
+     */
+    public ?string $defaultOrder = null;
+
+    /**
+     * Server-side bulk actions that POST selected row IDs.
+     * Each entry: ['id' => string, 'label' => string, 'url' => string,
+     *              'destructive' => bool, 'icon' => ?string, 'confirm' => bool,
+     *              'confirmMessage' => ?string]  {count} placeholder in confirmMessage is interpolated.
+     * Renders as DataTables Buttons disabled until rows are selected.
+     */
+    public array $bulkActions = [];
+
+    /** Fully-qualified entity class sent as `className` alongside selected IDs. */
+    public ?string $entityClass = null;
+
+    /** CSRF token id used for bulk-action POST. */
+    public string $csrfTokenId = 'bulk_action';
+
     public bool $search = true;
     public string $scrollY = '70vh';
 //    public array $filter = [];

@@ -77,6 +77,13 @@ export default class extends Controller {
     searchBuilderColumns: { type: String, default: "[]" },
     filter: String, // json, from queryString, e.g. party=dem
     buttons: String, // json, from queryString, e.g. party=dem
+    select: { type: Boolean, default: false },
+    bulkActions: { type: String, default: "[]" }, // json: [{id,label,url,destructive,icon,confirm}]
+    csrfToken: { type: String, default: "" },
+    entityClass: { type: String, default: "" },
+    // Comma-separated "field:dir" pairs, e.g. "id:desc" or "updatedAt:desc,id:asc".
+    // Parsed into DataTables' `order` option at init time.
+    defaultOrder: { type: String, default: "" },
   };
 
   // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
@@ -182,7 +189,77 @@ export default class extends Controller {
       // }
       return column;
     });
+
+    if (this.selectValue) {
+      x.unshift({
+        data: null,
+        orderable: false,
+        searchable: false,
+        className: "select-checkbox",
+        defaultContent: "",
+        title: "",
+        width: "2rem",
+      });
+    }
+
     return x;
+  }
+
+  buildBulkActionButtons() {
+    if (!this.selectValue || !this.bulkActions.length) {
+      return [];
+    }
+
+    return this.bulkActions.map((action) => ({
+      text: action.label,
+      className: `btn-sm ${action.destructive ? "btn-outline-danger" : "btn-outline-secondary"}`,
+      enabled: false,
+      action: (e, dt) => this.runBulkAction(action, dt),
+    }));
+  }
+
+  runBulkAction(action, dt) {
+    const rows = dt.rows({ selected: true }).data().toArray();
+    if (!rows.length) {
+      return;
+    }
+
+    const ids = rows.map((row) => row.id).filter((id) => id !== undefined && id !== null);
+    if (!ids.length) {
+      console.warn("[api-grid] selected rows have no 'id' field; add it to the serializer groups");
+      return;
+    }
+
+    if (action.confirm !== false) {
+      const prompt = action.confirmMessage
+        ? action.confirmMessage.replace("{count}", ids.length)
+        : `${action.label}: ${ids.length} row${ids.length === 1 ? "" : "s"}?`;
+      if (!window.confirm(prompt)) {
+        return;
+      }
+    }
+
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = action.url;
+    form.style.display = "none";
+
+    const addInput = (name, value) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    };
+
+    addInput("_token", this.csrfTokenValue || "");
+    if (this.entityClassValue) {
+      addInput("className", this.entityClassValue);
+    }
+    ids.forEach((id) => addInput("ids[]", id));
+
+    document.body.appendChild(form);
+    form.submit();
   }
 
   connect() {
@@ -208,6 +285,7 @@ export default class extends Controller {
 
     this.columns = JSON.parse(this.columnConfigurationValue);
     this.facets = JSON.parse(this.facetConfigurationValue);
+    this.bulkActions = JSON.parse(this.bulkActionsValue || "[]");
     console.table(this.facets);
     // "compile" the custom twig blocks
     // var columnRender = [];
@@ -572,6 +650,22 @@ export default class extends Controller {
       };
     }
 
+    // Parse defaultOrderValue ("id:desc" | "a:asc,b:desc") into DataTables'
+    // [[colIdx, direction], ...] form. Field names are matched against the
+    // ordered column list (same order DataTables sees).
+    const initialOrder = [];
+    if (this.defaultOrderValue && this.defaultOrderValue.trim() !== "") {
+      const sortedCols = this.columns.slice().sort((a, b) => a.order - b.order);
+      this.defaultOrderValue.split(",").forEach((pair) => {
+        const [fieldRaw, dirRaw] = pair.split(":").map((s) => (s || "").trim());
+        if (!fieldRaw) return;
+        const dir = dirRaw && dirRaw.toLowerCase() === "desc" ? "desc" : "asc";
+        const idx = sortedCols.findIndex((c) => c.name === fieldRaw);
+        if (idx >= 0) initialOrder.push([idx, dir]);
+        else console.warn(`api_grid: defaultOrder "${fieldRaw}" matches no column`);
+      });
+    }
+
     let setup = {
       // let dt = new DataTable(el, {
       language: language,
@@ -589,6 +683,7 @@ export default class extends Controller {
       scroller: false,
       responsive: false,
       pageLength: this.pageLengthValue || 50,
+      ...(initialOrder.length ? { order: initialOrder } : {}),
       // responsive: {
       //     details: {
       //         renderer: modalRenderer,
@@ -625,6 +720,18 @@ export default class extends Controller {
 
         this.applyHeaderMetadata(dt);
 
+        if (this.selectValue && this.bulkActions.length) {
+          const toggleBulkButtons = () => {
+            const count = dt.rows({ selected: true }).count();
+            const start = this.buttons.length;
+            this.bulkActions.forEach((_action, idx) => {
+              dt.button(start + idx).enable(count > 0);
+            });
+          };
+          dt.on("select deselect", toggleBulkButtons);
+          toggleBulkButtons();
+        }
+
         // let xapi = new DataTable.Api(obj);
         // console.log(xapi);
         // console.log(xapi.table);
@@ -636,7 +743,15 @@ export default class extends Controller {
 
       ...(this.normalizedLayout() ? { layout: this.normalizedLayout() } : {}),
       ...(!this.layout && this.dom ? { dom: this.dom } : {}),
-      buttons: this.buttons,
+      ...(this.selectValue
+        ? {
+            select: {
+              style: "multi",
+              selector: "td.select-checkbox",
+            },
+          }
+        : {}),
+      buttons: [...this.buttons, ...this.buildBulkActionButtons()],
       xxbuttons: (x) => {
         // why isn't this being called?
         console.error(x);
@@ -742,8 +857,12 @@ export default class extends Controller {
             searchParams.append(key, value);
           }
         }
+        const requestUrl = new URL(this.apiCallValue, window.location.origin);
+        for (const [key, value] of searchParams.entries()) {
+          requestUrl.searchParams.append(key, value);
+        }
         let request = fetch(
-          this.apiCallValue + "?" + searchParams,
+          requestUrl.toString(),
           { headers: apiPlatformHeaders }
         )
           .then((response) => response.json())

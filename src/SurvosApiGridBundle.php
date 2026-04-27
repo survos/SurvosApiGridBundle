@@ -8,6 +8,7 @@ use Survos\ApiGridBundle\Command\IndexCommand;
 use Survos\ApiGridBundle\Components\GridComponent;
 use Survos\ApiGridBundle\Components\ItemGridComponent;
 use Survos\ApiGridBundle\Components\JsTwigComponent;
+use Survos\ApiGridBundle\Controller\AdminBrowseController;
 use Survos\ApiGridBundle\Controller\GridController;
 use Survos\ApiGridBundle\Controller\MeiliController;
 use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
@@ -66,6 +67,11 @@ class SurvosApiGridBundle extends AssetMapperBundle
             $container->services()->alias(MeiliService::class, $id);
         }
 
+        $builder->autowire(AdminBrowseController::class)
+            ->addTag('controller.service_arguments')
+            ->setAutoconfigured(true)
+            ->setPublic(true);
+
         // doctrine entities and inspection
         $builder->autowire(GridController::class)
             ->addTag('container.service_subscriber')
@@ -105,6 +111,7 @@ class SurvosApiGridBundle extends AssetMapperBundle
         if (class_exists(Environment::class)) {
             $builder
                 ->setDefinition('survos.api_grid_bundle', new Definition(TwigExtension::class))
+                ->setArgument('$iriConverter', new Reference('api_platform.iri_converter', ContainerInterface::NULL_ON_INVALID_REFERENCE))
                 ->addTag('twig.extension')
                 ->setPublic(false);
         }

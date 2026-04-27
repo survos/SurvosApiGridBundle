@@ -1,0 +1,12 @@
+{% extends '@SurvosTabler/layout/base.html.twig' %}
+
+{% block title %}{{ label }}{% endblock %}
+
+{% block body %}
+    <twig:api_grid
+        :class="class"
+        :searchPanes="false"
+        :columnControl="true"
+        :searchBuilder="false"
+    />
+{% endblock %}

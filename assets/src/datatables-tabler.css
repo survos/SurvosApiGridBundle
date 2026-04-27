@@ -1,0 +1,146 @@
+/* datatables.net-bs5 */
+table.table.dataTable > :not(caption) > * > * {
+    background-color: var(--tblr-table-bg);
+}
+div.dt-scroll-body {
+    border-bottom-color: var(--tblr-border-color);
+    border-bottom-width: var(--tblr-border-width);
+}
+@media screen and (max-width: 767px) {
+    div.dt-container .row {
+        --bs-gutter-y: 0.5rem;
+    }
+}
+
+/* datatables.net-buttons-bs5 */
+div.dt-button-collection {
+    background-color: var(--tblr-body-bg);
+    border: var(--tblr-border-width) solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    box-shadow: var(--tblr-box-shadow);
+}
+div.dt-button-collection div.dt-button-split button:last-child {
+    color: var(--tblr-dropdown-link-color);
+    padding: var(--tblr-dropdown-item-padding-y) var(--tblr-dropdown-item-padding-x);
+}
+div.dt-button-collection div.dt-button-split button:last-child:hover {
+    color: var(--tblr-dropdown-link-hover-color);
+    background-color: var(--tblr-dropdown-link-hover-bg);
+}
+div.dt-button-info {
+    background-color: var(--tblr-body-bg);
+    border: 1px solid var(--tblr-border-color-translucent);
+}
+:root[data-bs-theme=dark] div.dt-button-collection.fixed {
+    background-color: var(--tblr-body-bg);
+    border: 1px solid var(--tblr-border-color-translucent);
+}
+
+/* datatables.net-select-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-responsive-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-fixedheader-bs5 */
+table.dataTable.fixedHeader-floating,
+table.dataTable.fixedHeader-locked {
+    background-color: var(--tblr-body-bg);
+}
+
+div.dtfh-floatingparent-foot table {
+    border-top-color: var(--tblr-border-color);
+    border-top-width: var(--tblr-border-width);
+}
+
+/* datatables.net-rowgroup-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-fixedcolumns-bs5 */
+table.dataTable thead tr > .dtfc-fixed-start,
+table.dataTable thead tr > .dtfc-fixed-end,
+table.dataTable tfoot tr > .dtfc-fixed-start,
+table.dataTable tfoot tr > .dtfc-fixed-end {
+    background-color: var(--tblr-table-bg);
+}
+table.dataTable tbody tr > .dtfc-fixed-start,
+table.dataTable tbody tr > .dtfc-fixed-end {
+    background-color: var(--tblr-table-bg);
+}
+
+div.dtfc-top-blocker,
+div.dtfc-bottom-blocker {
+    background-color: var(--tblr-body-bg);
+}
+
+div.dt-scroll-body {
+    border-left-color: var(--tblr-table-color) !important;
+}
+
+div.dt-scroll-headInner table.table-bordered tr th:first-child,
+div.dt-scroll-footInner table.table-bordered tr th:first-child {
+    border-left-color: var(--tblr-border-color) !important;
+}
+
+/* datatables.net-colreorder-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-rowreorder-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-scroller-bs5 */
+html[data-bs-theme=dark] div.DTS div.dataTables_scrollBody table {
+    background-color: var(--tblr-body-bg);
+}
+
+/* datatables.net-keytable-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-searchpanes-bs5 */
+html[data-bs-theme=dark] div.dtsp-panesContainer button.btn-subtle {
+    border: var(--tblr-border-width) solid var(--tblr-border-color);
+}
+html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dt-container div.dt-scroll-body,
+html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dt-container div.dataTables_scrollBody,
+html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dataTables_wrapper div.dt-scroll-body,
+html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dataTables_wrapper div.dataTables_scrollBody {
+    background: var(--tblr-table-bg) !important;
+}
+
+/* datatables.net-searchbuilder-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-autofill-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-columncontrol-bs5 */
+:root {
+    --dtcc-button_hover-background: rgb(var(--tblr-tertiary-bg-rgb));
+    --dtcc-button-icon_color: var(--tblr-body-color);
+    --dtcc-spacer_border: var(--tblr-border-width) solid var(--tblr-border-color);
+    --dtcc-title_background: rgb(var(--tblr-tertiary-bg-rgb));
+    --dtcc-search-icon_color: var(--tblr-body-color);
+    --dtcc-search-icon_hover-background: rgb(var(--tblr-tertiary-bg-rgb));
+    --dtcc-search-input_border: var(--tblr-border-width) solid var(--tblr-border-color);
+    --dtcc-search-input_background-color: var(--tblr-body-bg);
+    --dtcc-search-input_background: var(--tblr-body-bg);
+    --dtcc-search-input_border-radius: var(--tblr-border-radius);
+    --dtcc-list-buttons_background: rgb(var(--tblr-secondary-bg-rgb));
+}
+:root .dropdown-menu {
+    --dtcc-dropdown_background: var(--tblr-dropdown-bg);
+    --dtcc-dropdown_border: var(--tblr-dropdown-border-width) solid var(--tblr-dropdown-border-color);
+    --dtcc-dropdown_border-radius: var(--tblr-dropdown-border-radius);
+    --dtcc-dropdown_box-shadow: var(--tblr-dropdown-box-shadow);
+    --dtcc-dropdown_padding: var(--tblr-dropdown-padding-y) var(--tblr-dropdown-padding-x);
+    --dtcc-dropdown_z-index: var(--tblr-dropdown-zindex);
+    --dtcc-dropdown-button_color: var(--tblr-dropdown-link-color);
+    --dtcc-dropdown-button_padding: var(--tblr-dropdown-item-padding-y) var(--tblr-dropdown-item-padding-x);
+    --dtcc-dropdown-button_hover-background: var(--tblr-dropdown-link-hover-bg);
+}
+
+/* datatables.net-staterestore-bs5 */
+/* No --bs- vars to override */
+
+/* datatables.net-editor-bs5 */
+/* No --bs- vars to override */

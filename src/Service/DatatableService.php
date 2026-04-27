@@ -16,6 +16,8 @@ use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGridBundle\Attribute\Facet;
 use Survos\ApiGridBundle\Attribute\MeiliId;
+use Survos\FieldBundle\Attribute\Field;
+use Survos\FieldBundle\Service\FieldReader;
 use Survos\ApiGridBundle\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGridBundle\Model\Column;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -25,8 +27,9 @@ use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMulti
 
 class DatatableService
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ?FieldReader $fieldReader = null,
+    ) {
     }
 
     /**
@@ -89,20 +92,18 @@ class DatatableService
                 $column = new Column(...$c);
 
             }
-            $existingSettings = $settings[$columnName]??null;
-            if ($existingSettings) {
-                $options = (new OptionsResolver())
-                    ->setDefaults([
-                        'name' => null,
-                        'searchable' => false,
-                        'order' => 100,
-                        'sortable' => false,
-                        'is_primary' => false,
-                        'browsable' => false
-                    ])->resolve($existingSettings);
-                $column->searchable = $column->searchable || $options['searchable'];
-                $column->sortable = $column->sortable || $options['sortable'];
-                $column->browsable = $column->browsable || $options['browsable'];
+            // Apply #[Field] settings as defaults — explicit col() args override via ??=.
+            // col('code') inherits searchable/sortable/browsable/visible/width from #[Field].
+            // col('code', searchable: false) explicitly disables even if #[Field] says true.
+            if ($fieldSettings = $settings[$columnName] ?? null) {
+                $column->searchable ??= $fieldSettings['searchable'] ?? false;
+                $column->sortable   ??= $fieldSettings['sortable']   ?? false;
+                $column->browsable  ??= $fieldSettings['browsable']  ?? false;
+                $column->visible    ??= $fieldSettings['visible']    ?? null;
+                $column->width      ??= $fieldSettings['width']      ?? null;
+                if (empty($column->title) || $column->title === $column->name) {
+                    $column->title = $fieldSettings['title'] ?? $column->name;
+                }
             }
             if ($column->condition) {
                 $normalizedColumns[] = $column;
@@ -129,113 +130,68 @@ class DatatableService
     public function getSettingsFromAttributes(string $class): array
     {
         assert(class_exists($class), $class);
-        $reflectionClass = new \ReflectionClass($class);
+        $rc = new \ReflectionClass($class);
         $settings = [];
-        // class attributes first.
-        foreach ($reflectionClass->getAttributes() as $attribute) {
 
-            //
+        // ── Layer 1: #[Field] via FieldReader (authoritative when present) ───────
+        if ($this->fieldReader !== null) {
+            foreach ($this->fieldReader->getDescriptors($class) as $descriptor) {
+                $name = $descriptor->name;
+                $settings[$name] = array_merge($settings[$name] ?? [], array_filter([
+                    'name'       => $name,
+                    'title'      => $descriptor->getFallbackLabel(),
+                    'searchable' => $descriptor->searchable ?: null,
+                    'sortable'   => $descriptor->sortable   ?: null,
+                    'browsable'  => ($descriptor->filterable && ($descriptor->resolvedWidget()?->isBrowsable() ?? false)) ?: null,
+                    'visible'    => $descriptor->visible === false ? false : null,
+                    'width'      => $descriptor->width,
+                    'renderType' => $descriptor->isUrl ? 'url' : ($descriptor->isEmail ? 'email' : null),
+                ], fn ($v) => $v !== null));
+            }
+        }
+
+        // ── Layer 2: class-level #[ApiFilter] (fallback for unannotated entities) ─
+        // #[ApiFilter] on the class with a properties array is still valid in AP4/5.
+        foreach ($rc->getAttributes() as $attribute) {
             if (!u($attribute->getName())->endsWith('ApiFilter')) {
                 continue;
             }
-
-            // $filter = $attribute->getArguments()[0];
-            // if (u($filter)->endsWith('OrderFilter')) {
-            //     $orderProperties = $attribute->getArguments()['properties'];
-            //     return $orderProperties;
-            //            dd($attribute);
-            /** @var FilterInterface $filter */
-            $arguments = $attribute->getArguments();
-
-            /** @var ApiFilter $attrInstance */
-            $attrInstance = $attribute->newInstance();
-//            dump($attribute->newInstance(), $arguments, $attribute->getName(), $attribute);
-            $filter = $attrInstance->filterClass;
-            if (!$filter) {
-                dd($arguments, $attribute->getName(), $attribute);
+            /** @var ApiFilter $apiFilter */
+            $apiFilter   = $attribute->newInstance();
+            $filterClass = $apiFilter->filterClass;
+            if (!$filterClass) {
                 continue;
-                return [];
             }
-            $properties = $attrInstance->properties;
-            foreach ($properties as $property) {
-                if (!array_key_exists($property, $settings)) {
-                    $settings[$property] = [
-                        'name' => $property,
-                        'browsable' => false,
-                        'sortable' => false,
-                        'searchable' => false
-                    ];
+            foreach ($apiFilter->properties as $property => $strategy) {
+                if (is_int($property)) {
+                    $property = $strategy; // list-style: ['code', 'name']
                 }
-                switch ($filter) {
-                    case FacetsFieldSearchFilter::class:
-                        $settings[$property]['browsable'] = true;
-                        break;
-                    case SortFilter::class:
-                        assert(false, "why not OrderFilter?");
-                    case OrderFilter::class:
-                        $settings[$property]['sortable'] = true;
-                        break;
-
-                    case SearchFilter::class:
-                    case MeiliMultiFieldSearchFilter::class:
-                    case RangeFilter::class:
-                    case MultiFieldSearchFilter::class:
-                        $settings[$property]['searchable'] = true;
-                        break;
-                    default:
-                        if (str_ends_with($filter, '\\FacetsFieldSearchFilter')) {
-                            $settings[$property]['browsable'] = true;
-                        }
-                        break;
-                }
+                $settings[$property] ??= ['name' => $property];
+                match (true) {
+                    is_a($filterClass, OrderFilter::class, true)                           => $settings[$property]['sortable']   = true,
+                    is_a($filterClass, SearchFilter::class, true)                          => $settings[$property]['searchable'] = true,
+                    is_a($filterClass, FacetsFieldSearchFilter::class, true)               => $settings[$property]['browsable']  = true,
+                    str_ends_with($filterClass, '\\FacetsFieldSearchFilter')               => $settings[$property]['browsable']  = true,
+                    default                                                                => null,
+                };
             }
         }
 
-        // now go through each property, including getting the primary key
-        foreach ($reflectionClass->getProperties() as $property) {
-            $fieldname = $property->getName();
+        // ── Layer 3: property-level legacy attributes (#[Facet], #[MeiliId], #[ApiProperty identifier]) ─
+        foreach ($rc->getProperties() as $property) {
+            $name = $property->getName();
             foreach ($property->getAttributes() as $attribute) {
-                if (in_array($attribute->getName(), [MeiliId::class, Id::class])) {
-                    $settings[$fieldname]['is_primary'] = true;
-                }
-                if ($attribute->getName() == ApiProperty::class) {
-                    if ($attribute->getArguments()['identifier']??false) {
-                        $settings[$fieldname]['is_primary'] = true;
-                    }
-                }
-                if ($attribute->getName() == Facet::class) {
-                    $settings[$fieldname]['browsable'] = true;
-                }
-
-                if ($attribute->getName() == ApiFilter::class) {
-                    $attrInstance = $attribute->newInstance();
-                    switch ($filterClass = $attrInstance->filterClass) {
-                        case OrderFilter::class:
-                            $settings[$fieldname]['sortable'] = true;
-                            break;
-                        case SearchFilter::class:
-                            $settings[$fieldname]['searchable'] = true;
-                            break;
-                        default:
-                            dd("@todo: handle " . $filterClass);
-                    }
-                }
+                match ($attribute->getName()) {
+                    MeiliId::class, Id::class => $settings[$name]['is_primary'] = true,
+                    Facet::class              => $settings[$name]['browsable']  = true,
+                    ApiProperty::class        => $attribute->getArguments()['identifier'] ?? false
+                                                    ? ($settings[$name]['is_primary'] = true)
+                                                    : null,
+                    default                   => null,
+                };
             }
         }
 
-        // now go through each property, including getting the primary key
-        // something's still not right here!  Like setting browsable on getRp.
-        foreach ($reflectionClass->getMethods() as $method) {
-            $fieldname = $method->getName();
-            foreach ($method->getAttributes() as $attribute) {
-                if ($attribute->getName() == Facet::class) {
-//                if ($attribute->getName() == Groups::class) {
-//                    dump($settings, $fieldname, $attribute);
-                    $settings[$fieldname]['browsable'] = true;
-                }
-            }
-        }
-        // @todo: methods
         return $settings;
     }
 

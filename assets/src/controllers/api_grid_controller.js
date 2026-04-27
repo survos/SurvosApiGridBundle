@@ -55,7 +55,7 @@ const contentTypes = {
 
 // /* stimulusFetch: 'lazy' */
 export default class extends Controller {
-  static targets = ["table", "modal", "modalBody", "fieldSearch", "message"];
+  static targets = ["table", "modal", "modalBody", "fieldSearch", "message", "offcanvas", "offcanvasBody", "offcanvasTitle"];
   static values = {
     apiCall: { type: String, default: "" },
     searchPanesDataUrl: { type: String, default: "" },
@@ -84,6 +84,9 @@ export default class extends Controller {
     // Comma-separated "field:dir" pairs, e.g. "id:desc" or "updatedAt:desc,id:asc".
     // Parsed into DataTables' `order` option at init time.
     defaultOrder: { type: String, default: "" },
+    // Route name for the entity show page. When set, clicking a row opens an
+    // off-canvas panel loaded via fetch. Route params come from row.rp.
+    showRoute: { type: String, default: "" },
   };
 
   // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
@@ -189,6 +192,19 @@ export default class extends Controller {
       // }
       return column;
     });
+
+    if (this.showRouteValue) {
+      x.push({
+        data: null,
+        orderable: false,
+        searchable: false,
+        className: "dt-view-panel",
+        defaultContent: "",
+        title: "",
+        width: "2.5rem",
+        render: () => `<button class="btn btn-sm btn-outline-secondary btn-view-panel" title="View"><i class="bi bi-eye"></i></button>`,
+      });
+    }
 
     if (this.selectValue) {
       x.unshift({
@@ -437,6 +453,12 @@ export default class extends Controller {
     console.log(
       "Listening for button.transition and button .btn-modal clicks events",
     );
+
+    dt.on("click", "tr td button.btn-view-panel", ($event) => {
+      $event.stopPropagation();
+      const data = dt.row($event.currentTarget.closest("tr")).data();
+      this.openShowPanel(data);
+    });
 
     dt.on("click", "tr td button.transition", ($event) => {
       console.log($event.currentTarget);
@@ -705,6 +727,10 @@ export default class extends Controller {
       serverSide: true, // use grid for client-side
 
       initComplete: (obj, data) => {
+        if (this.columnControlValue) {
+          this.portalColumnControlDropdown(el);
+        }
+
         dt.on("searchPanes.rebuildPane", function () {
           // This function will run after the user selects a value from the SearchPane
           console.log(
@@ -972,7 +998,10 @@ export default class extends Controller {
                 }
               });
             }
-            this.messageTarget.innerHTML = targetMessage;
+            const debugUrl = requestUrl.toString();
+            this.messageTarget.innerHTML =
+              targetMessage +
+              ` <a class="text-muted small ms-2" target="_blank" href="${debugUrl}" title="Last API call">🔗 API</a>`;
 
             // if next page isn't working, make sure api_platform.yaml is correctly configured
             // defaults:
@@ -1120,27 +1149,24 @@ export default class extends Controller {
     }
 
     if (this.columnControlValue) {
-      // Enable ColumnControl search list for browsable fields.
+      // Enable ColumnControl — search/searchList placed OUTSIDE the dropdown array
+      // so ColumnControl renders them as an inline second header row (not a popup).
       this.columns.forEach((c, idx) => {
         if (c.browsable) {
           defs.push({
             targets: idx,
             columnControl: [
-              "order",
-              [
-                {
-                  extend: "searchList",
-                  ajaxOnly: true,
-                  search: true,
-                  select: true,
-                },
-              ],
+              { target: 0, content: ["order"] },
+              { target: 1, content: [{ extend: "searchList", ajaxOnly: true, search: true, select: true }] },
             ],
           });
         } else if (c.searchable) {
           defs.push({
             targets: idx,
-            columnControl: ["order", ["search"]],
+            columnControl: [
+              { target: 0, content: ["order"] },
+              { target: 1, content: ["search"] },
+            ],
           });
         }
       });
@@ -1184,9 +1210,47 @@ export default class extends Controller {
     return defs;
   }
 
+  // The ColumnControl plugin calculates top/left as offsets from document.body,
+  // but appends the dropdown inside dt-container whose offsetParent is Tabler's
+  // .page-wrapper (position:relative). Portal to body so the coordinates resolve
+  // correctly without touching any layout CSS.
+  openShowPanel(data) {
+    if (!this.showRouteValue || !data?.rp) return;
+    const url = Routing.generate(this.showRouteValue, { ...data.rp, _fragment: '_show' });
+    if (this.hasOffcanvasTitleTarget) {
+      this.offcanvasTitleTarget.textContent = data.name ?? data.title ?? data.id ?? '';
+    }
+    if (this.hasOffcanvasBodyTarget) {
+      this.offcanvasBodyTarget.innerHTML = '<div class="text-center p-4"><div class="spinner-border"></div></div>';
+    }
+    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(this.offcanvasTarget);
+    bsOffcanvas.show();
+    fetch(url)
+      .then(r => r.text())
+      .then(html => { if (this.hasOffcanvasBodyTarget) this.offcanvasBodyTarget.innerHTML = html; })
+      .catch(e => { if (this.hasOffcanvasBodyTarget) this.offcanvasBodyTarget.innerHTML = `<div class="alert alert-danger">${e.message}</div>`; });
+  }
+
+  portalColumnControlDropdown(tableEl) {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node.classList?.contains('dtcc-dropdown')) {
+            document.body.appendChild(node);
+          }
+        }
+      }
+    });
+    // The table is a sibling of .dt-container (both inside the .table-responsive wrapper),
+    // so closest('.dt-container') from the table returns null. Observe the common parent.
+    const root = tableEl.parentElement?.querySelector('.dt-container') ?? tableEl.parentElement ?? tableEl;
+    observer.observe(root, { childList: true, subtree: true });
+  }
+
   columnControlConfig() {
-    // Baseline content for all columns (individual columns can override via columnDefs).
-    return ["order", ["orderAsc", "orderDesc", "search"]];
+    // Global default: sort button + sort-options dropdown in row 0.
+    // Per-column defs override this to add search inputs in row 1.
+    return [{ target: 0, content: ["order", ["orderAsc", "orderDesc"]] }];
   }
 
   // get columns() {
@@ -1257,6 +1321,23 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
         if (renderType === "image") {
           return `<img class="img-thumbnail plant-thumb" alt="${data}" src="${data}" />`;
         }
+        if (type === "display" && data && renderType === "url") {
+          const href = /^https?:\/\//i.test(data) ? data : `https://${data}`;
+          return `<a href="${href}" target="_blank" rel="noopener">${data}</a>`;
+        }
+        if (type === "display" && data && renderType === "email") {
+          return `<a href="mailto:${data}">${data}</a>`;
+        }
+
+        // Auto-link bare domains (domain.edu, domain.org, http://...) even without explicit renderType
+        if (type === "display" && typeof data === "string" && data && !renderType) {
+          const url = /^https?:\/\//i.test(data) ? data
+            : /^[\w.-]+\.(edu|org|com|net|gov|io)(\/.*)?$/i.test(data) ? `https://${data}`
+            : null;
+          if (url) {
+            return `<a href="${url}" target="_blank" rel="noopener">${data}</a>`;
+          }
+        }
 
         if (route) {
           if (locale) {
@@ -1279,12 +1360,15 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
               let x1 = elements[0];
               let x2 = elements[1];
               let x3 = elements[2];
-              return row[x1][x2][x3];
+              return row[x1]?.[x2]?.[x3] ?? null;
             } else if (elements.length === 2) {
-              // hack, only one level deep, etc.  ugh
+              // @todo: replace with a proper nested-path resolver; dot-path columns
+              // like "organization.id" should use a generic reduce, not hand-rolled
+              // indexing. Guard with ?. so null relations don't crash (e.g. Contact
+              // with no Organization).
               let x1 = elements[0];
               let x2 = elements[1];
-              return row[x1][x2];
+              return row[x1]?.[x2] ?? null;
             } else {
               return row[propertyName];
             }
@@ -1357,10 +1441,22 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     }
     // really this is the queryStringParameters
     let facetsUrl = [];
-    // same as #[ApiFilter(MultiFieldSearchFilter::class, properties: ["label", "code"], arguments: ["searchParameterName"=>"search"])]
+    // Map the global DataTables search to each searchable column's ApiPlatform filter parameter.
+    // ApiPlatform SearchFilter uses the property name as the query param (e.g. name=Bohr),
+    // not a generic "search" param. We only send to columns flagged searchable so we don't
+    // accidentally hit exact-match filters with a partial search value.
     if (params.search && params.search.value) {
-      apiData["search"] = params.search.value;
-      facetsUrl.push("q=" + params.search.value);
+      const searchVal = params.search.value;
+      // this.columns is our #[Field]-driven config; searchable=true means an ApiPlatform
+      // SearchFilter is configured for that property.
+      const searchableCols = this.columns.filter(c => c.searchable && c.name);
+      if (searchableCols.length > 0) {
+        searchableCols.forEach(c => { apiData[c.name] = searchVal; });
+      } else {
+        // Fallback for entities using a MultiFieldSearchFilter with searchParameterName=search
+        apiData["search"] = searchVal;
+      }
+      facetsUrl.push("q=" + searchVal);
     }
 
     let order = {};

@@ -129,6 +129,9 @@ class ApiGridComponent implements TwigBlocksInterface
      */
     public ?string $defaultOrder = null;
 
+    /** When set, an eye-button appears per row; clicking fetches this route and renders the response in an offcanvas panel. */
+    public ?string $showRoute = null;
+
     /**
      * Server-side bulk actions that POST selected row IDs.
      * Each entry: ['id' => string, 'label' => string, 'url' => string,

@@ -31,6 +31,7 @@
     entityClass: this.entityClass ?? '',
     csrfToken: this.select and this.bulkActions ? csrf_token(this.csrfTokenId) : '',
     defaultOrder: this.defaultOrder ?? '',
+    showRoute: this.showRoute ?? '',
 }) }}>
 
     {% if this.searchPanes %}
@@ -99,5 +100,16 @@
             modalContent: 'really should load with ajax'
         }) }}
     {% endblock %}
+
+    {% if this.showRoute %}
+    <div class="offcanvas offcanvas-end" tabindex="-1" style="width: min(600px, 90vw)"
+         {{ stimulus_target(this.stimulusController, 'offcanvas') }}>
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" {{ stimulus_target(this.stimulusController, 'offcanvasTitle') }}></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body" {{ stimulus_target(this.stimulusController, 'offcanvasBody') }}></div>
+    </div>
+    {% endif %}
 
 </div>

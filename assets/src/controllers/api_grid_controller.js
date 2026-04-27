@@ -53,6 +53,27 @@ const contentTypes = {
   POST: "application/json",
 };
 
+if (DataTable.ColumnControl?.content) {
+  DataTable.ColumnControl.content.numberRange = {
+    defaults: {
+      columnName: null,
+    },
+
+    init: function (config) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "dtcc-number-range d-flex gap-1";
+      wrapper.dataset.columnName = config.columnName;
+
+      wrapper.innerHTML = `
+        <input type="number" class="form-control form-control-sm dtcc-range-min" placeholder="Min" style="min-width: 72px;">
+        <input type="number" class="form-control form-control-sm dtcc-range-max" placeholder="Max" style="min-width: 72px;">
+      `;
+
+      return wrapper;
+    },
+  };
+}
+
 // /* stimulusFetch: 'lazy' */
 export default class extends Controller {
   static targets = ["table", "modal", "modalBody", "fieldSearch", "message", "offcanvas", "offcanvasBody", "offcanvasTitle"];
@@ -92,6 +113,16 @@ export default class extends Controller {
   // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
   // sortableFields: {type: String, default: '[]'},
   // searchableFields: {type: String, default: '[]'},
+
+  bindNumberRangeFilters(dt) {
+    document.addEventListener("input", (event) => {
+      if (!event.target.closest(".dtcc-number-range")) {
+        return;
+      }
+
+      dt.draw();
+    });
+  }
 
   cols() {
     // see https://javascript.plainenglish.io/are-javascript-object-keys-ordered-and-iterable-5147eedb26ce
@@ -746,6 +777,8 @@ export default class extends Controller {
 
         this.applyHeaderMetadata(dt);
 
+        this.bindNumberRangeFilters(dt);
+
         if (this.selectValue && this.bulkActions.length) {
           const toggleBulkButtons = () => {
             const count = dt.rows({ selected: true }).count();
@@ -1152,6 +1185,26 @@ export default class extends Controller {
       // Enable ColumnControl — search/searchList placed OUTSIDE the dropdown array
       // so ColumnControl renders them as an inline second header row (not a popup).
       this.columns.forEach((c, idx) => {
+        if (String(c.widget || '').toLowerCase() === 'range') {
+          defs.push({
+            targets: idx,
+            columnControl: [
+              { target: 0, content: ["order"] },
+              {
+                target: 1,
+                content: [
+                  {
+                    extend: "numberRange",
+                    columnName: c.name,
+                  }
+                ],
+              },
+            ],
+          });
+
+          return;
+        }
+
         if (c.browsable) {
           defs.push({
             targets: idx,
@@ -1282,7 +1335,7 @@ export default class extends Controller {
       // return action + ' ' + modal_route;
       // Routing.generate()
 
-      return `<button data-modal-route="${modal_route}" class="btn btn-modal btn-action-${action}" 
+      return `<button data-modal-route="${modal_route}" class="btn btn-modal btn-action-${action}"
 title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     });
 
@@ -1461,7 +1514,7 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
 
     let order = {};
     if (params.searchBuilder) {
-      apiData["searchBuilder"] = params.searchBuilder;
+      apiData["searchBuilder"] = JSON.stringify(params.searchBuilder);
     }
     if (params.style) {
       apiData["_style"] = params.style;
@@ -1518,6 +1571,20 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     //     // }
     // });
     // console.error({facets});
+
+    document.querySelectorAll(".dtcc-number-range[data-column-name]").forEach((wrapper) => {
+      const columnName = wrapper.dataset.columnName;
+      const min = wrapper.querySelector(".dtcc-range-min")?.value;
+      const max = wrapper.querySelector(".dtcc-range-max")?.value;
+
+      if (min !== undefined && min !== "") {
+        apiData[`${columnName}Min`] = min;
+      }
+
+      if (max !== undefined && max !== "") {
+        apiData[`${columnName}Max`] = max;
+      }
+    });
 
     // Column-specific filtering
     params.columns.forEach(function (column, index) {

@@ -17,6 +17,7 @@ class Column
         public ?string $className = null,
         public ?string $class_name = null,
         public ?string $width = null,
+        public ?string $widget = null,
         public ?int $responsivePriority = null,
         public ?string $titleAttr = null,
         public ?bool $facet = null,

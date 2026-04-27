@@ -101,6 +101,7 @@ class DatatableService
                 $column->browsable  ??= $fieldSettings['browsable']  ?? false;
                 $column->visible    ??= $fieldSettings['visible']    ?? null;
                 $column->width      ??= $fieldSettings['width']      ?? null;
+                $column->widget     ??= $fieldSettings['widget']     ?? null;
                 if (empty($column->title) || $column->title === $column->name) {
                     $column->title = $fieldSettings['title'] ?? $column->name;
                 }
@@ -145,6 +146,7 @@ class DatatableService
                     'browsable'  => ($descriptor->filterable && ($descriptor->resolvedWidget()?->isBrowsable() ?? false)) ?: null,
                     'visible'    => $descriptor->visible === false ? false : null,
                     'width'      => $descriptor->width,
+                    'widget'     => $descriptor->resolvedWidget()?->value,
                     'renderType' => $descriptor->isUrl ? 'url' : ($descriptor->isEmail ? 'email' : null),
                 ], fn ($v) => $v !== null));
             }

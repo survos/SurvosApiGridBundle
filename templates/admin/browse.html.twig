@@ -3,10 +3,28 @@
 {% block title %}{{ label }}{% endblock %}
 
 {% block body %}
-    <twig:api_grid
-        :class="class"
-        :searchPanes="false"
-        :columnControl="true"
-        :searchBuilder="false"
-    />
+    {% if class %}
+        <twig:api_grid
+            :class="class"
+            :searchPanes="false"
+            :columnControl="true"
+            :searchBuilder="false"
+            :showRoute="showRoute"
+        />
+    {% else %}
+        <div class="list-group">
+            {% for entity in entities %}
+                <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                   href="{{ path('survos_admin_browse', {code: entity.code}) }}">
+                    <span>
+                        <span class="fw-semibold">{{ entity.label }}</span>
+                        <span class="text-muted ms-2">{{ entity.class }}</span>
+                    </span>
+                    <span class="badge text-bg-secondary">{{ entity.code }}</span>
+                </a>
+            {% else %}
+                <div class="alert alert-warning">No Doctrine entities are registered.</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}

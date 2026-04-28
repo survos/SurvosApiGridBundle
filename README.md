@@ -170,6 +170,70 @@ Notes:
 - `browsable: true` marks a field as a SearchPanes facet.
 - `:caller="_self"` enables inline `<twig:block name="...">` templates for custom rendering.
 
+### Admin browser route
+
+The generic admin browser is available at `/admin/browse/{code}`. The code is
+derived from the bundle/app prefix plus the entity short name:
+
+- `Survos\OutreachBundle\Entity\Contact` -> `/admin/browse/outreach_contact`
+- `App\Entity\Intake` -> `/admin/browse/app_intake`
+
+`/admin/browse` lists the registered Doctrine entities. The old
+`/admin/browse?class=...` form is not supported.
+
+If a route named `{code}_show` exists, the admin browser passes it as
+`showRoute` to the grid. The grid then adds an eye-button column and opens the
+show route in an offcanvas panel. Rows must expose `rp` route parameters in the
+serialized API response.
+
+### Inline row actions
+
+For per-row actions such as show and edit, add an ordinary non-searchable action
+column and render it with a Twig block:
+
+```twig
+{% set columns = [
+    col('name'),
+    col('status'),
+    col(name: '_actions', title: '', sortable: false, searchable: false),
+] %}
+
+<twig:api_grid
+    :class="class"
+    :apiGetCollectionUrl="apiGetCollectionUrl"
+    :columns="columns"
+    :caller="_self"
+>
+    <twig:block name="_actions">
+        <a class="btn btn-sm btn-outline-secondary"
+           href="{{ path('app_object_show', row.rp) }}">
+            Show
+        </a>
+        <a class="btn btn-sm btn-outline-primary"
+           href="{{ path('app_object_edit', row.rp) }}">
+            Edit
+        </a>
+    </twig:block>
+</twig:api_grid>
+```
+
+DataTables does not provide an EasyAdmin-style inline action system; this is a
+rendered column like any other field.
+
+Because the action column is rendered from Twig, buttons can also use Symfony UX
+Stimulus helper functions:
+
+```twig
+<twig:block name="_actions">
+    <button class="btn btn-sm btn-outline-secondary"
+            {{ stimulus_action('modal-form', 'open', 'click', {
+                url: path('app_object_show', row.rp)
+            }) }}>
+        Show
+    </button>
+</twig:block>
+```
+
 ## EasyAdmin / Sidebar Layouts: ColumnControl
 
 SearchPanes are great, but the left-hand facet sidebar can clash with admin layouts that already have a sidebar (e.g. EasyAdmin).

@@ -233,7 +233,19 @@ export default class extends Controller {
         defaultContent: "",
         title: "",
         width: "2.5rem",
-        render: () => `<button class="btn btn-sm btn-outline-secondary btn-view-panel" title="View"><i class="bi bi-eye"></i></button>`,
+        render: () => `<button class="btn btn-sm btn-outline-secondary btn-view-panel" title="View">View</button>`,
+      });
+    }
+
+    if (this.showRouteValue || true) {
+      x.unshift({
+        data: null,
+        orderable: false,
+        searchable: false,
+        className: "dtr-control",
+        defaultContent: "",
+        title: "",
+        width: "2rem",
       });
     }
 
@@ -259,7 +271,7 @@ export default class extends Controller {
 
     return this.bulkActions.map((action) => ({
       text: action.label,
-      className: `btn-sm ${action.destructive ? "btn-outline-danger" : "btn-outline-secondary"}`,
+      className: `bulk-action d-none btn-sm ${action.destructive ? "btn-danger" : ""}`,
       enabled: false,
       action: (e, dt) => this.runBulkAction(action, dt),
     }));
@@ -338,8 +350,11 @@ export default class extends Controller {
     // var columnRender = [];
     this.dom = this.domValue;
     this.layout = this._parseLayout(this.layoutValue);
-    // dom: 'Plfrtip',
-    console.assert(this.dom, "Missing dom");
+
+    // Treat empty string dom as "not provided"
+    if (!this.layout && (!this.dom || this.dom === "")) {
+      this.layout = this.defaultLayout();
+    }
 
     this.filter = JSON.parse(this.filterValue || "[]");
     // console.error(this.buttonsValue);
@@ -394,9 +409,7 @@ export default class extends Controller {
     this.locale = this.localeValue;
     this.viewTotal = true; // this.viewTotalValue;
     this.cascadePanes = false; // never with serverSide: true! this.cascadePanesValue;
-    if (!this.layout && !this.dom) {
-      this.layout = this.defaultLayout();
-    }
+
     console.log(
       "hola from " + this.identifier + " locale: " + this.localeValue,
     );
@@ -485,7 +498,7 @@ export default class extends Controller {
       "Listening for button.transition and button .btn-modal clicks events",
     );
 
-    dt.on("click", "tr td button.btn-view-panel", ($event) => {
+    dt.on("click", "button.btn-view-panel", ($event) => {
       $event.stopPropagation();
       const data = dt.row($event.currentTarget.closest("tr")).data();
       this.openShowPanel(data);
@@ -719,8 +732,11 @@ export default class extends Controller {
       });
     }
 
+    const layout = this.normalizedLayout() || this.defaultLayout();
+
     let setup = {
       // let dt = new DataTable(el, {
+
       language: language,
       createdRow: this.createdRow,
       // paging: true,
@@ -734,7 +750,6 @@ export default class extends Controller {
       // scrollX:        true,
       // scrollCollapse: true,
       scroller: false,
-      responsive: false,
       pageLength: this.pageLengthValue || 50,
       ...(initialOrder.length ? { order: initialOrder } : {}),
       // responsive: {
@@ -782,11 +797,18 @@ export default class extends Controller {
         if (this.selectValue && this.bulkActions.length) {
           const toggleBulkButtons = () => {
             const count = dt.rows({ selected: true }).count();
-            const start = this.buttons.length;
-            this.bulkActions.forEach((_action, idx) => {
-              dt.button(start + idx).enable(count > 0);
-            });
+            const api = dt.buttons('.bulk-action');
+            const nodes = api.nodes();
+
+            if (count > 0) {
+              nodes.removeClass('d-none');
+              api.enable(true);
+            } else {
+              nodes.addClass('d-none');
+              api.enable(false);
+            }
           };
+
           dt.on("select deselect", toggleBulkButtons);
           toggleBulkButtons();
         }
@@ -800,8 +822,10 @@ export default class extends Controller {
         // dt.search(dt.columns().search()).draw();
       },
 
-      ...(this.normalizedLayout() ? { layout: this.normalizedLayout() } : {}),
-      ...(!this.layout && this.dom ? { dom: this.dom } : {}),
+      layout: layout,
+      paging: true,
+      info: true,
+      lengthChange: true,
       ...(this.selectValue
         ? {
             select: {
@@ -810,6 +834,13 @@ export default class extends Controller {
             },
           }
         : {}),
+      responsive: {
+        details: {
+          type: 'column',
+          target: this.selectValue ? 1 : 0,
+          renderer: modalRenderer,
+        },
+      },
       buttons: [...this.buttons, ...this.buildBulkActionButtons()],
       xxbuttons: (x) => {
         // why isn't this being called?
@@ -1079,6 +1110,9 @@ export default class extends Controller {
     }
 
     let dt = new DataTable(el, setup);
+
+    this.addButtonClickListener(dt);
+
     if (this.filter.hasOwnProperty("P")) {
     }
     if (this.searchPanesValue && dt.searchPanes) {
@@ -1126,13 +1160,10 @@ export default class extends Controller {
 
   defaultLayout() {
     return {
-      topStart: ["pageLength"],
-      topEnd: [
-        ...(this.searchBuilderValue ? ["searchBuilder"] : []),
-        this.hasColumnControlPlugin() && this.columnControlValue ? "columnControl" : "search",
-      ],
-      bottomStart: ["info"],
-      bottomEnd: ["paging"],
+      topStart: ['buttons', 'pageLength'],
+      topEnd: 'search',
+      bottomStart: 'info',
+      bottomEnd: 'paging',
     };
   }
 
@@ -1268,15 +1299,37 @@ export default class extends Controller {
   // .page-wrapper (position:relative). Portal to body so the coordinates resolve
   // correctly without touching any layout CSS.
   openShowPanel(data) {
-    if (!this.showRouteValue || !data?.rp) return;
-    const url = Routing.generate(this.showRouteValue, { ...data.rp, _fragment: '_show' });
+    if (!this.showRouteValue) {
+      console.error("[api-grid] Missing showRoute value.");
+      return;
+    }
+
+    if (!data?.rp && !data?.["@id"]) {
+      console.error("[api-grid] Missing row route params and @id.", data);
+      return;
+    }
+
+    const url = data?.rp
+      ? Routing.generate(this.showRouteValue, {
+          ...data.rp,
+          _fragment: "_show",
+          _page_content_only: 1,
+        })
+      : data["@id"];
+
     if (this.hasOffcanvasTitleTarget) {
       this.offcanvasTitleTarget.textContent = data.name ?? data.title ?? data.id ?? '';
     }
     if (this.hasOffcanvasBodyTarget) {
       this.offcanvasBodyTarget.innerHTML = '<div class="text-center p-4"><div class="spinner-border"></div></div>';
     }
-    const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(this.offcanvasTarget);
+
+    if (!window.bootstrap?.Offcanvas) {
+      console.error("[api-grid] Bootstrap Offcanvas is not available.");
+      return;
+    }
+
+    const bsOffcanvas = window.bootstrap.Offcanvas.getOrCreateInstance(this.offcanvasTarget);
     bsOffcanvas.show();
     fetch(url)
       .then(r => r.text())

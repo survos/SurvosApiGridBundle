@@ -31,7 +31,7 @@
     entityClass: this.entityClass ?? '',
     csrfToken: this.select and this.bulkActions ? csrf_token(this.csrfTokenId) : '',
     defaultOrder: this.defaultOrder ?? '',
-    showRoute: this.showRoute ?? '',
+    showRoute: this.getShowRoute ?? '',
 }) }}>
 
     {% if this.searchPanes %}
@@ -101,7 +101,7 @@
         }) }}
     {% endblock %}
 
-    {% if this.showRoute %}
+    {% if this.getShowRoute %}
     <div class="offcanvas offcanvas-end" tabindex="-1" style="width: min(600px, 90vw)"
          {{ stimulus_target(this.stimulusController, 'offcanvas') }}>
         <div class="offcanvas-header">

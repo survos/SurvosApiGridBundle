@@ -374,5 +374,14 @@ class ApiGridComponent implements TwigBlocksInterface
 
     }
 
+    public function getShowRoute(): ?string
+    {
+        if (!$this->class) {
+            return null;
+        }
 
+        $shortName = (new \ReflectionClass($this->class))->getShortName();
+
+        return 'app_' . strtolower($shortName) . '_show';
+    }
 }

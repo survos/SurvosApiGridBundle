@@ -38,6 +38,43 @@ Output:
 
 - an array of `Column` objects used to build the DataTables column list.
 
+#### Future: object-keyed columns and `_defaults`
+
+The component should eventually accept an associative Twig/PHP array as an
+ergonomic alternative to the current list form:
+
+```twig
+{% set columns = {
+    _defaults: {
+        searchable: true,
+        sortable: true,
+        browsable: false
+    },
+    name: {},
+    email: {},
+    status: {
+        browsable: true
+    },
+    _actions: {
+        title: '',
+        searchable: false,
+        sortable: false
+    }
+} %}
+```
+
+Normalization rules:
+
+- String-keyed entries become named columns; the key supplies `name`.
+- `_defaults` is consumed as grid-local default column configuration and is not emitted as a column.
+- `_actions` remains a real column. Do not reserve all underscore-prefixed keys.
+- Merge order should be: inferred entity/field metadata, then `_defaults`, then the per-column config.
+- List-style arrays stay supported for backward compatibility and for generated/JSON configurations where explicit order is safer.
+
+This gives non-entity grids (for example Pixie-backed grids) a concise way to
+declare default column behavior while preserving the current DataTables output
+shape.
+
 ### Stimulus + DataTables
 
 Controller: `@survos/api-grid/api_grid`

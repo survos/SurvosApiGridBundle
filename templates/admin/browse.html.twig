@@ -4,11 +4,24 @@
 
 {% block body %}
     {% if class %}
+
+        {% set bulkActions = [
+            {
+                id: 'delete',
+                label: 'Delete',
+                url: path('bulk_action_selection', { actionId: 'delete' }),
+                destructive: true
+            }
+        ] %}
+
         <twig:api_grid
             :class="class"
+            :entityClass="class"
             :searchPanes="false"
             :columnControl="true"
             :searchBuilder="false"
+            :select="true"
+            :bulkActions="bulkActions"
             :showRoute="showRoute"
         />
     {% else %}

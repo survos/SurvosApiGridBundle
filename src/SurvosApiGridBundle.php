@@ -3,7 +3,6 @@
 namespace Survos\ApiGridBundle;
 
 use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
-use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGridBundle\Command\IndexCommand;
 use Survos\ApiGridBundle\Components\GridComponent;
 use Survos\ApiGridBundle\Components\ItemGridComponent;
@@ -212,12 +211,6 @@ class SurvosApiGridBundle extends AssetMapperBundle
             ->setArgument('$meiliService', new Reference('api_meili_service', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
 
-
-        $builder->register(MultiFieldSearchFilter::class)
-            ->addArgument(new Reference('doctrine.orm.default_entity_manager'))
-            ->addArgument(new Reference('request_stack'))
-            ->addArgument(new Reference('logger'))
-            ->addTag('api_platform.filter');
 
         //        $builder->register(SimpleDatatablesComponent::class);
         //        $builder->autowire(SimpleDatatablesComponent::class);

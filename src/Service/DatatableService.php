@@ -172,6 +172,7 @@ class DatatableService
                 match (true) {
                     is_a($filterClass, OrderFilter::class, true)                           => $settings[$property]['sortable']   = true,
                     is_a($filterClass, SearchFilter::class, true)                          => $settings[$property]['searchable'] = true,
+                    is_a($filterClass, MultiFieldSearchFilter::class, true)                => $settings[$property]['searchable'] = true,
                     is_a($filterClass, FacetsFieldSearchFilter::class, true)               => $settings[$property]['browsable']  = true,
                     str_ends_with($filterClass, '\\FacetsFieldSearchFilter')               => $settings[$property]['browsable']  = true,
                     default                                                                => null,

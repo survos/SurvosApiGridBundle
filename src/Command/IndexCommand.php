@@ -8,7 +8,6 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\EntityManagerInterface;
 use Meilisearch\Endpoints\Indexes;
 use Psr\Log\LoggerInterface;
-use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
 use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\CoreBundle\Service\SurvosUtils;

@@ -107,6 +107,39 @@ html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dataTab
     background: var(--tblr-table-bg) !important;
 }
 
+/* Generated api-grid column sizing */
+table.dataTable th.dt-col-wrap,
+table.dataTable td.dt-col-wrap {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.25;
+}
+
+table.dataTable th.dt-col-title,
+table.dataTable td.dt-col-title,
+table.dataTable th.dt-col-long-text,
+table.dataTable td.dt-col-long-text {
+    min-width: 12rem;
+    max-width: 28rem;
+}
+
+table.dataTable th.dt-col-facet,
+table.dataTable td.dt-col-facet {
+    min-width: 9rem;
+    max-width: 16rem;
+}
+
+table.dataTable th.dt-col-compact,
+table.dataTable td.dt-col-compact {
+    white-space: nowrap;
+}
+
+table.dataTable th.dt-col-number,
+table.dataTable td.dt-col-number {
+    text-align: right;
+}
+
 /* datatables.net-searchbuilder-bs5 */
 /* No --bs- vars to override */
 
@@ -115,8 +148,18 @@ html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dataTab
 
 /* datatables.net-columncontrol-bs5 */
 :root {
+    --dtcc-button_background: transparent;
+    --dtcc-button_border: none;
+    --dtcc-button_border-radius: var(--tblr-border-radius-sm);
+    --dtcc-button_opacity: 0.75;
+    --dtcc-button_disabled-opacity: 0.6;
+    --dtcc-button_empty-opacity: 0.8;
+    --dtcc-button_hover-border: none;
     --dtcc-button_hover-background: rgb(var(--tblr-tertiary-bg-rgb));
+    --dtcc-button_hover-opacity: 1;
     --dtcc-button-icon_color: var(--tblr-body-color);
+    --dtcc-button-icon_size: 1rem;
+    --dtcc-button-icon_margin: 0.5rem;
     --dtcc-spacer_border: var(--tblr-border-width) solid var(--tblr-border-color);
     --dtcc-title_background: rgb(var(--tblr-tertiary-bg-rgb));
     --dtcc-search-icon_color: var(--tblr-body-color);
@@ -125,18 +168,108 @@ html[data-bs-theme=dark] div.dtsp-panesContainer div.dtsp-searchPane div.dataTab
     --dtcc-search-input_background-color: var(--tblr-body-bg);
     --dtcc-search-input_background: var(--tblr-body-bg);
     --dtcc-search-input_border-radius: var(--tblr-border-radius);
+    --dtcc-search-input_padding: 0.25rem 0.5rem;
+    --dtcc-search-input_margin-top: 0.5rem;
+    --dtcc-list-buttons_max-height: 18rem;
     --dtcc-list-buttons_background: rgb(var(--tblr-secondary-bg-rgb));
-}
-:root .dropdown-menu {
     --dtcc-dropdown_background: var(--tblr-dropdown-bg);
     --dtcc-dropdown_border: var(--tblr-dropdown-border-width) solid var(--tblr-dropdown-border-color);
     --dtcc-dropdown_border-radius: var(--tblr-dropdown-border-radius);
     --dtcc-dropdown_box-shadow: var(--tblr-dropdown-box-shadow);
+    --dtcc-dropdown_margin: 0.25rem 0 0;
     --dtcc-dropdown_padding: var(--tblr-dropdown-padding-y) var(--tblr-dropdown-padding-x);
+    --dtcc-dropdown_width: 16rem;
     --dtcc-dropdown_z-index: var(--tblr-dropdown-zindex);
+    --dtcc-dropdown-button_background: transparent;
+    --dtcc-dropdown-button_border: none;
     --dtcc-dropdown-button_color: var(--tblr-dropdown-link-color);
     --dtcc-dropdown-button_padding: var(--tblr-dropdown-item-padding-y) var(--tblr-dropdown-item-padding-x);
     --dtcc-dropdown-button_hover-background: var(--tblr-dropdown-link-hover-bg);
+}
+
+div.dtcc-dropdown {
+    z-index: var(--tblr-dropdown-zindex, 1000);
+    overflow: hidden;
+    border: var(--tblr-dropdown-border-width, 1px) solid var(--tblr-dropdown-border-color, var(--tblr-border-color));
+    border-radius: var(--tblr-dropdown-border-radius, var(--tblr-border-radius));
+    background: var(--tblr-dropdown-bg, var(--tblr-body-bg));
+    color: var(--tblr-dropdown-color, var(--tblr-body-color));
+    box-shadow: var(--tblr-dropdown-box-shadow, var(--tblr-box-shadow));
+}
+
+div.dtcc-dropdown .dtcc-dropdown-liner {
+    background: inherit;
+}
+
+table.dataTable span.dtcc div.dtcc-list,
+div.dtcc-dropdown div.dtcc-list {
+    width: 100%;
+    min-width: 10rem;
+}
+
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    width: 100%;
+}
+
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectAll,
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectNone,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectAll,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectNone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.75rem;
+    padding: 0.125rem 0.375rem;
+    border: var(--tblr-border-width) solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    background-color: var(--tblr-body-bg);
+    color: var(--tblr-body-color);
+    font-size: 0.75rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectAll:hover,
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectNone:hover,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectAll:hover,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls button.dtcc-list-selectNone:hover {
+    background-color: rgb(var(--tblr-tertiary-bg-rgb));
+    text-decoration: none;
+}
+
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-controls input.dtcc-list-search,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-controls input.dtcc-list-search {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    padding: var(--dtcc-search-input_padding);
+    border: var(--dtcc-search-input_border);
+    border-radius: var(--dtcc-search-input_border-radius);
+    background-color: var(--dtcc-search-input_background-color);
+    color: var(--tblr-body-color);
+    font-size: 0.75rem;
+}
+
+table.dataTable span.dtcc div.dtcc-list div.dtcc-list-buttons,
+div.dtcc-dropdown div.dtcc-list div.dtcc-list-buttons {
+    max-height: var(--dtcc-list-buttons_max-height);
+    overflow: auto;
+    background: var(--dtcc-list-buttons_background);
+}
+
+table.dataTable span.dtcc .dtcc-number-range {
+    width: min(100%, 10rem);
+}
+
+table.dataTable span.dtcc .dtcc-number-range input {
+    min-width: 0 !important;
+    width: 4.75rem;
+    padding-right: 0.25rem;
+    padding-left: 0.25rem;
 }
 
 /* datatables.net-staterestore-bs5 */

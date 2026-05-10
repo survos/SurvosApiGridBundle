@@ -79,7 +79,6 @@ export default class extends Controller {
   static targets = ["table", "modal", "modalBody", "fieldSearch", "message", "offcanvas", "offcanvasBody", "offcanvasTitle"];
   static values = {
     apiCall: { type: String, default: "" },
-    searchPanesDataUrl: { type: String, default: "" },
     columnConfiguration: { type: String, default: "[]" },
     facetConfiguration: { type: String, default: "[]" },
     globals: { type: String, default: "[]" },
@@ -87,12 +86,7 @@ export default class extends Controller {
     locale: { type: String, default: "no-locale!" },
     style: { type: String, default: "spreadsheet" },
     layout: { type: String, default: "" },
-    cascadePanes: { type: Boolean, default: false },
-    viewTotal: { type: Boolean, default: false },
-    index: { type: String, default: "" }, // meili
-    dom: { type: String, default: "" },
     pageLength: { type: Number, default: 50 },
-    searchPanes: { type: Boolean, default: true },
     columnControl: { type: Boolean, default: false },
     searchBuilder: { type: Boolean, default: false },
     searchBuilderColumns: { type: String, default: "[]" },
@@ -110,7 +104,6 @@ export default class extends Controller {
     showRoute: { type: String, default: "" },
   };
 
-  // with searchPanes dom: {type: String, default: 'P<"dtsp-dataTable"rQfti>'},
   // sortableFields: {type: String, default: '[]'},
   // searchableFields: {type: String, default: '[]'},
 
@@ -132,9 +125,12 @@ export default class extends Controller {
       return a.order - b.order; // Sort in ascending order
     });
 
+    const visibleColumnCount = columns.filter((c) => c.visible !== false).length + this.leadingUtilityColumnCount();
+
     let x = columns.map((c) => {
       let render = null;
-      c.className = c.title;
+      const inferred = this.inferredColumnDefaults(c, visibleColumnCount);
+      const className = [inferred.className, c.className].filter(Boolean).join(" ") || null;
       c.searchBuilderType = "num";
       if (c.twigTemplate) {
         const templateName = `column:${c.name}`;
@@ -175,12 +171,12 @@ export default class extends Controller {
         locale: c.locale,
         render: render,
         sortable: typeof c.sortable ? c.sortable : false,
-        className: c.className,
+        className: className,
         visible: typeof c.visible === 'boolean' ? c.visible : undefined,
       });
 
-      if (c.width) {
-        column.width = c.width;
+      if (c.width || inferred.width) {
+        column.width = c.width || inferred.width;
       }
       if (c.titleAttr) {
         column.titleAttr = c.titleAttr;
@@ -196,31 +192,6 @@ export default class extends Controller {
         type: "num",
       };
 
-      column.searchPanes = {
-        show: c.browsable,
-        dtOpts: {
-          info: true,
-          columnDefs: [
-            {
-              targets: 0,
-              className: "f32",
-            },
-          ],
-        },
-      };
-
-      if (c.browsable) {
-        // console.warn(c.name, column);
-      }
-      // column.searchPanes.dtOpts = {
-      //     info: true,
-      //     columnDefs: [
-      //             {
-      //                 targets: 0,
-      //                 className: 'f32'
-      //             }
-      //         ]
-      // }
       return column;
     });
 
@@ -348,11 +319,9 @@ export default class extends Controller {
     console.table(this.facets);
     // "compile" the custom twig blocks
     // var columnRender = [];
-    this.dom = this.domValue;
     this.layout = this._parseLayout(this.layoutValue);
 
-    // Treat empty string dom as "not provided"
-    if (!this.layout && (!this.dom || this.dom === "")) {
+    if (!this.layout) {
       this.layout = this.defaultLayout();
     }
 
@@ -407,8 +376,6 @@ export default class extends Controller {
     this.searchBuilderColumns = JSON.parse(this.searchBuilderColumnsValue);
 
     this.locale = this.localeValue;
-    this.viewTotal = true; // this.viewTotalValue;
-    this.cascadePanes = false; // never with serverSide: true! this.cascadePanesValue;
 
     console.log(
       "hola from " + this.identifier + " locale: " + this.localeValue,
@@ -605,32 +572,14 @@ export default class extends Controller {
 
     let searchFieldsByColumnNumber = [];
     let options = [];
-    let preSelectArray = [];
 
     let filterColumns = this.columns;
-    // console.log(filterColumns, typeof filterColumns);
-    // filterColumns.sort(function (a, b) {
-    //     return a.browseOrder - b.browseOrder;
-    // });
-    // do not use foreach on object
     Object.entries(filterColumns).forEach((entry) => {
       const [key, value] = entry;
       searchFieldsByColumnNumber.push(key);
     });
 
     this.columns.forEach((column, index) => {
-      let name = "";
-      if (typeof column == "string") {
-        name = column;
-      } else {
-        name = column.name;
-      }
-      if (this.filter.hasOwnProperty(name)) {
-        preSelectArray.push({
-          column: index,
-          rows: this.filter[name].split("|"),
-        });
-      }
       // console.log(column);
       // if (column.browsable) {
       //     // console.error(index);
@@ -664,10 +613,6 @@ export default class extends Controller {
       //     // console.warn("Missing " + column.name, Object.keys(lookup));
       // }
     });
-
-    let searchPanesRaw = [];
-
-    // console.error('searchFields', searchFieldsByColumnNumber);
 
     let apiPlatformHeaders = {
       Accept: "application/ld+json",
@@ -721,13 +666,14 @@ export default class extends Controller {
     // ordered column list (same order DataTables sees).
     const initialOrder = [];
     if (this.defaultOrderValue && this.defaultOrderValue.trim() !== "") {
+      const columnOffset = this.leadingUtilityColumnCount();
       const sortedCols = this.columns.slice().sort((a, b) => a.order - b.order);
       this.defaultOrderValue.split(",").forEach((pair) => {
         const [fieldRaw, dirRaw] = pair.split(":").map((s) => (s || "").trim());
         if (!fieldRaw) return;
         const dir = dirRaw && dirRaw.toLowerCase() === "desc" ? "desc" : "asc";
         const idx = sortedCols.findIndex((c) => c.name === fieldRaw);
-        if (idx >= 0) initialOrder.push([idx, dir]);
+        if (idx >= 0) initialOrder.push([idx + columnOffset, dir]);
         else console.warn(`api_grid: defaultOrder "${fieldRaw}" matches no column`);
       });
     }
@@ -777,18 +723,7 @@ export default class extends Controller {
           this.portalColumnControlDropdown(el);
         }
 
-        dt.on("searchPanes.rebuildPane", function () {
-          // This function will run after the user selects a value from the SearchPane
-          console.log(
-            "A selection has been made and the table has been updated.",
-          );
-        });
         this.handleTrans(el);
-
-        const box = document.getElementsByClassName("dtsp-title");
-        if (box.length) {
-          box[0].style.display = "none";
-        }
 
         this.applyHeaderMetadata(dt);
 
@@ -842,6 +777,17 @@ export default class extends Controller {
         },
       },
       buttons: [...this.buttons, ...this.buildBulkActionButtons()],
+      columns: this.cols(),
+      ...((this.searchBuilderValue || this.searchBuilderColumns.length)
+        ? {
+            searchBuilder: {
+              ...(this.searchBuilderColumns.length ? { columns: this.searchBuilderColumns } : {}),
+              depthLimit: 1,
+              threshold: 0,
+              showEmptyPanes: true,
+            },
+          }
+        : {}),
       xxbuttons: (x) => {
         // why isn't this being called?
         console.error(x);
@@ -879,46 +825,11 @@ export default class extends Controller {
         });
         return buttons;
       },
-      columns: this.cols(),
-      ...(this.searchPanesValue
-        ? {
-            searchPanes: {
-              initCollapsed: true,
-              dtOpts: {
-                scrollCollapse: true,
-              },
-              layout: "columns-1",
-              show: true,
-              cascadePanes: this.cascadePanes,
-              viewTotal: true,
-              preSelect: preSelectArray,
-            },
-          }
-        : {}),
-      ...((this.searchBuilderValue || this.searchBuilderColumns.length)
-        ? {
-            searchBuilder: {
-              ...(this.searchBuilderColumns.length ? { columns: this.searchBuilderColumns } : {}),
-              depthLimit: 1,
-              threshold: 0,
-              showEmptyPanes: true,
-            },
-          }
-        : {}),
-      // columns:
-      //     [
-      //     this.c({
-      //         propertyName: 'name',
-      //     }),
-      // ],
-      columnDefs: this.columnDefs(searchFieldsByColumnNumber),
+      columnDefs: this.columnDefs(),
       // https://datatables.net/reference/option/ajax
       ajax: (params, callback, settings) => {
         this.messageTarget.innerHTML = `starting at ${params.start}`;
-        this.apiParams = this.dataTableParamsToApiPlatformParams(
-          params,
-          searchPanesRaw,
-        );
+        this.apiParams = this.dataTableParamsToApiPlatformParams(params);
         // this.debug &&
         // console.error(this.apiParams);
         // console.assert(params.start, `DataTables is requesting ${params.length} records starting at ${params.start}`, this.apiParams);
@@ -927,10 +838,6 @@ export default class extends Controller {
         // yet another locale hack
         if (this.locale !== "") {
           this.apiParams["_locale"] = this.locale;
-        }
-        // check for meili index
-        if (this.hasIndexValue) {
-          this.apiParams["_index"] = this.indexValue;
         }
         if (this.hasStyleValue) {
           this.apiParams["_style"] = this.styleValue;
@@ -986,107 +893,19 @@ export default class extends Controller {
 
             // let first = (apiOptions.page - 1) * apiOptions.itemsPerPage;
             let d = member;
-            if (d.length) {
-              // console.table(d[0]);
-              // console.log('first result', d[0]);
-            }
-            let searchPanes = null;
-            searchPanes = {
-              initCollapsed: true,
-              layout: "columns-1",
-              show: true,
-              cascadePanes: this.cascadePanes,
-              viewTotal: this.viewTotal,
-              showZeroCounts: true,
-              preSelect: preSelectArray,
-            };
 
-            // options.threshold = 0.01;
-            // options.showZeroCounts = true;
-            // options.cascadePanes = true;
-            // options.viewTotal = true;
-            // options.show = true;
-            // console.error('searchpanes', searchPanes, options);
-
-            // if searchPanes have been sent back from the results, sort them by browseOrder
-            if (
-              typeof hydraData["facets"] !== "undefined" &&
-              typeof hydraData["facets"]["searchPanes"] !== "undefined"
-            ) {
-              searchPanesRaw = hydraData["facets"]["searchPanes"]["options"];
-              searchPanes = this.sequenceSearchPanes(
-                hydraData["facets"]["searchPanes"]["options"],
-              );
-              console.warn({ searchPanes, searchPanesRaw, hydraData });
-            } else if (this.searchPanesValue) {
-              const fallbackOptions = this.buildSearchPaneOptionsFromRows(member);
-              if (Object.keys(fallbackOptions).length > 0) {
-                searchPanesRaw = fallbackOptions;
-                searchPanes = this.sequenceSearchPanes(fallbackOptions);
-              } else {
-                searchPanes = null;
-              }
-            } else {
-              searchPanes = null;
-            }
-            // searchPanes.threshold = 0.01;
-            if (searchPanes) {
-              searchPanes.showZeroCounts = true;
-              searchPanes.cascadePanes = true;
-              searchPanes.viewTotal = true;
-              searchPanes.show = true;
-            }
-            let targetMessage = "";
-            if (typeof this.apiParams.facet_filter != "undefined") {
-              this.apiParams.facet_filter.forEach((index) => {
-                // format is (probably) facet,value1|value2
-                if (targetMessage !== "") {
-                  targetMessage += ", ";
-                }
-                let string = index.split(",");
-                if (string.length > 0) {
-                  let firstPart = string[0];
-                  let splitValue = string[2].split("|");
-                  let returnValue = [];
-                  splitValue.forEach((index) => {
-                    if (searchPanes?.options && firstPart in searchPanes["options"]) {
-                      searchPanes["options"][firstPart].forEach((array) => {
-                        if (index === array.value) {
-                          returnValue.push(array.label);
-                          return false;
-                        }
-                      });
-                    }
-                  });
-                  targetMessage += string[0] + " : " + returnValue.join("|");
-                }
-              });
-            }
             const debugUrl = requestUrl.toString();
             this.messageTarget.innerHTML =
-              targetMessage +
               ` <a class="text-muted small ms-2" target="_blank" href="${debugUrl}" title="Last API call">🔗 API</a>`;
 
-            // if next page isn't working, make sure api_platform.yaml is correctly configured
-            // defaults:
-            //     pagination_client_items_per_page: true
-
-            // if there's a "next" page and we didn't get everything, fetch the next page and return the slice.
-            let next = hydraData?.view?.next ?? hydraData?.["hydra:view"]?.["hydra:next"] ?? null;
-            // we need the searchpanes options, too.
-
-            let callbackValues = {
+            callback({
               draw: params.draw,
               data: d,
               columnControl:
                 (hydraData.facets && hydraData.facets.columnControl) || {},
               recordsTotal: total,
-              recordsFiltered: total, //  itemsReturned,
-            };
-            if (searchPanes?.options && Object.keys(searchPanes.options).length > 0) {
-              callbackValues.searchPanes = searchPanes;
-            }
-            callback(callbackValues);
+              recordsFiltered: total,
+            });
           })
           .catch((error) => {
             console.error(error, error?.request);
@@ -1113,11 +932,6 @@ export default class extends Controller {
 
     this.addButtonClickListener(dt);
 
-    if (this.filter.hasOwnProperty("P")) {
-    }
-    if (this.searchPanesValue && dt.searchPanes) {
-      dt.searchPanes();
-    }
     if (this.filter.hasOwnProperty("q")) {
       dt.search(this.filter.q).draw();
     }
@@ -1125,24 +939,10 @@ export default class extends Controller {
     this.filter = [];
     this.columns.forEach((column, index) => {
       if (column.order == 0) {
-        dt.column(index).visible(false);
+        dt.column(index + this.leadingUtilityColumnCount()).visible(false);
       }
     });
 
-    if (this.searchPanesValue && dt.searchPanes) {
-      console.log("moving panes to div.search-panes");
-      const paneContainer = dt.searchPanes.container?.();
-      if (paneContainer) {
-        $("div.dtsp-verticalPanes").append(paneContainer);
-      }
-    }
-    // $("div.search-panes").append(dt.searchPanes.container());
-    if (this.filter.hasOwnProperty("P")) {
-    }
-    const contentContainer = document.getElementsByClassName("search-panes");
-    if (contentContainer.length > 0) {
-      const ps = new PerfectScrollbar(contentContainer[0]);
-    }
     return dt;
   }
 
@@ -1191,7 +991,7 @@ export default class extends Controller {
   applyHeaderMetadata(dt) {
     const headerCells = dt.table().header()?.querySelectorAll("th") || [];
     this.columns.forEach((column, index) => {
-      const th = headerCells[index];
+      const th = headerCells[index + this.leadingUtilityColumnCount()];
       if (!th) return;
       if (column.titleAttr) {
         th.setAttribute("title", column.titleAttr);
@@ -1202,23 +1002,19 @@ export default class extends Controller {
     });
   }
 
-  columnDefs(searchPanesColumns) {
+  columnDefs() {
     let defs = [];
-
-    if (this.searchPanesValue) {
-      defs.push({
-        searchPanes: { show: true },
-        targets: searchPanesColumns,
-      });
-    }
+    const columnOffset = this.leadingUtilityColumnCount();
 
     if (this.columnControlValue) {
-      // Enable ColumnControl — search/searchList placed OUTSIDE the dropdown array
-      // so ColumnControl renders them as an inline second header row (not a popup).
+      // Enable ColumnControl. Text and range inputs stay inline in the second
+      // header row; facet lists use a dropdown so option buttons are not clipped.
       this.columns.forEach((c, idx) => {
+        const target = idx + columnOffset;
+
         if (String(c.widget || '').toLowerCase() === 'range') {
           defs.push({
-            targets: idx,
+            targets: target,
             columnControl: [
               { target: 0, content: ["order"] },
               {
@@ -1238,15 +1034,24 @@ export default class extends Controller {
 
         if (c.browsable) {
           defs.push({
-            targets: idx,
+            targets: target,
             columnControl: [
               { target: 0, content: ["order"] },
-              { target: 1, content: [{ extend: "searchList", ajaxOnly: true, search: true, select: true }] },
+              {
+                target: 1,
+                content: [{
+                  extend: "dropdown",
+                  icon: "search",
+                  iconActive: "searchActive",
+                  text: "Filter",
+                  content: [{ extend: "searchList", ajaxOnly: true, search: true, select: true }],
+                }],
+              },
             ],
           });
         } else if (c.searchable) {
           defs.push({
-            targets: idx,
+            targets: target,
             columnControl: [
               { target: 0, content: ["order"] },
               { target: 1, content: ["search"] },
@@ -1257,7 +1062,7 @@ export default class extends Controller {
     }
 
     this.columns.forEach((column, index) => {
-      const def = { targets: index };
+      const def = { targets: index + this.leadingUtilityColumnCount() };
       let hasConfig = false;
 
       if (typeof column.visible === "boolean") {
@@ -1292,6 +1097,12 @@ export default class extends Controller {
     });
 
     return defs;
+  }
+
+  leadingUtilityColumnCount() {
+    // Keep this in sync with cols(), where responsive/select utility columns
+    // are prepended before the configured entity columns.
+    return 1 + (this.selectValue ? 1 : 0);
   }
 
   // The ColumnControl plugin calculates top/left as offsets from document.body,
@@ -1400,6 +1211,40 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
       },
     };
     resolvedActions.forEach((action) => {});
+  }
+
+  inferredColumnDefaults(column, visibleColumnCount = 0) {
+    const name = String(column.name || "").toLowerCase();
+    const title = String(column.title || column.name || "").toLowerCase();
+    const widget = String(column.widget || "").toLowerCase();
+    const classes = [];
+    let width = null;
+    const numericNameParts = [
+      "year", "count", "total", "number", "qty", "quantity", "price", "amount",
+      "votes", "budget", "height", "width", "length", "score", "rating",
+    ];
+
+    if (name === "id" || name.endsWith("id") || name.endsWith("_id")) {
+      classes.push("dt-col-compact", "dt-col-number");
+      width = "5rem";
+    } else if (widget === "range" || numericNameParts.some((part) => name === part || name.endsWith(part) || name.includes(`_${part}`))) {
+      classes.push("dt-col-compact", "dt-col-number");
+      width = visibleColumnCount > 8 ? "7rem" : "8rem";
+    } else if (column.browsable || widget === "select" || widget === "boolean") {
+      classes.push("dt-col-facet", "dt-col-wrap");
+      width = visibleColumnCount > 8 ? "11rem" : "13rem";
+    } else if (["title", "name", "label"].includes(name) || ["title", "name", "label"].includes(title)) {
+      classes.push("dt-col-title", "dt-col-wrap");
+      width = visibleColumnCount > 8 ? "18rem" : "24rem";
+    } else if (/(description|overview|summary|abstract|notes?|content|text)$/.test(name)) {
+      classes.push("dt-col-long-text", "dt-col-wrap");
+      width = visibleColumnCount > 8 ? "20rem" : "28rem";
+    }
+
+    return {
+      className: classes.join(" "),
+      width,
+    };
   }
 
   c({
@@ -1531,7 +1376,7 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     return obj;
   }
 
-  dataTableParamsToApiPlatformParams(params, searchPanesRaw) {
+  dataTableParamsToApiPlatformParams(params) {
     let columns = params.columns; // get the columns passed back to us, sanity.
     // var apiData = {
     //     page: 1
@@ -1542,8 +1387,11 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
 
     let apiData = {};
     if (params.length) {
-      // was apiData.itemsPerPage = params.length;
+      apiData.itemsPerPage = params.length;
+      // Keep these for older api-grid offset/limit providers; API Platform's
+      // native Doctrine paginator ignores them.
       apiData.limit = params.length;
+      apiData.page = Math.floor((params.start || 0) / params.length) + 1;
     }
     // really this is the queryStringParameters
     let facetsUrl = [];
@@ -1590,16 +1438,6 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
 
     // Extract the path
     let path = urlWithoutProtocolAndDomain.split("?")[0];
-    if (params.searchPanes) {
-      for (const [key, value] of Object.entries(params.searchPanes)) {
-        const values = Object.values(value);
-        if (values.length) {
-          // Use API Platform's native array format: role[]=TENANT_ADMIN
-          apiData[key] = values;
-          facetsUrl.push(values.map((v) => `${key}[]=${encodeURIComponent(v)}`).join("&"));
-        }
-      }
-    }
 
     for (const [key, value] of Object.entries(this.filter)) {
       facetsUrl.push(key + "=" + value);
@@ -1631,11 +1469,11 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
       const max = wrapper.querySelector(".dtcc-range-max")?.value;
 
       if (min !== undefined && min !== "") {
-        apiData[`${columnName}Min`] = min;
+        apiData[`${columnName}[gte]`] = min;
       }
 
       if (max !== undefined && max !== "") {
-        apiData[`${columnName}Max`] = max;
+        apiData[`${columnName}[lte]`] = max;
       }
     });
 
@@ -1680,93 +1518,6 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     // console.table(apiData);
 
     return apiData;
-  }
-
-  buildSearchPaneOptionsFromRows(rows) {
-    const options = {};
-    const browsableColumns = this.columns.filter((column) => column.browsable === true);
-
-    browsableColumns.forEach((column) => {
-      const counts = new Map();
-      rows.forEach((row) => {
-        const value = row?.[column.name];
-        const normalized = this.normalizeFacetValue(value);
-        if (normalized === null || normalized === "") {
-          return;
-        }
-        counts.set(normalized, (counts.get(normalized) || 0) + 1);
-      });
-
-      if (counts.size === 0) {
-        return;
-      }
-
-      options[column.name] = Array.from(counts.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map(([value, count]) => ({
-          label: String(value),
-          value: String(value),
-          total: count,
-          count: count,
-        }));
-    });
-
-    return options;
-  }
-
-  normalizeFacetValue(value) {
-    if (value === null || value === undefined) {
-      return null;
-    }
-    if (Array.isArray(value)) {
-      return value.length ? String(value[0]) : null;
-    }
-    if (typeof value === "object") {
-      if (typeof value.name === "string") return value.name;
-      if (typeof value.label === "string") return value.label;
-      if (typeof value.id === "string" || typeof value.id === "number") return String(value.id);
-      return null;
-    }
-    return String(value);
-  }
-
-  sequenceSearchPanes(data) {
-    let newOrderdata = [];
-    let searchPanesOrder = this.columns.filter(function (columnConfig) {
-      return columnConfig.browsable === true;
-    });
-
-    searchPanesOrder = searchPanesOrder.sort(function (a, b) {
-      if (a.browseOrder != b.browseOrder) {
-        return a.browseOrder - b.browseOrder;
-      }
-      let aData = 0;
-      let bData = 0;
-
-      if (typeof data[a.name] != "undefined") {
-        aData = data[a.name].length;
-      }
-
-      if (typeof data[b.name] != "undefined") {
-        bData = data[b.name].length;
-      }
-
-      return bData - aData;
-    });
-
-    searchPanesOrder.forEach(function (index) {
-      if (typeof data[index.name] != "undefined") {
-        newOrderdata[index.name] = data[index.name];
-      } else {
-        console.warn(index.name);
-        // newOrderdata[index.name] =  data[index.name];
-      }
-    });
-
-    let newOptionOrderData = [];
-    newOptionOrderData["options"] = newOrderdata;
-    console.log({ newOptionOrderData, newOrderdata, searchPanesOrder });
-    return newOptionOrderData;
   }
 
   initFooter(el) {

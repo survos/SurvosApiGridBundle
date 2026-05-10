@@ -6,24 +6,14 @@ namespace Survos\ApiGridBundle\Service;
 
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\FilterInterface;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
-use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Doctrine\ORM\Mapping\Id;
 use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
-use Survos\ApiGridBundle\Attribute\Facet;
-use Survos\ApiGridBundle\Attribute\MeiliId;
-use Survos\FieldBundle\Attribute\Field;
 use Survos\FieldBundle\Service\FieldReader;
-use Survos\ApiGridBundle\Filter\MeiliSearch\SortFilter;
 use Survos\ApiGridBundle\Model\Column;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Serializer\Attribute\Groups;
 use function Symfony\Component\String\u;
-use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 
 class DatatableService
 {
@@ -45,10 +35,6 @@ class DatatableService
         //        dd($template->getSourceContext());
         //        dd($template->getBlockNames());
         $normalizedColumns = [];
-
-//        $sortableFields = $this->sortableFields($class);
-//        $searchableFields = $this->searchableFields($class);
-
 
         foreach ($columns as $idx => $c) {
             if (empty($c)) {
@@ -73,7 +59,6 @@ class DatatableService
             } else {
                 if (!array_key_exists('name', $c)) {
                     continue;
-                    dd("mssing name in " . join('|', array_keys($c)), $columns, $idx, $c);
                 }
                 assert(array_key_exists('name', $c), json_encode($c));
                 $columnName = $c['name'];
@@ -102,6 +87,7 @@ class DatatableService
                 $column->visible    ??= $fieldSettings['visible']    ?? null;
                 $column->width      ??= $fieldSettings['width']      ?? null;
                 $column->widget     ??= $fieldSettings['widget']     ?? null;
+                $column->type       ??= $fieldSettings['type']       ?? null;
                 if (empty($column->title) || $column->title === $column->name) {
                     $column->title = $fieldSettings['title'] ?? $column->name;
                 }
@@ -140,9 +126,10 @@ class DatatableService
                 $name = $descriptor->name;
                 $settings[$name] = array_merge($settings[$name] ?? [], array_filter([
                     'name'       => $name,
+                    'type'       => $descriptor->type,
                     'title'      => $descriptor->getFallbackLabel(),
                     'searchable' => $descriptor->searchable ?: null,
-                    'sortable'   => $descriptor->sortable   ?: null,
+                    'sortable'   => ($descriptor->sortable || $this->isNaturallySortable($descriptor->type)) ?: null,
                     'browsable'  => ($descriptor->filterable && ($descriptor->resolvedWidget()?->isBrowsable() ?? false)) ?: null,
                     'visible'    => $descriptor->visible === false ? false : null,
                     'width'      => $descriptor->width,
@@ -180,17 +167,16 @@ class DatatableService
             }
         }
 
-        // ── Layer 3: property-level legacy attributes (#[Facet], #[MeiliId], #[ApiProperty identifier]) ─
+        // ── Layer 3: property-level identifier attributes ─
         foreach ($rc->getProperties() as $property) {
             $name = $property->getName();
             foreach ($property->getAttributes() as $attribute) {
                 match ($attribute->getName()) {
-                    MeiliId::class, Id::class => $settings[$name]['is_primary'] = true,
-                    Facet::class              => $settings[$name]['browsable']  = true,
-                    ApiProperty::class        => $attribute->getArguments()['identifier'] ?? false
-                                                    ? ($settings[$name]['is_primary'] = true)
-                                                    : null,
-                    default                   => null,
+                    Id::class          => $settings[$name]['is_primary'] = true,
+                    ApiProperty::class => $attribute->getArguments()['identifier'] ?? false
+                                            ? ($settings[$name]['is_primary'] = true)
+                                            : null,
+                    default            => null,
                 };
             }
         }
@@ -198,71 +184,10 @@ class DatatableService
         return $settings;
     }
 
-
-    public function sortableFields(?string $class): array
+    private function isNaturallySortable(string $type): bool
     {
-
-        assert(class_exists($class), $class);
-        $reflector = new \ReflectionClass($class);
-        foreach ($reflector->getAttributes() as $attribute) {
-            $filter = $attribute->getName();
-            if (!u($filter)->endsWith('ApiFilter')) {
-                continue;
-            }
-            if (u($filter)->endsWith('OrderFilter')) {
-                $orderProperties = $attribute->getArguments()['properties'];
-                return $orderProperties;
-            }
-        }
-        return [];
-    }
-
-    public function searchableFields(string $class): array
-    {
-        $reflector = new \ReflectionClass($class);
-        $searchableFields = [];
-        foreach ($reflector->getAttributes() as $attribute) {
-            if (!u($attribute->getName())->endsWith('ApiFilter')) {
-                continue;
-            }
-            $attrInstance = $attribute->newInstance();
-            $filter = $attrInstance->filterClass;
-//            if (u($filter)->endsWith('MultiFieldSearchFilter')) {
-//                $fields = $attribute->getArguments()['properties'];
-//                $searchableFields = array_merge($searchableFields,$fields );
-//            }
-            if (in_array($filter, [RangeFilter::class, SearchFilter::class, MultiFieldSearchFilter::class])) {
-                $fields = $attrInstance->properties;
-                $searchableFields = array_merge($searchableFields, $fields);
-            }
-        }
-        return $searchableFields;
-    }
-
-    public function searchBuilderFields(string $class, array $normalizedColumns): array
-    {
-        $reflector = new \ReflectionClass($class);
-        $columnNumbers = [];
-        foreach ($reflector->getAttributes() as $attribute) {
-
-            if (!u($attribute->getName())->endsWith('ApiFilter')) {
-                continue;
-            }
-            $attrInstance = $attribute->newInstance();
-            $filter = $attrInstance->filterClass;
-// @todo: handle other filters
-            if (in_array($filter, [RangeFilter::class, SearchFilter::class])) {
-                $searchFields = $attrInstance->properties;
-                foreach ($normalizedColumns as $idx => $column) {
-                    if (in_array($column->name, $searchFields)) {
-                        $columnNumbers[] = $idx;
-                    }
-                }
-            }
-        }
-
-
-        return $columnNumbers;
+        return in_array($type, ['int', 'float', 'bool'], true)
+            || is_a($type, \DateTimeInterface::class, true);
     }
 
 

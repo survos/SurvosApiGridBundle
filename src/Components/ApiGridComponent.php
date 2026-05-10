@@ -2,22 +2,12 @@
 
 namespace Survos\ApiGridBundle\Components;
 
-use ApiPlatform\Metadata\IriConverterInterface;
-use ApiPlatform\Doctrine\Orm\State\CollectionProvider;
-use ApiPlatform\Exception\InvalidArgumentException;
-use ApiPlatform\Metadata\GetCollection;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGridBundle\Components\Common\TwigBlocksInterface;
-use Survos\ApiGridBundle\Model\Column;
 use Survos\ApiGridBundle\Service\DatatableService;
-use Survos\ApiGridBundle\Service\MeiliService;
-use Survos\ApiGridBundle\State\MeiliSearchStateProvider;
 use Survos\ApiGridBundle\TwigBlocksTrait;
-use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
-use Symfony\UX\TwigComponent\Attribute\PreMount;
 use Twig\Environment;
 use Twig\TemplateWrapper;
 
@@ -31,18 +21,10 @@ class ApiGridComponent implements TwigBlocksInterface
         private LoggerInterface $logger,
         private RequestStack $requestStack,
         private DatatableService $datatableService,
-        private UrlGeneratorInterface $urlGenerator,
-        private IriConverterInterface $iriConverter,
-        private ?object $inspectionService=null,
-        private ?MeiliService $meiliService=null,
         public ?string $stimulusController=null,
-        private bool $meili = false,
         private ?string $class = null,
         private array $filter = [],
-        private $collectionRoutes = [],
     ) {
-        // Intentionally keep constructor side-effect free.
-        // Older versions tried to resolve routes here via InspectionService.
     }
 
     public function getClass(): ?string
@@ -59,39 +41,9 @@ class ApiGridComponent implements TwigBlocksInterface
         return $this->filter;
     }
 
-    public function getCollectionRoutes(): array
-    {
-        if (!$this->class || !$this->inspectionService || !method_exists($this->inspectionService, 'getAllUrlsForResource')) {
-            return [];
-        }
-
-        // @todo: move to compiler pass if this stays.
-        return $this->inspectionService->getAllUrlsForResource($this->class);
-    }
-
-    public function setCollectionRoutes(array $collectionRoutes): void
-    {
-        $this->collectionRoutes = $collectionRoutes;
-    }
-
-
-
     public function setClass(?string $class): self
     {
         $this->class = $class;
-        return $this;
-    }
-
-    public function setFacets(bool|string $facets): self
-    {
-        $value = is_bool($facets)
-            ? $facets
-            : filter_var($facets, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE);
-
-        if ($value !== null) {
-            $this->searchPanes = $value;
-        }
-
         return $this;
     }
 
@@ -106,11 +58,8 @@ class ApiGridComponent implements TwigBlocksInterface
     public array|object|null $schema = null;
 
 //    public ?string $class = null;
-    public ?string $index = null; // name of the meili index
-    public string $dom='';
     public string|array|null $layout = null;
     public int $pageLength=50;
-    public string $searchPanesDataUrl; // maybe deprecate this?
     public ?string $apiGetCollectionUrl=null;
     public ?string $apiRoute = null;
     public array $apiRouteParams = [];
@@ -162,8 +111,7 @@ class ApiGridComponent implements TwigBlocksInterface
     public ?string $tableId = null;
     public string $tableClasses = '';
 
-    // Filter UI (SearchPanes sidebar vs ColumnControl in headers)
-    public bool $searchPanes = true;
+    // Filter UI (header search vs ColumnControl in headers vs searchBuilder modal)
     public bool $columnControl = false;
     public bool $searchBuilder = false;
 
@@ -179,23 +127,7 @@ class ApiGridComponent implements TwigBlocksInterface
             return [];
         }
 
-        $settings = $this->datatableService->getSettingsFromAttributes($this->class);
-        if ($this->inspectionService && method_exists($this->inspectionService, 'defaultColumns')) {
-            foreach ($this->inspectionService->defaultColumns($this->class) as $field => $config) {
-                if (!array_key_exists($field, $settings)) {
-                    $settings[$field] = [
-                        'name' => $field,
-                        'browsable' => false,
-                        'sortable' => false,
-                        'searchable' => false,
-                    ];
-                }
-                $settings[$field]['sortable'] = (bool) (($settings[$field]['sortable'] ?? false) || ($config['sortable'] ?? false));
-                $settings[$field]['searchable'] = (bool) (($settings[$field]['searchable'] ?? false) || ($config['searchable'] ?? false));
-            }
-        }
-
-        return $settings;
+        return $this->datatableService->getSettingsFromAttributes($this->class);
     }
 
     /**
@@ -204,14 +136,7 @@ class ApiGridComponent implements TwigBlocksInterface
      */
     public function getNormalizedColumns(string $columnType='columns'): iterable
     {
-        // Only compute a Meili index when Meili is explicitly enabled.
-        if ($this->meili && $this->class && !$this->index && $this->meiliService) {
-            $this->index = $this->meiliService->getPrefixedIndexName(
-                MeiliSearchStateProvider::getSearchIndexObject($this->class)
-            );
-        }
-
-        // Settings are inferred from PHP attributes (ApiFilter/Facet/MeiliId/etc).
+        // Settings are inferred from PHP attributes and FieldBundle descriptors.
 
         $settings = $this->getDefaultColumns();
         if (!$this->columns) {
@@ -245,125 +170,25 @@ class ApiGridComponent implements TwigBlocksInterface
 
     }
 
-    public function searchPanesColumns(): int
-    {
-        $count = 0;
-        // count the number, if > 6 we could figured out the best layout
-        foreach ($this->getNormalizedColumns() as $column) {
-//            dd($column);
-            if ($column->inSearchPane) {
-                $count++;
-            }
-        }
-        $count = min($count, 6);
-        return $count;
-    }
-
-    /**
-     * @return array<string, Column>
-     */
-    public function GridNormalizedColumns(): iterable
-    {
-        $normalizedColumns = [];
-        foreach ($this->columns as $c) {
-            if (empty($c)) {
-                continue;
-            }
-            if (is_string($c)) {
-                $c = [
-                    'name' => $c,
-                ];
-            }
-            assert(is_array($c));
-            $column = new Column(...$c);
-            if ($column->condition) {
-                $normalizedColumns[$column->name] = $column;
-            }
-        }
-        return $normalizedColumns;
-    }
-
     public function mount(string $class,
 //                          array $columns=[],
                            ?string $apiRoute=null,
                            ?string $apiGetCollectionUrl=null,
                            array $filter = [],
                            array $buttons = [],
-                           bool $meili=false)
-        // , string $apiGetCollectionUrl,  array  $apiGetCollectionParams = [])
+                           bool $meili=false
+    )
     {
-        // this allows the jstwig templates to compile, but needs to happen earlier.
-//        $this->twig->addGlobal('owner', []);
-//        dd($this->twig->getGlobals());
-
-//        dd($columns, $meili);
-        // if meili, get the index and validate the columns
-
-
-
         $this->filter = $filter;
         $this->buttons = $buttons;
-        $this->meili = $meili;
-//        assert($class == $this->class, "$class <> $this->class");
-        $this->class = $class; // ??
-//            : $this->iriConverter->getIriFromResource($class, operation: new GetCollection(),
-//                context: $context ?? []);
-        // Doctrine-first: prefer passing apiGetCollectionUrl explicitly.
-        if ($apiGetCollectionUrl) {
-            $this->apiGetCollectionUrl = $apiGetCollectionUrl;
-            return;
-        }
-
-        // Backward compatibility: apiRoute requires InspectionService to map a "route key" to an operation.
+        $this->class = $class;
+        $this->apiGetCollectionUrl = $apiGetCollectionUrl;
         if ($apiRoute) {
-            if (!$this->inspectionService || !method_exists($this->inspectionService, 'getAllUrlsForResource')) {
-                throw new \RuntimeException(
-                    'ApiGrid: apiRoute requires Survos\\InspectionBundle. Prefer passing apiGetCollectionUrl instead.'
-                );
-            }
-
-            $routes = $this->inspectionService->getAllUrlsForResource($class);
-            $routeKey = $apiRoute;
-            if (!array_key_exists($routeKey, $routes)) {
-                throw new \RuntimeException(sprintf(
-                    'ApiGrid: unknown apiRoute "%s". Known keys: %s',
-                    $routeKey,
-                    implode(', ', array_keys($routes))
-                ));
-            }
-
-            $opName = $routes[$routeKey]['opName'] ?? null;
-            if (!$opName) {
-                throw new \RuntimeException(sprintf('ApiGrid: route metadata missing opName for "%s".', $routeKey));
-            }
-
-            $this->apiGetCollectionUrl = $this->urlGenerator->generate($opName);
+            throw new \RuntimeException('ApiGrid: apiRoute is no longer supported. Pass apiGetCollectionUrl or rely on api_route(class).');
         }
-        //        try {
-//        } catch (InvalidArgumentException $exception) {
-//            $urls = $this->inspectionService->getAllUrlsForResource($class);
-//            dd($urls, $exception);
-//        }
-//        dd($apiGetCollectionUrl);
-//        if (!$apiGetCollectionUrl) {
-//            $route = array_key_first($urls);
-////            $route = $urls[$meili ? MeiliSearchStateProvider::class : CollectionProvider::class];
-//            if ($meili) {
-//                $indexName = (new \ReflectionClass($class))->getShortName();
-//                $params = ['indexName' => $indexName];
-//                if (!$this->apiGetCollectionUrl) {
-//                    $this->apiGetCollectionUrl =  $this->urlGenerator->generate($route, $params??[]);
-//                }
-//            }
-//            $this->collectionRoutes = $this->inspectionService->getAllUrlsForResource($class);
-//        }
-//        dd($this->collectionRoutes, $apiGetCollectionUrl, $this->apiGetCollectionUrl);
-        return;
-
-        dd($urls, $class, $meili, $route->getPath());
-        return;
-        dd(func_get_args());;
-        dd($this->apiUrl);
+        if ($meili) {
+            throw new \RuntimeException('ApiGrid: the meili DataTables mode was removed. Use ux-search or Meilisearch directly.');
+        }
     }
 
     public function facetColumns(): iterable

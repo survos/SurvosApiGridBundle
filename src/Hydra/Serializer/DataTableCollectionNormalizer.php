@@ -278,16 +278,12 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                 $facetsData[$key] = $data;
             }
 
-            $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
-
             // ColumnControl expects a top-level "columnControl" object in the JSON response.
             // We expose it under facets so the JS bridge can forward it to DataTables.
             $returnData['columnControl'] = $this->createColumnControlOptions($facetsData);
 
             return $returnData;
         }
-
-        $returnData['searchPanes']['options'] = $this->normalizer->normalize($facetsData, self::FACETFORMAT, $context);
 
         $returnData['columnControl'] = $this->createColumnControlOptions($facetsData);
 
@@ -312,20 +308,6 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         return $columnControl;
-    }
-
-    private function createAllSearchPanesRecords(array $params)
-    {
-        $data = [];
-        foreach ($params as $param) {
-            $data[] = $this->createSearchPanesArray($param["label"], 0);
-        }
-        return $data;
-    }
-
-    private function createSearchPanesArray($key, $count)
-    {
-        return ["label" => $key, "total" => $count, "value" => $key, "count" => $count];
     }
 
     // copied from JsonLdContextTrait, which is internal

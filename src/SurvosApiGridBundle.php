@@ -4,7 +4,6 @@ namespace Survos\ApiGridBundle;
 
 use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
 use Survos\ApiGridBundle\Command\IndexCommand;
-use Survos\ApiGridBundle\Components\GridComponent;
 use Survos\ApiGridBundle\Components\ItemGridComponent;
 use Survos\ApiGridBundle\Components\JsTwigComponent;
 use Survos\ApiGridBundle\Controller\AdminBrowseController;
@@ -12,11 +11,11 @@ use Survos\ApiGridBundle\Controller\GridController;
 use Survos\ApiGridBundle\Controller\MeiliController;
 use Survos\ApiGridBundle\Filter\MeiliSearch\MultiFieldSearchFilter as MeiliMultiFieldSearchFilter;
 use Survos\ApiGridBundle\Components\ApiGridComponent;
-use Survos\ApiGridBundle\Paginator\SlicePaginationExtension;
 use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\ApiGridBundle\Twig\TwigExtension;
 use Survos\CoreBundle\Bundle\AssetMapperBundle;
+use Survos\CoreBundle\Traits\HasConfigurableRoutes;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -36,6 +35,8 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_lo
 
 class SurvosApiGridBundle extends AssetMapperBundle
 {
+    use HasConfigurableRoutes;
+
     public const ASSET_PACKAGE = 'api-grid';
 
     // $config is the bundle Configuration that you usually process in ExtensionInterface::load() but already merged and processed
@@ -44,6 +45,9 @@ class SurvosApiGridBundle extends AssetMapperBundle
      */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        $this->captureRouteConfig($config);
+        $this->registerRouteLoader($builder);
+
         $meiliAvailable = class_exists(\Meilisearch\Client::class);
 
         $builder->register('survos_api_grid_datatable_service', DatatableService::class)
@@ -115,15 +119,6 @@ class SurvosApiGridBundle extends AssetMapperBundle
                 ->setPublic(false);
         }
 
-        $builder->register(GridComponent::class)
-            ->setAutowired(true)
-            ->setAutoconfigured(true)
-            ->setArgument('$twig', new Reference('twig'))
-            ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$stimulusController', $config['grid_stimulus_controller'])
-            ->setArgument('$registry', new Reference('doctrine'))
-        ;
-
         $builder->register(ItemGridComponent::class)
             ->setAutowired(true)
             ->setAutoconfigured(true)
@@ -189,16 +184,6 @@ class SurvosApiGridBundle extends AssetMapperBundle
         //     ->setPublic(false)
         //     ->setDecoratedService(MeiliCollectionNormalizer::class);
 
-        $builder->register('api_platform.doctrine.orm.query_extension.pagination',SlicePaginationExtension::class)
-            ->setAutowired(true)
-            ->addTag('api_platform.doctrine.orm.query_extension.collection', ['priority' => -60])
-        ;
-        $services = $container->services();
-        $services->set(SlicePaginationExtension::class)
-            ->tag('api_platform.doctrine.orm.query_extension.collection', ['priority' => -60])
-        ;
-        $container->services()->alias(SlicePaginationExtension::class,'api_platform.doctrine.orm.query_extension.pagination');
-
         $builder->register(DatatableService::class)->setAutowired(true)->setAutoconfigured(true);
 
         $builder->register(ApiGridComponent::class)
@@ -207,8 +192,6 @@ class SurvosApiGridBundle extends AssetMapperBundle
             ->setArgument('$twig', new Reference('twig'))
             ->setArgument('$logger', new Reference('logger', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$datatableService', new Reference(DatatableService::class))
-            ->setArgument('$inspectionService', new Reference('Survos\\InspectionBundle\\Services\\InspectionService', ContainerInterface::NULL_ON_INVALID_REFERENCE))
-            ->setArgument('$meiliService', new Reference('api_meili_service', ContainerInterface::NULL_ON_INVALID_REFERENCE))
             ->setArgument('$stimulusController', $config['stimulus_controller']);
 
 
@@ -222,14 +205,14 @@ class SurvosApiGridBundle extends AssetMapperBundle
 
     public function configure(DefinitionConfigurator $definition): void
     {
-        // since the configuration is short, we can add it here
-        $definition->rootNode()
-            ->children()
+        $children = $definition->rootNode()->children();
+        $this->addRouteOptions($children, '');
+
+        $children
             ->scalarNode('stimulus_controller')
                 ->info('The stimulus controller to use, should extend @survos/api-grid/api-grid')
                 ->defaultValue('@survos/api-grid/api-grid')
             ->end()
-            ->scalarNode('grid_stimulus_controller')->defaultValue('@survos/api-grid/grid')->end()
             ->scalarNode('meiliHost')->defaultValue('%env(MEILI_SERVER)%')->end()
             ->scalarNode('meiliKey')->defaultValue('%env(MEILI_API_KEY)%')->end()
             ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
@@ -238,7 +221,26 @@ class SurvosApiGridBundle extends AssetMapperBundle
                 ->info('https://www.meilisearch.com/docs/reference/api/settings#faceting-object')
                 ->defaultValue(1000)
             ->end()
-            ->end();;
+        ->end();
     }
 
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        parent::prependExtension($container, $builder);
+
+        if ($builder->hasExtension('api_platform')) {
+            $builder->prependExtensionConfig('api_platform', [
+                'defaults' => [
+                    'pagination_client_enabled' => true,
+                    'pagination_client_items_per_page' => true,
+                ],
+            ]);
+        }
+    }
+
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $this->addRouteLoaderCompilerPass($container);
+    }
 }

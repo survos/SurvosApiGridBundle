@@ -2,8 +2,7 @@
     schema: schema,
     globals: this.globals,
     api_call:  apiCall,
-    searchBuilderColumns: this.searchBuilderColumns,
-    searchPanesDataUrl:  this.searchPanesDataUrl|default(null),
+  #  searchBuilderColumns: this.searchBuilderColumns,
     locale: locale,
     globals: globals,
     buttons: buttons|default([]),
@@ -15,14 +14,11 @@
 
 
     modalTemplate: this.modalTemplate,
-    dom: this.dom|default(false),
     layout: this.layout|default(null),
     style: this.style,
-    index: this.index|default(false),
     pageLength: this.pageLength,
     filter: this.filter,
 
-    searchPanes: this.searchPanes,
     columnControl: this.columnControl,
     searchBuilder: this.searchBuilder,
 
@@ -34,60 +30,14 @@
     showRoute: this.getShowRoute ?? '',
 }) }}>
 
-    {% if this.searchPanes %}
-        <div class="dtsp-verticalContainer row g-4">
-            <div class="col-sm-12 col-md-5 col-lg-4 col-xl-3">
-                <div class="card">
-                    <button class="btn btn-primary dtsp-verticalPanes-toggler rounded m-3" type="button" data-bs-toggle="collapse" data-bs-target="#dtsp-verticalPanes" aria-expanded="true" aria-controls="dtsp-verticalPanes">
-                        Filters
-                    </button>
-                    <div class="card-body pt-0 pt-lg-3 collapse show" id="dtsp-verticalPanes">
-                        <div class="dtsp-verticalPanes"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-12 col-md-7 col-lg-8 col-xl-9">
-                <div class="card">
-                    <div class="card-body">
-                        <div {{ stimulus_target(this.stimulusController, 'message') }}></div>
-                        <div class="table-responsive customTable">
-                            <table class="table table-bordered table-striped nowrap" {{ stimulus_target(this.stimulusController, 'table') }}></table>
-                        </div>
-                    </div>
-                </div>
+    <div class="card">
+        <div class="card-body">
+            <div {{ stimulus_target(this.stimulusController, 'message') }}></div>
+            <div class="table-responsive customTable">
+                <table class="table table-bordered table-striped" {{ stimulus_target(this.stimulusController, 'table') }}></table>
             </div>
         </div>
-    {% else %}
-        <div class="card">
-            <div class="card-body">
-                <div {{ stimulus_target(this.stimulusController, 'message') }}></div>
-                <div class="table-responsive customTable">
-                    <table class="table table-bordered table-striped nowrap" {{ stimulus_target(this.stimulusController, 'table') }}></table>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-        {#            {{ component('menu', {#}
-        {#                type: PAGE_MENU,#}
-        {#                options: {#}
-        {#                    columns: columns|json_encode#}
-        {#                }#}
-        {#            }) }}#}
-
-        {#            {% for c in columns %}#}
-        {#                {% if c.browsable %}#}
-        {#                <li>#}
-        {#                    <a href="{{ path('survos_facet_show', {indexName: this.index, fieldName: c.name}) }}">#}
-        {#                        {{ c.name }}#}
-        {#                        {{ c.browsable ? 'B' }}#}
-        {#                    </a>#}
-
-        {#                </li>#}
-        {#                {% endif %}#}
-        {#                <a href="{{ path('field') }}">{{ c.name }}</a>#}
-        {#            {% endfor %}#}
-
-
+    </div>
 
     {% block modal %}
         {{ include('@SurvosApiGrid/_modal.html.twig', {

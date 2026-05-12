@@ -98,6 +98,8 @@ class ApiGridComponent implements TwigBlocksInterface
 
     public bool $search = true;
     public string $scrollY = '70vh';
+    /** Horizontal scroll instead of responsive column hiding. Mutually exclusive with responsive. */
+    public bool $scrollX = false;
 //    public array $filter = [];
     public bool $useDatatables = true;
 

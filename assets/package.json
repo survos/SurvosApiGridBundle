@@ -16,7 +16,6 @@
           "datatables.net-bs5/css/dataTables.bootstrap5.css": true,
           "datatables.net-buttons-bs5/css/buttons.bootstrap5.css": true,
           "datatables.net-responsive-bs5/css/responsive.bootstrap5.css": true,
-          "datatables.net-scroller-bs5/css/scroller.bootstrap5.css": true,
           "datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.css": true,
           "datatables.net-select-bs5/css/select.bootstrap5.css": true
         }
@@ -30,13 +29,19 @@
       "datatables.net-plugins/i18n/es-ES.mjs": "^2.3.6",
       "datatables.net-plugins/i18n/de-DE.mjs": "^2.3.6",
       "datatables.net-bs5": "3.0.0-beta.2",
+      "datatables.net-bs5/css/dataTables.bootstrap5.css": "3.0.0-beta.2",
       "datatables.net-buttons-bs5": "4.0.0-beta.1",
+      "datatables.net-buttons-bs5/css/buttons.bootstrap5.css": "4.0.0-beta.1",
       "datatables.net-responsive-bs5": "4.0.0-beta.1",
+      "datatables.net-responsive-bs5/css/responsive.bootstrap5.css": "4.0.0-beta.1",
       "datatables.net-scroller-bs5": "3.0.0-beta.1",
       "datatables.net-searchbuilder-bs5": "2.0.0-beta.1",
+      "datatables.net-searchbuilder-bs5/css/searchBuilder.bootstrap5.css": "2.0.0-beta.1",
       "datatables.net-select-bs5": "4.0.0-beta.1",
+      "datatables.net-select-bs5/css/select.bootstrap5.css": "4.0.0-beta.1",
       "datatables.net-columncontrol": "2.0.0-beta.1",
       "datatables.net-columncontrol-bs5": "2.0.0-beta.1",
+      "datatables.net-columncontrol-bs5/css/columnControl.bootstrap5.css": "2.0.0-beta.1",
       "stimulus-attributes": "^1.0.2"
     }
   },

@@ -140,6 +140,17 @@ table.dataTable td.dt-col-number {
     text-align: right;
 }
 
+/* Column group header row */
+table.dataTable thead th.dt-column-group {
+    background-color: rgb(var(--tblr-secondary-bg-rgb));
+    border-bottom: 2px solid var(--tblr-border-color);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tblr-secondary);
+    padding-block: 0.35rem;
+}
+
 /* datatables.net-searchbuilder-bs5 */
 /* No --bs- vars to override */
 

@@ -89,6 +89,7 @@ export default class extends Controller {
     pageLength: { type: Number, default: 50 },
     columnControl: { type: Boolean, default: false },
     searchBuilder: { type: Boolean, default: false },
+    scrollX: { type: Boolean, default: false },
     searchBuilderColumns: { type: String, default: "[]" },
     filter: String, // json, from queryString, e.g. party=dem
     buttons: String, // json, from queryString, e.g. party=dem
@@ -769,13 +770,17 @@ export default class extends Controller {
             },
           }
         : {}),
-      responsive: {
-        details: {
-          type: 'column',
-          target: this.selectValue ? 1 : 0,
-          renderer: modalRenderer,
-        },
-      },
+      ...(this.scrollXValue
+        ? { scrollX: true, responsive: false }
+        : {
+            responsive: {
+              details: {
+                type: 'column',
+                target: this.selectValue ? 1 : 0,
+                renderer: modalRenderer,
+              },
+            },
+          }),
       buttons: [...this.buttons, ...this.buildBulkActionButtons()],
       columns: this.cols(),
       ...((this.searchBuilderValue || this.searchBuilderColumns.length)
@@ -929,6 +934,10 @@ export default class extends Controller {
     }
 
     let dt = new DataTable(el, setup);
+
+    if (this.columns.some(c => c.group)) {
+      this.prependGroupHeaderRow(dt);
+    }
 
     this.addButtonClickListener(dt);
 
@@ -1103,6 +1112,60 @@ export default class extends Controller {
     // Keep this in sync with cols(), where responsive/select utility columns
     // are prepended before the configured entity columns.
     return 1 + (this.selectValue ? 1 : 0);
+  }
+
+  /**
+   * Prepends a group label row above the header rows DataTables (and ColumnControl)
+   * have already built. Called after new DataTable() so we don't interfere with
+   * ColumnControl's own thead row management.
+   *
+   * Each cell in the group row corresponds 1:1 to a column (no rowspan tricks).
+   * Grouped runs share a single colspan cell with the group label; ungrouped and
+   * utility columns get an empty cell. This keeps alignment exact and requires no
+   * cooperation from DataTables internals.
+   *
+   * Limitation: if a column is hidden via ColumnControl, the group colspan is not
+   * automatically updated. Handle via a 'column-visibility' listener if needed.
+   */
+  prependGroupHeaderRow(dt) {
+    const sorted = [...this.columns].sort((a, b) => (a.order ?? 100) - (b.order ?? 100));
+    const thead = dt.table().header();
+    const firstRow = thead.querySelector('tr');
+    if (!firstRow) return;
+
+    const groupRow = document.createElement('tr');
+    const offset = this.leadingUtilityColumnCount();
+
+    // Empty stubs for utility columns (responsive control + optional select checkbox)
+    for (let i = 0; i < offset; i++) {
+      groupRow.appendChild(document.createElement('th'));
+    }
+
+    // Walk sorted columns, collecting consecutive runs of the same group label
+    let i = 0;
+    while (i < sorted.length) {
+      const group = sorted[i].group ?? null;
+
+      if (!group) {
+        // Ungrouped: one empty cell, aligns with the column below it
+        groupRow.appendChild(document.createElement('th'));
+        i++;
+      } else {
+        // Count the consecutive run sharing this group label
+        let span = 0;
+        while (i + span < sorted.length && (sorted[i + span].group ?? null) === group) {
+          span++;
+        }
+        const th = document.createElement('th');
+        th.colSpan = span;
+        th.className = 'dt-column-group text-center fw-semibold';
+        th.textContent = group;
+        groupRow.appendChild(th);
+        i += span;
+      }
+    }
+
+    thead.insertBefore(groupRow, firstRow);
   }
 
   // The ColumnControl plugin calculates top/left as offsets from document.body,

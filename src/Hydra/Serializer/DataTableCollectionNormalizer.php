@@ -112,9 +112,8 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
                             try {
                                 $counts = $repo->getCounts($facet);
                                 $doctrineFacets[$facet] = $counts;
-                            } catch (\Exception $exception) {
-                                // @todo: handle arrays in doctrine, etc.
-
+                            } catch (\Throwable) {
+                                // silently skip facets that can't be counted
                             }
                         }
                     }

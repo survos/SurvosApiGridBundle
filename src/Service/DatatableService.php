@@ -93,6 +93,11 @@ class DatatableService
                     $column->title = $fieldSettings['title'] ?? $column->name;
                 }
             }
+            // Strip the group label prefix from the column title so grouped columns
+            // show "Height" instead of "Dimensions Height" under the Dimensions header.
+            if ($column->group && str_starts_with(mb_strtolower($column->title ?? ''), mb_strtolower($column->group))) {
+                $column->title = trim(mb_substr($column->title, mb_strlen($column->group)));
+            }
             if ($column->condition) {
                 $normalizedColumns[] = $column;
             }

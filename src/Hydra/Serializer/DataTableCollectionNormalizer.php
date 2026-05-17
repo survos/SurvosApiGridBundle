@@ -12,6 +12,7 @@ use ApiPlatform\Metadata\Error;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
+use ApiPlatform\Doctrine\Orm\Paginator as OrmPaginator;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use ApiPlatform\Metadata\Util\IriHelper;
@@ -93,7 +94,7 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
 
         if ($object instanceof PaginatorInterface) {
             $data = $this->getNextData($object, $context, []);
-            if ($context['request_uri']) {
+            if ($context['request_uri'] && $object instanceof OrmPaginator) {
                 parse_str((string)parse_url($context['request_uri'], PHP_URL_QUERY), $params);
                 $em = $object->getQuery()->getEntityManager();
                 $metadata = $em->getClassMetadata($context['operation']->getClass());

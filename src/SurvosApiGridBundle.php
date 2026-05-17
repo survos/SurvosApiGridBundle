@@ -135,15 +135,19 @@ class SurvosApiGridBundle extends AssetMapperBundle
                 ->addTag('meili_search_filter')
             ;
 
-            $builder->register(MeiliSearchStateProvider::class)
+            $providerDef = $builder->register(MeiliSearchStateProvider::class)
                 ->setArgument('$meiliSearchFilters', tagged_iterator('meili_search_filter'))
                 ->setArgument('$meili', new Reference('api_meili_service'))
                 ->setArgument('$httpClient', new Reference('httplug.http_client', ContainerInterface::NULL_ON_INVALID_REFERENCE))
                 ->setArgument('$denormalizer', new Reference('serializer'))
-                ->addTag('api_platform.state_provider')
                 ->setAutowired(true)
                 ->setPublic(true)
             ;
+            // Only intercept all API Platform collections when explicitly opted in.
+            // Default false: set provider: MeiliSearchStateProvider::class on individual operations.
+            if ($config['meili_provider']) {
+                $providerDef->addTag('api_platform.state_provider');
+            }
         }
 
 
@@ -202,6 +206,9 @@ class SurvosApiGridBundle extends AssetMapperBundle
             ->scalarNode('meiliHost')->defaultValue('%env(MEILI_SERVER)%')->end()
             ->scalarNode('meiliKey')->defaultValue('%env(MEILI_API_KEY)%')->end()
             ->scalarNode('meiliPrefix')->defaultValue('%env(MEILI_PREFIX)%')->end()
+            ->booleanNode('meili_provider')->defaultValue(false)
+                ->info('Register MeiliSearchStateProvider as a global api_platform.state_provider. Only enable when Meili is configured and entities should be served from it.')
+            ->end()
             ->booleanNode('passLocale')->defaultValue(false)->end()
             ->integerNode('maxValuesPerFacet')
                 ->info('https://www.meilisearch.com/docs/reference/api/settings#faceting-object')

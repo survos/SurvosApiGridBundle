@@ -144,7 +144,6 @@ class DatatableService
                     'group'      => $descriptor->group,
                     'widget'     => $descriptor->resolvedWidget()?->value,
                     'renderType' => $descriptor->isUrl ? 'url' : ($descriptor->isEmail ? 'email' : null),
-                    'group'      => $descriptor->group,
                 ], fn ($v) => $v !== null));
             }
         }

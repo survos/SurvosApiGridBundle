@@ -40,7 +40,6 @@ class Column
         public int $order = 100,
         public bool $condition = true,
         public string|bool|null $domain = null,
-        public ?string $group = null,
     ) {
         if (empty($this->title)) {
             $this->title = $this->name;

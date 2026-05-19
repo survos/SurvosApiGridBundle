@@ -18,7 +18,7 @@ use ApiPlatform\State\Pagination\PartialPaginatorInterface;
 use ApiPlatform\Metadata\Util\IriHelper;
 use Psr\Log\LoggerInterface;
 use Survos\ApiGridBundle\Event\FacetEvent;
-use Survos\CoreBundle\Traits\QueryBuilderHelperInterface;
+use Survos\FieldBundle\Repository\QueryBuilderHelperInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Countries;

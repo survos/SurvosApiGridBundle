@@ -26,8 +26,9 @@
         "twig/twig": "^3.4",
         "symfony/dom-crawler": "^7.4||^8.0",
         "api-platform/symfony": "^4.1",
-        "survos/core-bundle": "^2.0",
-        "survos/js-twig-bundle": "^2.0"
+        "survos/js-twig-bundle": "^2.0",
+        "survos/kit-bundle": "^2.0",
+        "survos/field-bundle": "^2.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

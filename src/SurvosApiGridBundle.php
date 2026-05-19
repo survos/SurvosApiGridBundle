@@ -13,8 +13,8 @@ use Survos\ApiGridBundle\Components\ApiGridComponent;
 use Survos\ApiGridBundle\Service\DatatableService;
 use Survos\ApiGridBundle\Service\MeiliService;
 use Survos\ApiGridBundle\Twig\TwigExtension;
-use Survos\CoreBundle\Bundle\AssetMapperBundle;
-use Survos\CoreBundle\Traits\HasConfigurableRoutes;
+use Survos\Kit\AbstractUxBundle;
+use Survos\Kit\Traits\HasConfigurableRoutes;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,7 +32,7 @@ use Survos\ApiGridBundle\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
-class SurvosApiGridBundle extends AssetMapperBundle
+class SurvosApiGridBundle extends AbstractUxBundle
 {
     use HasConfigurableRoutes;
 

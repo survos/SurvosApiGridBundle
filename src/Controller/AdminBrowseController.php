@@ -6,7 +6,7 @@ namespace Survos\ApiGridBundle\Controller;
 
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
-use Survos\CoreBundle\Service\SurvosUtils;
+use Survos\FieldBundle\Compiler\EntityMetaPass;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -54,7 +54,7 @@ class AdminBrowseController extends AbstractController
         $choices = [];
 
         foreach ($this->allMetadata() as $metadata) {
-            $code = SurvosUtils::entityCode($metadata->getName());
+            $code = EntityMetaPass::entityCode($metadata->getName());
             $choices[] = [
                 'code' => $code,
                 'class' => $metadata->getName(),
@@ -86,7 +86,7 @@ class AdminBrowseController extends AbstractController
     private function metadataForCode(string $code): ClassMetadata
     {
         foreach ($this->allMetadata() as $metadata) {
-            if (SurvosUtils::entityCode($metadata->getName()) === $code) {
+            if (EntityMetaPass::entityCode($metadata->getName()) === $code) {
                 return $metadata;
             }
         }

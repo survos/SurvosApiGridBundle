@@ -1063,7 +1063,21 @@ export default class extends Controller {
             targets: target,
             columnControl: [
               { target: 0, content: ["order"] },
-              { target: 1, content: ["search"] },
+              {
+                target: 1,
+                content: [{
+                  extend: "search",
+                  excludeLogic: [
+                    "notContains",
+                    "equal",
+                    "notEqual",
+                    "starts",
+                    "ends",
+                    "empty",
+                    "notEmpty",
+                  ],
+                }],
+              },
             ],
           });
         }
@@ -1541,7 +1555,7 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     });
 
     // Column-specific filtering
-    params.columns.forEach(function (column, index) {
+    params.columns.forEach((column, index) => {
       // Classic DataTables column search
       if (column.search && column.search.value) {
         apiData[column.data] = column.search.value;
@@ -1549,8 +1563,9 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
 
       // ColumnControl server-side filters
       if (column.columnControl) {
-        if (column.columnControl.search && column.columnControl.search.value) {
-          apiData[column.data] = column.columnControl.search.value;
+        const columnControlSearch = this.columnControlSearchValue(column.columnControl.search);
+        if (columnControlSearch !== null) {
+          apiData[column.data] = columnControlSearch;
         }
         if (Array.isArray(column.columnControl.list) && column.columnControl.list.length) {
           // Use API Platform's native array format: field[]=val1&field[]=val2
@@ -1581,6 +1596,31 @@ title="${modal_route}"><i class="action-${action} bi bi-${icon}"></i></button>`;
     // console.table(apiData);
 
     return apiData;
+  }
+
+  columnControlSearchValue(search) {
+    if (search === null || search === undefined || search === "") {
+      return null;
+    }
+    if (typeof search === "string" || typeof search === "number") {
+      return String(search);
+    }
+    if (Array.isArray(search)) {
+      const values = search
+        .map((item) => this.columnControlSearchValue(item))
+        .filter((value) => value !== null && value !== "");
+
+      return values.length ? values : null;
+    }
+    if (typeof search === "object") {
+      for (const key of ["value", "search", "term", "query"]) {
+        if (search[key] !== undefined && search[key] !== null && search[key] !== "") {
+          return String(search[key]);
+        }
+      }
+    }
+
+    return null;
   }
 
   initFooter(el) {

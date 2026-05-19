@@ -10,6 +10,7 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use Doctrine\ORM\Mapping\Id;
 use Survos\ApiGridBundle\Api\Filter\FacetsFieldSearchFilter;
+use Survos\ApiGridBundle\Api\Filter\LikePatternSearchFilter;
 use Survos\ApiGridBundle\Api\Filter\MultiFieldSearchFilter;
 use Survos\FieldBundle\Service\FieldReader;
 use Survos\ApiGridBundle\Model\Column;
@@ -86,6 +87,7 @@ class DatatableService
                 $column->browsable  ??= $fieldSettings['browsable']  ?? false;
                 $column->visible    ??= $fieldSettings['visible']    ?? null;
                 $column->width      ??= $fieldSettings['width']      ?? null;
+                $column->group      ??= $fieldSettings['group']      ?? null;
                 $column->widget     ??= $fieldSettings['widget']     ?? null;
                 $column->type       ??= $fieldSettings['type']       ?? null;
                 $column->group      ??= $fieldSettings['group']      ?? null;
@@ -139,6 +141,7 @@ class DatatableService
                     'browsable'  => ($descriptor->filterable && ($descriptor->resolvedWidget()?->isBrowsable() ?? false)) ?: null,
                     'visible'    => $descriptor->visible === false ? false : null,
                     'width'      => $descriptor->width,
+                    'group'      => $descriptor->group,
                     'widget'     => $descriptor->resolvedWidget()?->value,
                     'renderType' => $descriptor->isUrl ? 'url' : ($descriptor->isEmail ? 'email' : null),
                     'group'      => $descriptor->group,
@@ -166,6 +169,7 @@ class DatatableService
                 match (true) {
                     is_a($filterClass, OrderFilter::class, true)                           => $settings[$property]['sortable']   = true,
                     is_a($filterClass, SearchFilter::class, true)                          => $settings[$property]['searchable'] = true,
+                    is_a($filterClass, LikePatternSearchFilter::class, true)                => $settings[$property]['searchable'] = true,
                     is_a($filterClass, MultiFieldSearchFilter::class, true)                => $settings[$property]['searchable'] = true,
                     is_a($filterClass, FacetsFieldSearchFilter::class, true)               => $settings[$property]['browsable']  = true,
                     str_ends_with($filterClass, '\\FacetsFieldSearchFilter')               => $settings[$property]['browsable']  = true,

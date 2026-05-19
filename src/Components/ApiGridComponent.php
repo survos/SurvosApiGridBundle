@@ -116,6 +116,7 @@ class ApiGridComponent implements TwigBlocksInterface
     // Filter UI (header search vs ColumnControl in headers vs searchBuilder modal)
     public bool $columnControl = false;
     public bool $searchBuilder = false;
+    public bool $globalSearch = false;
 
 
     public function getLocale(): string

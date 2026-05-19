@@ -68,7 +68,7 @@ final class MultiFieldSearchFilter extends AbstractFilter implements FilterInter
         $alias = $queryBuilder->getRootAliases()[0];
         $orExp = $queryBuilder->expr()->orX();
 
-        foreach (array_keys($this->getProperties() ?? []) as $prop) {
+        foreach ($this->configuredProperties() as $prop) {
             $orExp->add($queryBuilder->expr()->like('LOWER(' . $alias . '.' . $prop . ')', ':' . $parameterName));
         }
 
@@ -90,7 +90,7 @@ final class MultiFieldSearchFilter extends AbstractFilter implements FilterInter
         }
         return [
             $this->searchParameterName => [
-                'property' => implode(', ', array_keys($props)),
+                'property' => implode(', ', $this->configuredProperties()),
                 'type' => 'string',
                 'required' => false,
                 'openapi' => [
@@ -98,5 +98,21 @@ final class MultiFieldSearchFilter extends AbstractFilter implements FilterInter
                 ],
             ],
         ];
+    }
+
+    /**
+     * ApiFilter properties may be declared as either ['title', 'overview'] or
+     * ['title' => true, 'overview' => true]. Normalize both forms.
+     *
+     * @return list<string>
+     */
+    private function configuredProperties(): array
+    {
+        $properties = [];
+        foreach ($this->getProperties() ?? [] as $property => $strategy) {
+            $properties[] = (string) (is_int($property) ? $strategy : $property);
+        }
+
+        return $properties;
     }
 }

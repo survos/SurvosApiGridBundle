@@ -162,7 +162,13 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         $data['@id'] = $this->iriConverter->getIriFromResource($resourceClass, UrlGeneratorInterface::ABS_PATH, $context['operation'] ?? null, $context);
         $data['@type'] = 'Collection';
 
-        if ($object instanceof PaginatorInterface) {
+        $request = $this->requestStack->getCurrentRequest();
+        $knownTotalItems = $request?->query->get('_totalItems');
+        if (is_numeric($knownTotalItems)) {
+            $data['totalItems'] = (int) $knownTotalItems;
+        } elseif ($request?->query->getBoolean('_skipTotalItems') && $object instanceof OrmPaginator) {
+            $data['totalItems'] = $this->getEstimatedTotalItems($object, $context);
+        } elseif ($object instanceof PaginatorInterface) {
             $data['totalItems'] = $object->getTotalItems();
         }
 
@@ -175,6 +181,27 @@ final class DataTableCollectionNormalizer extends AbstractCollectionNormalizer
         }
 
         return $data;
+    }
+
+    private function getEstimatedTotalItems(OrmPaginator $object, array $context): int
+    {
+        try {
+            $em = $object->getQuery()->getEntityManager();
+            if ($em->getConnection()->getDatabasePlatform()->getName() !== 'postgresql') {
+                return 0;
+            }
+
+            $class = $context['operation']->getClass();
+            $metadata = $em->getClassMetadata($class);
+            $tableName = $metadata->getTableName();
+
+            return (int) $em->getConnection()->fetchOne(
+                'SELECT GREATEST(reltuples, 0)::bigint FROM pg_class WHERE oid = to_regclass(:tableName)',
+                ['tableName' => $tableName]
+            );
+        } catch (\Throwable) {
+            return 0;
+        }
     }
 
     /**

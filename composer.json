@@ -31,7 +31,6 @@
         "survos/field-bundle": "^2.5"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
         "phpstan/phpstan": "^2.0",
         "symfony/browser-kit": "^8.1",
         "symfony/framework-bundle": "^8.1",

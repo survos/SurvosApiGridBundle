@@ -32,6 +32,7 @@ use Survos\ApiGridBundle\Hydra\Serializer\DataTableCollectionNormalizer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
+// Symfony\Component\HttpKernel\Bundle\Bundle <-- Flex auto-registration marker (see Survos\Kit\AbstractSurvosBundle)
 class SurvosApiGridBundle extends AbstractUxBundle
 {
     use HasConfigurableRoutes;
